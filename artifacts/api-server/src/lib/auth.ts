@@ -29,16 +29,34 @@ export async function requireAuth(req: AuthRequest, res: Response, next: NextFun
   }
 }
 
-export async function requireRole(role: string) {
-  return async (req: AuthRequest, res: Response, next: NextFunction) => {
+export function requireRole(...roles: string[]) {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.dbUser) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
-    if (req.dbUser.role !== role) {
-      res.status(403).json({ error: "Forbidden" });
+    if (!req.dbUser.role || !roles.includes(req.dbUser.role)) {
+      res.status(403).json({ error: `Forbidden: requires ${roles.join(" or ")} role` });
       return;
     }
     next();
   };
+}
+
+// Resolves the DB user if a valid session exists, but never rejects the request.
+// Used for endpoints that are public for some resources and private for others.
+export async function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {
+  try {
+    const auth = getAuth(req);
+    if (auth?.userId) {
+      const [user] = await db.select().from(usersTable).where(eq(usersTable.clerkId, auth.userId)).limit(1);
+      if (user) {
+        req.dbUserId = user.id;
+        req.dbUser = user;
+      }
+    }
+  } catch {
+    // ignore — treat as anonymous
+  }
+  next();
 }

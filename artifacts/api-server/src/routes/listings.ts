@@ -8,11 +8,37 @@ import {
   industryBenchmarksTable,
   contactRequestsTable,
 } from "@workspace/db";
-import { eq, and, gte, lte, ilike, sql } from "drizzle-orm";
-import { requireAuth, type AuthRequest } from "../lib/auth";
+import { eq, and, gte, lte, ilike, inArray, sql } from "drizzle-orm";
+import { z } from "zod/v4";
+import { requireAuth, requireRole, optionalAuth, type AuthRequest } from "../lib/auth";
+import { validateBody, parseId } from "../lib/validate";
 import { computeValuation, computeIntelligence } from "../lib/valuation";
 
 const router = Router();
+
+const createListingSchema = z.object({
+  companyName: z.string().trim().min(1).max(200),
+  industry: z.string().trim().min(1).max(100),
+  description: z.string().max(5000).optional(),
+  revenue: z.number().positive().finite(),
+  ebitda: z.number().finite(),
+  ebitdaMargin: z.number().min(0).max(1).optional(),
+  revenueGrowthRate: z.number().min(-1).max(10).optional(),
+  askingValuation: z.number().positive().finite(),
+  debtRatio: z.number().min(0).max(1).optional(),
+  customerConcentration: z.number().min(0).max(1).optional(),
+  employeeCount: z.number().int().min(0).max(10_000_000).optional(),
+  foundedYear: z.number().int().min(1800).max(2100).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
+  stage: z.enum(["seed", "early", "growth", "mature"]).optional(),
+});
+
+// Owners may edit business fields, but never status/declaration/ownership.
+const updateListingSchema = createListingSchema.partial();
+
+const declarationSchema = z.object({ accepted: z.literal(true) });
+const contactSchema = z.object({ message: z.string().trim().min(1).max(2000) });
 
 // GET /api/listings — marketplace browse
 router.get("/", async (req: AuthRequest, res, next) => {
@@ -58,30 +84,14 @@ router.get("/my", requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
-// POST /api/listings — create listing
-router.post("/", requireAuth, async (req: AuthRequest, res, next) => {
+// POST /api/listings — create listing (sellers only)
+router.post("/", requireAuth, requireRole("seller"), validateBody(createListingSchema), async (req: AuthRequest, res, next) => {
   try {
-    const body = req.body as {
-      companyName: string;
-      industry: string;
-      description?: string;
-      revenue: number;
-      ebitda: number;
-      ebitdaMargin?: number;
-      revenueGrowthRate?: number;
-      askingValuation: number;
-      debtRatio?: number;
-      customerConcentration?: number;
-      employeeCount?: number;
-      foundedYear?: number;
-      city?: string;
-      state?: string;
-      stage: string;
-    };
+    const body = req.body as z.infer<typeof createListingSchema>;
 
     const [listing] = await db.insert(listingsTable).values({
-      userId: req.dbUserId!,
       ...body,
+      userId: req.dbUserId!,
       status: "draft",
     }).returning();
 
@@ -91,10 +101,14 @@ router.post("/", requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
-// GET /api/listings/:id
-router.get("/:id", async (req: AuthRequest, res, next) => {
+// GET /api/listings/:id — public for active listings; drafts visible to owner only
+router.get("/:id", optionalAuth, async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const [row] = await db
       .select({ listing: listingsTable, sellerName: usersTable.name })
       .from(listingsTable)
@@ -107,11 +121,20 @@ router.get("/:id", async (req: AuthRequest, res, next) => {
       return;
     }
 
-    // Increment view count
-    await db
-      .update(listingsTable)
-      .set({ viewCount: sql`${listingsTable.viewCount} + 1` })
-      .where(eq(listingsTable.id, id));
+    const isOwner = row.listing.userId === req.dbUserId;
+    // Non-active listings (draft/pending/closed) expose seller financials — owner only.
+    if (row.listing.status !== "active" && !isOwner) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    // Only count genuine prospect views (active listings, not the owner's own visits).
+    if (row.listing.status === "active" && !isOwner) {
+      await db
+        .update(listingsTable)
+        .set({ viewCount: sql`${listingsTable.viewCount} + 1` })
+        .where(eq(listingsTable.id, id));
+    }
 
     res.json({ ...row.listing, sellerName: row.sellerName });
   } catch (err) {
@@ -119,10 +142,14 @@ router.get("/:id", async (req: AuthRequest, res, next) => {
   }
 });
 
-// PATCH /api/listings/:id
-router.patch("/:id", requireAuth, async (req: AuthRequest, res, next) => {
+// PATCH /api/listings/:id — owner edits business fields only (status changes go through declaration)
+router.patch("/:id", requireAuth, validateBody(updateListingSchema), async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const [existing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
 
     if (!existing || existing.userId !== req.dbUserId) {
@@ -130,9 +157,10 @@ router.patch("/:id", requireAuth, async (req: AuthRequest, res, next) => {
       return;
     }
 
+    const updates = req.body as z.infer<typeof updateListingSchema>;
     const [updated] = await db
       .update(listingsTable)
-      .set(req.body as Partial<typeof listingsTable.$inferInsert>)
+      .set(updates)
       .where(eq(listingsTable.id, id))
       .returning();
 
@@ -160,16 +188,15 @@ router.delete("/:id", requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
-// POST /api/listings/:id/declaration
-router.post("/:id/declaration", requireAuth, async (req: AuthRequest, res, next) => {
+// POST /api/listings/:id/declaration — owner accepts seller declaration, activating the listing
+router.post("/:id/declaration", requireAuth, validateBody(declarationSchema), async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
-    const { accepted } = req.body as { accepted: boolean };
-
-    if (!accepted) {
-      res.status(400).json({ error: "Declaration must be accepted" });
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
       return;
     }
+    const { accepted } = req.body as z.infer<typeof declarationSchema>;
 
     const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
     if (!listing || listing.userId !== req.dbUserId) {
@@ -201,10 +228,14 @@ router.post("/:id/declaration", requireAuth, async (req: AuthRequest, res, next)
 // GET /api/listings/:id/valuation
 router.get("/:id/valuation", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
 
-    if (!listing) {
+    if (!listing || (listing.status !== "active" && listing.userId !== req.dbUserId)) {
       res.status(404).json({ error: "Not found" });
       return;
     }
@@ -243,10 +274,14 @@ router.get("/:id/valuation", requireAuth, async (req: AuthRequest, res, next) =>
 // GET /api/listings/:id/intelligence
 router.get("/:id/intelligence", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, id)).limit(1);
 
-    if (!listing) {
+    if (!listing || (listing.status !== "active" && listing.userId !== req.dbUserId)) {
       res.status(404).json({ error: "Not found" });
       return;
     }
@@ -283,48 +318,66 @@ router.get("/:id/intelligence", requireAuth, async (req: AuthRequest, res, next)
   }
 });
 
-// POST /api/listings/:id/contact
-router.post("/:id/contact", requireAuth, async (req: AuthRequest, res, next) => {
+// POST /api/listings/:id/contact — investors request contact with an active listing's seller
+router.post("/:id/contact", requireAuth, requireRole("investor"), validateBody(contactSchema), async (req: AuthRequest, res, next) => {
   try {
-    const listingId = Number(req.params.id);
-    const { message } = req.body as { message: string };
-
-    const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, listingId)).limit(1);
-    if (!listing) {
+    const listingId = parseId(req.params.id);
+    if (!listingId) {
       res.status(404).json({ error: "Not found" });
       return;
     }
+    const { message } = req.body as z.infer<typeof contactSchema>;
 
-    const [cr] = await db.insert(contactRequestsTable).values({
-      investorId: req.dbUserId!,
-      listingId,
-      message,
-    }).returning();
+    const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, listingId)).limit(1);
+    if (!listing || listing.status !== "active") {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+    if (listing.userId === req.dbUserId) {
+      res.status(400).json({ error: "You cannot contact your own listing" });
+      return;
+    }
 
-    res.status(201).json(cr);
-  } catch (err) {
-    next(err);
-  }
-});
-
-// GET /api/contact-requests
-router.get("/contact-requests/all", requireAuth, async (req: AuthRequest, res, next) => {
-  try {
-    const rows = await db
-      .select({
-        cr: contactRequestsTable,
-        investorName: usersTable.name,
-        listingName: listingsTable.companyName,
-      })
+    // Don't create duplicate requests: an existing pending OR accepted request for the same
+    // listing already covers this investor (a declined one may be re-requested).
+    const [dup] = await db
+      .select()
       .from(contactRequestsTable)
-      .leftJoin(usersTable, eq(contactRequestsTable.investorId, usersTable.id))
-      .leftJoin(listingsTable, eq(contactRequestsTable.listingId, listingsTable.id))
-      .where(
-        eq(listingsTable.userId, req.dbUserId!)
-      )
-      .orderBy(sql`${contactRequestsTable.createdAt} DESC`);
+      .where(and(
+        eq(contactRequestsTable.investorId, req.dbUserId!),
+        eq(contactRequestsTable.listingId, listingId),
+        inArray(contactRequestsTable.status, ["pending", "accepted"]),
+      ))
+      .limit(1);
+    if (dup) {
+      res.status(200).json(dup);
+      return;
+    }
 
-    res.json(rows.map(({ cr, investorName, listingName }) => ({ ...cr, investorName, listingName })));
+    try {
+      const [cr] = await db.insert(contactRequestsTable).values({
+        investorId: req.dbUserId!,
+        listingId,
+        message,
+      }).returning();
+      res.status(201).json(cr);
+    } catch (err) {
+      // A concurrent request beat our dedup check; the partial unique index rejected it (23505).
+      if (err && typeof err === "object" && "code" in err && (err as { code?: string }).code === "23505") {
+        const [existing] = await db
+          .select()
+          .from(contactRequestsTable)
+          .where(and(
+            eq(contactRequestsTable.investorId, req.dbUserId!),
+            eq(contactRequestsTable.listingId, listingId),
+            inArray(contactRequestsTable.status, ["pending", "accepted"]),
+          ))
+          .limit(1);
+        res.status(200).json(existing);
+        return;
+      }
+      throw err;
+    }
   } catch (err) {
     next(err);
   }

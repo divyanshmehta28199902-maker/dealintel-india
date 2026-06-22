@@ -6,10 +6,16 @@ import {
   usersTable,
   listingsTable,
 } from "@workspace/db";
-import { eq, or, sql } from "drizzle-orm";
+import { eq, or, and, ne, sql } from "drizzle-orm";
+import { z } from "zod/v4";
 import { requireAuth, type AuthRequest } from "../lib/auth";
+import { validateBody, parseId } from "../lib/validate";
 
 const router = Router();
+
+const messageSchema = z.object({
+  content: z.string().trim().min(1).max(5000),
+});
 
 router.get("/", requireAuth, async (req: AuthRequest, res, next) => {
   try {
@@ -38,7 +44,11 @@ router.get("/", requireAuth, async (req: AuthRequest, res, next) => {
         .select({ count: sql<number>`cast(count(*) as int)` })
         .from(messagesTable)
         .where(
-          eq(messagesTable.threadId, thread.id)
+          and(
+            eq(messagesTable.threadId, thread.id),
+            eq(messagesTable.isRead, false),
+            ne(messagesTable.senderId, userId),
+          )
         );
 
       const otherUserId = thread.sellerId === userId ? thread.investorId : thread.sellerId;
@@ -64,7 +74,11 @@ router.get("/", requireAuth, async (req: AuthRequest, res, next) => {
 
 router.get("/:threadId", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const threadId = Number(req.params.threadId);
+    const threadId = parseId(req.params.threadId);
+    if (!threadId) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const userId = req.dbUserId!;
 
     const [thread] = await db
@@ -85,11 +99,16 @@ router.get("/:threadId", requireAuth, async (req: AuthRequest, res, next) => {
       .where(eq(messagesTable.threadId, threadId))
       .orderBy(sql`${messagesTable.createdAt} ASC`);
 
-    // Mark as read
+    // Mark only the *incoming* messages as read for this viewer.
     await db
       .update(messagesTable)
       .set({ isRead: true })
-      .where(eq(messagesTable.threadId, threadId));
+      .where(
+        and(
+          eq(messagesTable.threadId, threadId),
+          ne(messagesTable.senderId, userId),
+        )
+      );
 
     res.json(messages.map(({ message, senderName }) => ({ ...message, senderName })));
   } catch (err) {
@@ -97,11 +116,15 @@ router.get("/:threadId", requireAuth, async (req: AuthRequest, res, next) => {
   }
 });
 
-router.post("/:threadId", requireAuth, async (req: AuthRequest, res, next) => {
+router.post("/:threadId", requireAuth, validateBody(messageSchema), async (req: AuthRequest, res, next) => {
   try {
-    const threadId = Number(req.params.threadId);
+    const threadId = parseId(req.params.threadId);
+    if (!threadId) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const userId = req.dbUserId!;
-    const { content } = req.body as { content: string };
+    const { content } = req.body as z.infer<typeof messageSchema>;
 
     const [thread] = await db
       .select()

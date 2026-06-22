@@ -29,6 +29,9 @@ export interface ValuationResult {
 export function computeValuation(listingId: number, input: ValuationInput): ValuationResult {
   const { revenue, ebitda, revenueGrowthRate = 0.12, benchmark, askingValuation } = input;
 
+  // Guard against zero/negative revenue producing NaN/Infinity in the margin-based projection.
+  const ebitdaMargin = revenue > 0 ? ebitda / revenue : 0;
+
   // Comparable EV (EBITDA × industry multiple)
   const comparableEV = ebitda * benchmark.ebitdaMultiple;
 
@@ -44,7 +47,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
 
   for (let year = 1; year <= 5; year++) {
     currentRevenue *= 1 + revenueGrowthRate;
-    const projectedEbitda = currentRevenue * (ebitda / revenue);
+    const projectedEbitda = currentRevenue * ebitdaMargin;
     const fcf = projectedEbitda - currentRevenue * capexRatio - currentRevenue * wcChangeRatio;
     const discounted = fcf / Math.pow(1 + discountRate, year);
     projectedCashFlows.push(Math.round(fcf));
@@ -58,7 +61,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   const dcfValue = presentValue + discountedTV;
 
   // Confidence score based on data completeness and margin quality
-  const ebitdaMarginPct = ebitda / revenue;
+  const ebitdaMarginPct = ebitdaMargin;
   let confidence = 0.7;
   if (ebitdaMarginPct > 0.2) confidence += 0.1;
   if (revenueGrowthRate > 0.1) confidence += 0.1;
@@ -76,10 +79,10 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   }
 
   const explanation = `Based on ${benchmark.industry} sector benchmarks (${benchmark.ebitdaMultiple}x EBITDA multiple), ` +
-    `the comparable EV is ₹${Math.round(comparableEV / 100) / 10}Cr. ` +
+    `the comparable EV is ₹${Math.round(comparableEV / 10) / 10}Cr. ` +
     `A 5-year DCF at ${discountRate * 100}% discount rate with ${revenueGrowthRate * 100}% revenue growth ` +
-    `yields ₹${Math.round(dcfValue / 100) / 10}Cr intrinsic value. ` +
-    `Suggested deal price is ₹${Math.round(suggestedPrice / 100) / 10}Cr.`;
+    `yields ₹${Math.round(dcfValue / 10) / 10}Cr intrinsic value. ` +
+    `Suggested deal price is ₹${Math.round(suggestedPrice / 10) / 10}Cr.`;
 
   return {
     listingId,
@@ -121,7 +124,8 @@ export function computeIntelligence(input: IntelligenceInput) {
     benchmark,
   } = input;
 
-  const ebitdaMargin = ebitda / revenue;
+  // Guard against zero/negative revenue (legacy/imported rows) producing NaN/Infinity.
+  const ebitdaMargin = revenue > 0 ? ebitda / revenue : 0;
 
   // Risk factors
   const riskFactors = [

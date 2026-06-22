@@ -6,8 +6,9 @@ import {
   usersTable,
   messageThreadsTable,
 } from "@workspace/db";
-import { eq, or, sql } from "drizzle-orm";
+import { eq, or, and, sql } from "drizzle-orm";
 import { requireAuth, type AuthRequest } from "../lib/auth";
+import { parseId } from "../lib/validate";
 
 const router = Router();
 
@@ -43,7 +44,11 @@ router.get("/", requireAuth, async (req: AuthRequest, res, next) => {
 // POST /api/contact-requests/:id/accept
 router.post("/:id/accept", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const [cr] = await db
       .select({ cr: contactRequestsTable, sellerId: listingsTable.userId })
       .from(contactRequestsTable)
@@ -56,20 +61,39 @@ router.post("/:id/accept", requireAuth, async (req: AuthRequest, res, next) => {
       return;
     }
 
-    // Create message thread
+    // Idempotent: a previously accepted request already has its thread — don't create a duplicate.
+    if (cr.cr.status === "accepted" && cr.cr.threadId) {
+      res.json({ ...cr.cr, investorName: null, listingName: null });
+      return;
+    }
+    if (cr.cr.status === "declined") {
+      res.status(400).json({ error: "Request was already declined" });
+      return;
+    }
+
+    // Create the thread first, then atomically attach it ONLY if the request is still
+    // pending. This prevents two concurrent accepts from creating duplicate threads.
     const [thread] = await db.insert(messageThreadsTable).values({
       listingId: cr.cr.listingId,
       sellerId: cr.sellerId!,
       investorId: cr.cr.investorId,
     }).returning();
 
-    const [updated] = await db
+    const [claimed] = await db
       .update(contactRequestsTable)
       .set({ status: "accepted", threadId: thread.id })
-      .where(eq(contactRequestsTable.id, id))
+      .where(and(eq(contactRequestsTable.id, id), eq(contactRequestsTable.status, "pending")))
       .returning();
 
-    res.json({ ...updated, investorName: null, listingName: null });
+    if (!claimed) {
+      // Lost the race (status changed concurrently): drop the orphan thread, return current state.
+      await db.delete(messageThreadsTable).where(eq(messageThreadsTable.id, thread.id));
+      const [current] = await db.select().from(contactRequestsTable).where(eq(contactRequestsTable.id, id)).limit(1);
+      res.json({ ...current, investorName: null, listingName: null });
+      return;
+    }
+
+    res.json({ ...claimed, investorName: null, listingName: null });
   } catch (err) {
     next(err);
   }
@@ -78,7 +102,11 @@ router.post("/:id/accept", requireAuth, async (req: AuthRequest, res, next) => {
 // POST /api/contact-requests/:id/decline
 router.post("/:id/decline", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const id = Number(req.params.id);
+    const id = parseId(req.params.id);
+    if (!id) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     const [cr] = await db
       .select({ cr: contactRequestsTable, sellerId: listingsTable.userId })
       .from(contactRequestsTable)
@@ -91,11 +119,27 @@ router.post("/:id/decline", requireAuth, async (req: AuthRequest, res, next) => 
       return;
     }
 
+    if (cr.cr.status === "accepted") {
+      res.status(400).json({ error: "Request was already accepted" });
+      return;
+    }
+    if (cr.cr.status === "declined") {
+      res.json({ ...cr.cr, investorName: null, listingName: null });
+      return;
+    }
+
     const [updated] = await db
       .update(contactRequestsTable)
       .set({ status: "declined" })
-      .where(eq(contactRequestsTable.id, id))
+      .where(and(eq(contactRequestsTable.id, id), eq(contactRequestsTable.status, "pending")))
       .returning();
+
+    if (!updated) {
+      // Lost the race (accepted/declined concurrently): return current state without clobbering it.
+      const [current] = await db.select().from(contactRequestsTable).where(eq(contactRequestsTable.id, id)).limit(1);
+      res.json({ ...current, investorName: null, listingName: null });
+      return;
+    }
 
     res.json({ ...updated, investorName: null, listingName: null });
   } catch (err) {

@@ -1,4 +1,5 @@
-import { pgTable, serial, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
@@ -13,7 +14,13 @@ export const contactRequestsTable = pgTable("contact_requests", {
   threadId: integer("thread_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
-});
+}, (table) => [
+  // An investor may have at most one outstanding (pending or accepted) request per listing.
+  // Declined requests are excluded so a fresh attempt is allowed after a decline.
+  uniqueIndex("contact_requests_active_uniq")
+    .on(table.investorId, table.listingId)
+    .where(sql`${table.status} in ('pending', 'accepted')`),
+]);
 
 export const insertContactRequestSchema = createInsertSchema(contactRequestsTable).omit({ id: true, status: true, threadId: true, createdAt: true, updatedAt: true });
 export type InsertContactRequest = z.infer<typeof insertContactRequestSchema>;

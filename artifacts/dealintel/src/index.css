@@ -294,9 +294,6 @@
     @apply border-border;
     box-sizing: border-box;
   }
-  html {
-    @apply dark;
-  }
   body {
     @apply bg-background text-foreground;
     font-family: var(--app-font-sans);
@@ -333,3 +330,13 @@
 .stat-glow { box-shadow: 0 0 20px rgba(245,158,11,0.08); }
 .stat-glow-green { box-shadow: 0 0 20px rgba(16,185,129,0.08); }
 .stat-glow-blue { box-shadow: 0 0 20px rgba(59,130,246,0.08); }
+
+/* Interactive card hover */
+.hover-elevate {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.hover-elevate:hover {
+  transform: translateY(-2px);
+  border-color: hsl(45 93% 55% / 0.35);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}

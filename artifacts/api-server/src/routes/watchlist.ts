@@ -2,7 +2,8 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { watchlistTable, listingsTable, usersTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
-import { requireAuth, type AuthRequest } from "../lib/auth";
+import { requireAuth, requireRole, type AuthRequest } from "../lib/auth";
+import { parseId } from "../lib/validate";
 
 const router = Router();
 
@@ -18,16 +19,30 @@ router.get("/", requireAuth, async (req: AuthRequest, res, next) => {
 
     res.json(rows.map(({ watchlist, listing, sellerName }) => ({
       ...watchlist,
-      listing: listing ? { ...listing, sellerName } : null,
+      // Only expose listing financials while the listing is still active — a seller who
+      // delists must not keep leaking data to investors who previously saved it.
+      listing: listing && listing.status === "active" ? { ...listing, sellerName } : null,
     })));
   } catch (err) {
     next(err);
   }
 });
 
-router.post("/:listingId", requireAuth, async (req: AuthRequest, res, next) => {
+router.post("/:listingId", requireAuth, requireRole("investor"), async (req: AuthRequest, res, next) => {
   try {
-    const listingId = Number(req.params.listingId);
+    const listingId = parseId(req.params.listingId);
+    if (!listingId) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    // Only active listings can be watched.
+    const [listing] = await db.select().from(listingsTable).where(eq(listingsTable.id, listingId)).limit(1);
+    if (!listing || listing.status !== "active") {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
     const [existing] = await db
       .select()
       .from(watchlistTable)
@@ -52,7 +67,11 @@ router.post("/:listingId", requireAuth, async (req: AuthRequest, res, next) => {
 
 router.delete("/:listingId", requireAuth, async (req: AuthRequest, res, next) => {
   try {
-    const listingId = Number(req.params.listingId);
+    const listingId = parseId(req.params.listingId);
+    if (!listingId) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
     await db
       .delete(watchlistTable)
       .where(and(eq(watchlistTable.userId, req.dbUserId!), eq(watchlistTable.listingId, listingId)));

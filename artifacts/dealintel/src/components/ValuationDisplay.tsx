@@ -72,6 +72,22 @@ const scenarioTooltips: Record<ScenarioResult["label"], string> = {
 // ── main ─────────────────────────────────────────────────────────────────────
 
 export function ValuationDisplay({ v }: { v: ValuationResult }) {
+  // Defensive defaults — old records stored in the DB may be missing fields
+  // added in recent engine updates. Never crash on undefined.
+  const warnings        = v.warnings        ?? [];
+  const tags            = v.tags            ?? [];
+  const dealScore       = v.dealScore       ?? 0;
+  const dealRating      = v.dealRating      ?? "N/A";
+  const riskScore       = v.riskScore       ?? 5;
+  const riskBand        = v.riskBand        ?? "Medium";
+  const riskLabel       = v.riskLabel       ?? "Standard";
+  const isLossMaking    = v.isLossMaking    ?? false;
+  const dcfNotMeaningful = v.dcfNotMeaningful ?? false;
+  const moicLabel       = v.moicLabel       ?? (v.moic != null ? "Standard" : "Not meaningful");
+  const irrAssumptions  = v.irrAssumptions  ?? null;
+  const moicAssumptions = v.moicAssumptions ?? null;
+  const breakdown       = v.valuationBreakdown ?? null;
+
   const priceSafe = Math.max(0, v.suggestedPrice);
 
   return (
@@ -79,13 +95,13 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
       <div className="space-y-4">
 
         {/* ── Warnings ──────────────────────────────────────────────────── */}
-        {v.warnings.length > 0 && (
+        {warnings.length > 0 && (
           <div className="rounded-lg border border-yellow-500/30 bg-yellow-500/8 px-4 py-3 space-y-1.5">
             <div className="flex items-center gap-2 mb-1">
               <ShieldAlert className="h-4 w-4 text-yellow-400 shrink-0" />
               <p className="text-xs font-semibold text-yellow-400 uppercase tracking-wider">Important Notes</p>
             </div>
-            {v.warnings.map((w, i) => (
+            {warnings.map((w, i) => (
               <p key={i} className="text-xs text-yellow-300/90 leading-snug pl-6">• {w}</p>
             ))}
           </div>
@@ -109,12 +125,12 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
 
           <div className="flex items-end justify-between mb-2">
             <div>
-              <span className={`text-4xl font-bold font-mono ${ratingColor(v.dealRating)}`}>{v.dealScore}</span>
+              <span className={`text-4xl font-bold font-mono ${ratingColor(dealRating)}`}>{dealScore}</span>
               <span className="text-muted-foreground text-sm ml-1">/100</span>
             </div>
-            <span className={`text-sm font-semibold ${ratingColor(v.dealRating)}`}>{v.dealRating}</span>
+            <span className={`text-sm font-semibold ${ratingColor(dealRating)}`}>{dealRating}</span>
           </div>
-          <Progress value={v.dealScore} className="h-2 mb-3" />
+          <Progress value={dealScore} className="h-2 mb-3" />
 
           {/* Risk band */}
           <div className="flex items-center justify-between text-xs border-t border-border pt-3 mb-3">
@@ -131,19 +147,19 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
               </Tooltip>
             </span>
             <span className="flex items-center gap-2">
-              <span className={`font-mono font-bold ${riskBandColor(v.riskBand)}`}>{v.riskScore}/10</span>
+              <span className={`font-mono font-bold ${riskBandColor(riskBand)}`}>{riskScore}/10</span>
               <Badge variant="outline" className={`text-xs px-1.5 py-0 ${
-                v.riskBand === "Low"    ? "bg-green-500/10 text-green-400 border-green-500/30" :
-                v.riskBand === "Medium" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" :
-                                          "bg-red-500/10 text-red-400 border-red-500/30"
-              }`}>{v.riskBand} Risk</Badge>
+                riskBand === "Low"    ? "bg-green-500/10 text-green-400 border-green-500/30" :
+                riskBand === "Medium" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/30" :
+                                        "bg-red-500/10 text-red-400 border-red-500/30"
+              }`}>{riskBand} Risk</Badge>
             </span>
           </div>
 
           {/* Tags */}
-          {v.tags.length > 0 && (
+          {tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
-              {v.tags.map((t) => (
+              {tags.map((t) => (
                 <Badge key={t} variant="outline" className={`${tagBadgeColor(t)} text-xs`}>{t}</Badge>
               ))}
             </div>
@@ -171,7 +187,7 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
             </div>
             <div className="flex flex-col items-end gap-1.5 shrink-0">
               <Badge variant="outline" className={`${tagColor(v.tag)} text-xs`}>{v.tag}</Badge>
-              <Badge variant="outline" className={`${riskLabelColor(v.riskLabel)} text-xs`}>{v.riskLabel}</Badge>
+              <Badge variant="outline" className={`${riskLabelColor(riskLabel)} text-xs`}>{riskLabel}</Badge>
             </div>
           </div>
 
@@ -181,24 +197,28 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
               <Info className="h-3 w-3" />
               Valuation derived from:
             </p>
-            <div className="flex items-center gap-2 text-xs font-mono">
-              {v.valuationBreakdown.comparableWeight > 0 && (
-                <span className="text-primary">
-                  {v.valuationBreakdown.comparableWeight}% Comparable ({formatINR(v.valuationBreakdown.comparableValue)})
-                </span>
-              )}
-              {v.valuationBreakdown.dcfWeight > 0 && v.valuationBreakdown.comparableWeight > 0 && (
-                <span className="text-muted-foreground">+</span>
-              )}
-              {v.valuationBreakdown.dcfWeight > 0 && (
-                <span className="text-green-400">
-                  {v.valuationBreakdown.dcfWeight}% DCF ({formatINR(v.valuationBreakdown.dcfValue)})
-                </span>
-              )}
-              {v.valuationBreakdown.dcfWeight === 0 && (
-                <span className="text-yellow-400">100% Comparable (DCF excluded)</span>
-              )}
-            </div>
+            {breakdown ? (
+              <div className="flex items-center gap-2 text-xs font-mono">
+                {breakdown.comparableWeight > 0 && (
+                  <span className="text-primary">
+                    {breakdown.comparableWeight}% Comparable ({formatINR(breakdown.comparableValue)})
+                  </span>
+                )}
+                {breakdown.dcfWeight > 0 && breakdown.comparableWeight > 0 && (
+                  <span className="text-muted-foreground">+</span>
+                )}
+                {breakdown.dcfWeight > 0 && (
+                  <span className="text-green-400">
+                    {breakdown.dcfWeight}% DCF ({formatINR(breakdown.dcfValue)})
+                  </span>
+                )}
+                {breakdown.dcfWeight === 0 && (
+                  <span className="text-yellow-400">100% Comparable (DCF excluded)</span>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground font-mono">Comparable + DCF blend</p>
+            )}
           </div>
 
           {/* Confidence */}
@@ -275,9 +295,9 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
             ) : (
               <>
                 <p className="text-2xl font-bold font-mono mt-1 text-primary">{v.irr}%</p>
-                {v.irrAssumptions && (
+                {irrAssumptions && (
                   <p className="text-xs text-muted-foreground mt-1 leading-tight">
-                    Exit at {v.irrAssumptions.exitMultiple}× in {v.irrAssumptions.holdingPeriod}
+                    Exit at {irrAssumptions.exitMultiple}× in {irrAssumptions.holdingPeriod}
                   </p>
                 )}
               </>
@@ -294,15 +314,15 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
               </>
             ) : (
               <>
-                <p className={`text-2xl font-bold font-mono mt-1 ${v.moicLabel === "Speculative (growth-based)" ? "text-orange-400" : "text-green-400"}`}>
+                <p className={`text-2xl font-bold font-mono mt-1 ${moicLabel === "Speculative (growth-based)" ? "text-orange-400" : "text-green-400"}`}>
                   {v.moic}x
                 </p>
-                {v.moicAssumptions && (
+                {moicAssumptions && (
                   <p className="text-xs text-muted-foreground mt-1 leading-tight">
-                    {formatINR(v.moicAssumptions.entryPrice)} → {formatINR(v.moicAssumptions.exitValue)}
+                    {formatINR(moicAssumptions.entryPrice)} → {formatINR(moicAssumptions.exitValue)}
                   </p>
                 )}
-                {v.moicLabel === "Speculative (growth-based)" && (
+                {moicLabel === "Speculative (growth-based)" && (
                   <p className="text-xs text-orange-400/80 mt-0.5">Speculative</p>
                 )}
               </>
@@ -334,7 +354,7 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
             <div className="flex items-center gap-2 mb-3">
               <Calculator className="h-4 w-4 text-primary" />
               <h3 className="font-semibold text-sm">Comparable EV</h3>
-              {v.isLossMaking && (
+              {isLossMaking && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Info className="h-3.5 w-3.5 text-orange-400 cursor-help" />
@@ -345,7 +365,7 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
                 </Tooltip>
               )}
             </div>
-            {v.isLossMaking ? (
+            {isLossMaking ? (
               <>
                 <p className="text-xs text-orange-400 font-medium mb-1.5">⚠️ N/A (Negative EBITDA)</p>
                 <p className="text-2xl font-bold font-mono text-orange-300">
@@ -372,7 +392,7 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
               <TrendingUp className="h-4 w-4 text-green-400" />
               <h3 className="font-semibold text-sm">5-Year DCF</h3>
             </div>
-            {v.dcfNotMeaningful ? (
+            {dcfNotMeaningful ? (
               <>
                 <p className="text-xs text-yellow-400 font-medium mb-1.5">Not meaningful</p>
                 <p className="text-2xl font-bold font-mono text-muted-foreground">₹0</p>

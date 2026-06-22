@@ -1,0 +1,315 @@
+FIX PREMIUM FEATURE ACCESS, COMPLETE MISSING MODULES, AND CONNECT PRICING TO REAL FUNCTIONALITY
+
+You are a senior SaaS architect and full-stack engineer.
+
+Your task is to transform the current pricing system from a UI-only pricing page into a fully functional subscription + feature access system.
+
+⸻
+
+🎯 OBJECTIVE
+
+Ensure:
+
+1. All listed premium features actually exist OR are properly gated
+2. Users can only access features based on their subscription
+3. Navigation reflects real feature availability
+4. No “fake features” shown without backend implementation
+
+⸻
+
+🔥 1. IMPLEMENT SUBSCRIPTION SYSTEM (CRITICAL)
+
+⸻
+
+DATABASE (MANDATORY)
+
+Ensure table:
+
+Subscriptions:
+
+* id
+* user_id
+* plan (FREE | INVESTOR_PRO | SELLER_PREMIUM)
+* status (ACTIVE | INACTIVE)
+* start_date
+* end_date
+
+⸻
+
+BACKEND LOGIC
+
+Create middleware:
+
+checkPlanAccess(requiredPlan)
+
+Example:
+
+* FREE → basic access
+* INVESTOR_PRO → full investor tools
+* SELLER_PREMIUM → seller tools
+
+⸻
+
+ATTACH PLAN TO USER
+
+When user logs in:
+
+* Fetch subscription
+* Attach to session/JWT
+
+⸻
+
+🔐 2. FEATURE GATING (VERY IMPORTANT)
+
+⸻
+
+INVESTOR PRO FEATURES (MUST BE RESTRICTED)
+
+Only accessible if:
+
+plan === INVESTOR_PRO
+
+Features:
+
+* Unlimited private deals
+* Scenario analysis (Bear/Base/Bull)
+* IRR / MOIC / Payback
+* Deal pipeline
+* Verified Deal Rooms
+* Document Vault access
+* NDA system
+
+⸻
+
+SELLER PREMIUM FEATURES
+
+Only accessible if:
+
+plan === SELLER_PREMIUM
+
+Features:
+
+* Featured listing
+* Verified badge
+* Priority contact requests
+* Deal boost
+* Investor matching
+
+⸻
+
+IMPLEMENT FRONTEND CHECKS
+
+Example:
+
+if (user.plan !== "INVESTOR_PRO") {
+  showUpgradeModal();
+}
+
+⸻
+
+🧱 3. FIX YOUR CURRENT PROBLEM (WHY FEATURES NOT VISIBLE)
+
+⸻
+
+DO THIS:
+
+1. Add debug display:
+
+Show current plan in UI:
+
+“Current Plan: FREE / INVESTOR_PRO / SELLER_PREMIUM”
+
+⸻
+
+2. Temporarily force upgrade:
+
+In database or code:
+
+user.plan = "INVESTOR_PRO"
+
+→ Verify if features appear
+
+⸻
+
+3. If features still don’t show:
+
+Problem = features NOT BUILT or NOT CONNECTED
+
+⸻
+
+🧠 4. BUILD MISSING CORE MODULES (HIGH PRIORITY)
+
+⸻
+
+MODULE 1: VERIFIED DEAL ROOM
+
+Each deal should have:
+
+* Financial summary
+* Documents
+* Deal narrative
+* Access control
+
+Route:
+→ /deal-room/:id
+
+⸻
+
+MODULE 2: DOCUMENT VAULT
+
+Features:
+
+* Upload files (P&L, Balance Sheet)
+* Restrict access:
+    * Only approved investors
+* Track:
+    * Who viewed
+    * When
+
+⸻
+
+MODULE 3: NDA SYSTEM
+
+Before access:
+
+Show:
+
+“I agree to NDA”
+
+Store:
+
+* user_id
+* deal_id
+* timestamp
+
+⸻
+
+MODULE 4: DEAL PIPELINE
+
+Stages:
+
+* Interested
+* Contacted
+* Due Diligence
+* Negotiation
+* Closed
+
+UI:
+
+* Kanban board
+
+⸻
+
+MODULE 5: MESSAGING SYSTEM
+
+* Investor ↔ Seller chat
+* Linked to deal
+
+⸻
+
+💰 5. CONNECT PRICING → REAL ACTIONS
+
+⸻
+
+UPGRADE BUTTON (IMPORTANT)
+
+When user clicks:
+
+“Upgrade to Pro”
+
+Trigger:
+
+* Change plan in DB (for now)
+* Later integrate Stripe/Razorpay
+
+⸻
+
+SHOW LOCKED FEATURES
+
+Instead of hiding:
+
+Display:
+
+🔒 “Investor Pro Required”
+
+Example:
+
+* Blur section
+* Add CTA: “Upgrade to unlock”
+
+⸻
+
+📊 6. REMOVE FAKE FEATURES (IMPORTANT)
+
+⸻
+
+If feature NOT built:
+
+DO NOT SHOW in pricing page
+
+OR
+
+Mark:
+
+“Coming Soon”
+
+⸻
+
+🎯 7. NAVIGATION FIX
+
+⸻
+
+Dynamically show menu:
+
+IF INVESTOR_PRO:
+
+* Show Pipeline
+* Show Private Deals (full)
+
+IF FREE:
+
+* Show limited features
+* Lock advanced ones
+
+⸻
+
+🧪 8. TESTING CHECKLIST
+
+⸻
+
+Test 3 users:
+
+1. FREE user
+2. INVESTOR_PRO user
+3. SELLER_PREMIUM user
+
+Verify:
+
+* Access control works
+* Upgrade works
+* Features unlock properly
+
+⸻
+
+🚨 RULES
+
+* No feature should exist only visually
+* Every feature must connect to backend
+* Pricing must reflect reality
+* Avoid fake complexity
+
+⸻
+
+🎯 FINAL RESULT
+
+Platform should behave like:
+
+“A real SaaS product where payment unlocks actual capabilities”
+
+NOT:
+
+“A UI demo with pricing page”
+
+⸻
+
+END

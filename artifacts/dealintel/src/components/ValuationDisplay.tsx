@@ -235,7 +235,16 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
                   </TooltipContent>
                 </Tooltip>
               </span>
-              <span className="font-mono">{Math.round(v.confidenceScore * 100)}%</span>
+              <span className="font-mono">
+                {Math.round(v.confidenceScore * 100)}%{" "}
+                <span className={
+                  v.confidenceScore * 100 >= 65 ? "text-green-400" :
+                  v.confidenceScore * 100 >= 40 ? "text-yellow-400" :
+                  "text-red-400"
+                }>
+                  ({v.confidenceScore * 100 >= 65 ? "High" : v.confidenceScore * 100 >= 40 ? "Moderate" : "Low"})
+                </span>
+              </span>
             </div>
             <Progress value={v.confidenceScore * 100} className="h-1.5" />
           </div>
@@ -297,7 +306,7 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
                 <p className="text-2xl font-bold font-mono mt-1 text-primary">{v.irr}%</p>
                 {irrAssumptions && (
                   <p className="text-xs text-muted-foreground mt-1 leading-tight">
-                    Exit at {irrAssumptions.exitMultiple}× in {irrAssumptions.holdingPeriod}
+                    Entry {formatINR(irrAssumptions.entryPrice)} → Exit {formatINR(irrAssumptions.exitValue)} ({irrAssumptions.exitMultiple}× multiple) over {irrAssumptions.holdingPeriod}
                   </p>
                 )}
               </>
@@ -334,13 +343,13 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
             <p className="text-xs text-muted-foreground uppercase tracking-wider">Payback</p>
             {v.paybackYears === null ? (
               <>
-                <p className="text-base font-bold font-mono mt-1 text-muted-foreground">N/A</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Not meaningful</p>
+                <p className="text-sm font-bold font-mono mt-1 text-muted-foreground">—</p>
+                <p className="text-xs text-muted-foreground mt-0.5 leading-tight">Not achieved within 5-year projection</p>
               </>
             ) : (
               <>
                 <p className="text-2xl font-bold font-mono mt-1">
-                  {v.paybackYears >= 5 ? "5yr+" : `${v.paybackYears}yr`}
+                  {v.paybackYears}yr
                 </p>
                 <p className="text-xs text-muted-foreground">FCF recovery</p>
               </>
@@ -444,10 +453,24 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
 
         {/* ── Methodology ───────────────────────────────────────────────── */}
         <Card className="p-5 border-card-border bg-muted/30">
-          <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
             <TrendingDown className="h-4 w-4 text-muted-foreground" /> Methodology
           </h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{v.explanation}</p>
+          <p className="text-xs text-muted-foreground mb-2">This valuation combines:</p>
+          <ul className="space-y-1 mb-3">
+            <li className="text-xs text-muted-foreground flex items-start gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              <span><span className="text-foreground font-medium">Comparable company analysis</span> — industry EBITDA (or revenue) multiple applied to normalised earnings</span>
+            </li>
+            <li className="text-xs text-muted-foreground flex items-start gap-2">
+              <span className="text-primary mt-0.5">•</span>
+              <span><span className="text-foreground font-medium">Discounted cash flow (DCF)</span> — 5-year free cash flow projection discounted at risk-adjusted WACC plus terminal value</span>
+            </li>
+          </ul>
+          <p className="text-xs text-muted-foreground border-t border-border pt-3 leading-relaxed">
+            Weighting applied based on profitability and cash flow visibility.{" "}
+            {v.explanation}
+          </p>
         </Card>
 
       </div>

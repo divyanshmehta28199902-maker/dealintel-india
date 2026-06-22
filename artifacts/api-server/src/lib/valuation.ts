@@ -21,6 +21,7 @@ export interface ScenarioResult {
 
 export interface IRRAssumptions {
   entryPrice: number;
+  exitValue: number;
   exitMultiple: number;
   holdingPeriod: string;
 }
@@ -278,7 +279,8 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
 
   const irrAssumptions: IRRAssumptions | null = irr !== null ? {
     entryPrice: Math.round(investmentAmount),
-    exitMultiple,
+    exitValue: Math.round(exitValue),
+    exitMultiple: Math.round(exitMultiple * 10) / 10,
     holdingPeriod: "5 years",
   } : null;
 
@@ -318,6 +320,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   }
 
   // ── Payback ────────────────────────────────────────────────────────────
+  // null = not achieved within 5-year projection (or no positive FCFs at all)
   let paybackYears: number | null = null;
   if (hasSomePositiveFCF) {
     let cumulative = 0;
@@ -325,7 +328,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
       cumulative += projectedCashFlows[i];
       if (cumulative >= investmentAmount) { paybackYears = i + 1; break; }
     }
-    if (paybackYears === null) paybackYears = 5;
+    // paybackYears stays null when cumulative FCFs don't recover the investment
   }
 
   // ── Range ──────────────────────────────────────────────────────────────

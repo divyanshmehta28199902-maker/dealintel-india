@@ -34,6 +34,7 @@ export interface ScenarioResult {
 
 export interface IRRAssumptions {
   entryPrice: number;
+  exitValue: number;
   exitMultiple: number;
   holdingPeriod: string;
 }

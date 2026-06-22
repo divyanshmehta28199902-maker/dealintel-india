@@ -1,0 +1,197 @@
+You are a senior investment banker, product designer, and financial systems architect.
+
+Refine my valuation UI and backend to eliminate final credibility gaps and make outputs fully transparent and investor-trustworthy.
+
+-----------------------------------
+1. ADD IRR TRANSPARENCY (MANDATORY)
+-----------------------------------
+
+Current issue:
+IRR is shown without explanation → looks like a black box
+
+Fix:
+
+Return:
+{
+  irr: number | null,
+  irr_assumptions: {
+    entry_price: number,
+    exit_value: number,
+    exit_multiple: number,
+    holding_period: "5 years"
+  }
+}
+
+UI (directly below IRR):
+
+"Assumes entry at ₹X Cr and exit at ₹Y Cr (X× EBITDA) over 5 years"
+
+If IRR is null:
+Show: "Not meaningful"
+
+-----------------------------------
+2. ADD MOIC BREAKDOWN
+-----------------------------------
+
+Current issue:
+MOIC lacks transparency
+
+Fix:
+
+Return:
+{
+  moic: number,
+  moic_assumptions: {
+    entry_price: number,
+    exit_value: number
+  }
+}
+
+UI:
+
+"Entry: ₹X Cr → Exit: ₹Y Cr"
+"Multiple on capital: X.x"
+
+-----------------------------------
+3. FIX PAYBACK CLARITY
+-----------------------------------
+
+Current issue:
+“5yr+” is vague
+
+Fix:
+
+IF payback not reached:
+  show:
+  "Payback not achieved within 5-year projection"
+
+ELSE:
+  show exact year
+
+-----------------------------------
+4. ADD VALUATION BREAKDOWN (CRITICAL)
+-----------------------------------
+
+Current issue:
+Final valuation looks like a black box
+
+Fix:
+
+Return:
+
+{
+  valuation_breakdown: {
+    dcf_value: number,
+    comparable_value: number,
+    weights: {
+      dcf: percentage,
+      comparable: percentage
+    }
+  }
+}
+
+UI section:
+
+"Valuation Breakdown"
+- DCF (60%): ₹X Cr
+- Comparable (40%): ₹Y Cr
+Final: ₹Z Cr
+
+-----------------------------------
+5. ADD CONFIDENCE DISPLAY BACK
+-----------------------------------
+
+Ensure confidence is ALWAYS visible
+
+UI:
+
+"Confidence: 72% (Moderate)"
+
+Rules:
+- Max cap = 85%
+- Never show unrealistic confidence
+
+-----------------------------------
+6. ADD UNCERTAINTY DISCLAIMER
+-----------------------------------
+
+If private deal OR no verified docs:
+
+Show banner:
+
+"⚠ Estimates based on limited private market data and management inputs. Not independently verified."
+
+-----------------------------------
+7. IMPROVE RISK SCORE CLARITY
+-----------------------------------
+
+UI improvement:
+
+Add label under score:
+
+"Scale: 0 (very low risk) → 10 (very high risk)"
+
+Also return:
+{
+  risk_score: number,
+  risk_label: "Low" | "Medium" | "High"
+}
+
+-----------------------------------
+8. REMOVE FALSE PRECISION
+-----------------------------------
+
+- Round all valuations:
+  ₹109.23 Cr → ₹109 Cr
+
+- Limit decimals:
+  IRR: 31.83% → 31.8%
+  MOIC: 3.12x → 3.1x
+
+-----------------------------------
+9. ADD METHODOLOGY EXPLANATION (UPGRADE)
+-----------------------------------
+
+Replace vague text with:
+
+"This valuation combines:
+- Comparable company analysis (EBITDA multiple)
+- Discounted cash flow (DCF) model
+
+Weighting applied based on profitability and cash flow visibility."
+
+-----------------------------------
+10. FINAL OUTPUT STRUCTURE
+-----------------------------------
+
+Return:
+
+{
+  valuation: number,
+  valuation_range: [min, max],
+  confidence: number,
+  irr: number | null,
+  irr_assumptions: object | null,
+  moic: number,
+  moic_assumptions: object,
+  payback: string,
+  risk_score: number,
+  risk_label: string,
+  score: number,
+  rating: string,
+  valuation_breakdown: object,
+  warnings: string[]
+}
+
+-----------------------------------
+GOAL:
+Make this feel like a professional investment memo.
+
+Avoid:
+- Black-box outputs
+- Overconfidence
+- Unexplained numbers
+
+Prioritize:
+Transparency > Complexity
+Trust > Flashy metrics

@@ -1,0 +1,174 @@
+You are a senior investment banker and quantitative financial engineer.
+
+Fix the final credibility gaps in my valuation engine. Focus ONLY on:
+1) Confidence realism
+2) Valuation transparency (breakdown)
+3) IRR mathematical correctness
+
+-----------------------------------
+1. FIX CONFIDENCE (REALISTIC + TRUSTWORTHY)
+-----------------------------------
+
+Current issue:
+Confidence is too high (e.g., 95%) → unrealistic and reduces trust
+
+Fix:
+
+confidence = 50
+
+IF verified → +15
+IF audited financials uploaded → +10
+IF EBITDA > 0 → +10
+IF positive free cash flow → +10
+IF revenue > ₹10Cr → +5
+IF consistent 3-year growth → +5
+
+IF private deal → -10
+IF no audited docs → -10
+IF EBITDA < 0 → -15
+IF negative FCF → -10
+
+Final rules:
+- Clamp: 40 ≤ confidence ≤ 85
+- NEVER exceed 85
+- Label:
+  70–85 → "High"
+  55–69 → "Moderate"
+  <55 → "Low"
+
+UI:
+"Confidence: 72% (Moderate)"
+
+-----------------------------------
+2. ADD VALUATION BREAKDOWN (CRITICAL)
+-----------------------------------
+
+Current issue:
+Final valuation looks like a black box
+
+Fix:
+
+Calculate:
+
+IF EBITDA > 0:
+  weight_dcf = 60%
+  weight_comparable = 40%
+ELSE:
+  weight_dcf = 0%
+  weight_comparable = 100%
+
+final_valuation =
+  (DCF × weight_dcf) +
+  (Comparable × weight_comparable)
+
+Return:
+
+{
+  valuation_breakdown: {
+    dcf_value: number,
+    comparable_value: number,
+    weights: {
+      dcf: percentage,
+      comparable: percentage
+    },
+    final_value: number
+  }
+}
+
+UI BLOCK (MANDATORY):
+
+"Valuation Breakdown"
+- DCF (60%): ₹143 Cr
+- Comparable (40%): ₹75 Cr
+Final Valuation: ₹109 Cr
+
+-----------------------------------
+3. FIX IRR (MATHEMATICALLY CORRECT)
+-----------------------------------
+
+Current issue:
+IRR does not match exit multiple (e.g., 2x → 31.8% is wrong)
+
+Fix:
+
+Use correct formula:
+
+IRR = (Exit_Value / Entry_Value)^(1 / Years) - 1
+
+Where:
+- Years = 5
+- Entry = current valuation
+- Exit = projected exit value
+
+Example:
+
+Entry = ₹109 Cr
+Exit = ₹340 Cr
+
+IRR = (340 / 109)^(1/5) - 1 ≈ 25–28%
+
+-----------------------------------
+4. FIX EXIT VALUE LOGIC
+-----------------------------------
+
+Exit must NOT be random
+
+IF EBITDA > 0:
+  exit_value = EBITDA_year5 × exit_multiple
+
+IF high growth:
+  exit_multiple = current_multiple + 1–3x expansion
+ELSE:
+  exit_multiple = industry multiple
+
+-----------------------------------
+5. FIX IRR DISPLAY (TRANSPARENCY)
+-----------------------------------
+
+Return:
+
+{
+  irr: number,
+  irr_assumptions: {
+    entry_price: number,
+    exit_value: number,
+    exit_multiple: number,
+    holding_period: "5 years"
+  }
+}
+
+UI:
+
+"Entry: ₹109 Cr → Exit: ₹340 Cr (12.5× EBITDA) over 5 years"
+
+-----------------------------------
+6. VALIDATION RULE (IMPORTANT)
+-----------------------------------
+
+Add check:
+
+IF IRR > 40%:
+  flag = "High return — verify assumptions"
+
+IF IRR < 0:
+  show "Not meaningful"
+
+-----------------------------------
+7. ROUNDING (REMOVE FALSE PRECISION)
+-----------------------------------
+
+- Valuation: ₹109.23 Cr → ₹109 Cr
+- IRR: 31.83% → 31.8%
+- Multiples: 12.47x → 12.5x
+
+-----------------------------------
+GOAL:
+Make outputs:
+- Mathematically correct
+- Transparent
+- Realistic (not over-optimistic)
+
+Avoid:
+- Inflated confidence
+- Black-box valuation
+- Unrealistic IRR

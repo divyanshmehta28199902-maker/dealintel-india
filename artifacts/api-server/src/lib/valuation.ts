@@ -118,26 +118,16 @@ function computeDCF(
 }
 
 // ---------------------------------------------------------------------------
-// IRR via bisection — null when invalid
+// IRR — simple annualised CAGR: (exitValue / entry)^(1/years) - 1
+// This is intentionally a CAGR approximation, not a full NPV-based IRR.
+// It keeps the number grounded in the stated entry/exit rather than being
+// distorted by lumpy interim cash flows.
 // ---------------------------------------------------------------------------
-function computeIRR(investment: number, cashFlows: number[], exitValue: number): number | null {
+function computeIRR(investment: number, exitValue: number, years = 5): number | null {
   if (investment <= 0 || exitValue <= 0) return null;
-  if (!cashFlows.some((f) => f > 0) && exitValue <= 0) return null;
-
-  let lo = -0.5, hi = 5.0;
-  for (let i = 0; i < 200; i++) {
-    const mid = (lo + hi) / 2;
-    let npv = -investment;
-    for (let y = 0; y < cashFlows.length; y++) {
-      npv += cashFlows[y] / Math.pow(1 + mid, y + 1);
-    }
-    npv += exitValue / Math.pow(1 + mid, cashFlows.length);
-    if (Math.abs(npv) < 0.001) { lo = mid; break; }
-    if (npv > 0) lo = mid; else hi = mid;
-  }
-  const irrRaw = (lo + hi) / 2;
-  if (irrRaw < -0.99 || irrRaw > 5) return null;
-  return Math.round(irrRaw * 1000) / 10; // 1 decimal — e.g. 31.8%
+  const raw = Math.pow(exitValue / investment, 1 / years) - 1;
+  if (!isFinite(raw) || raw < -0.99) return null;
+  return Math.round(raw * 1000) / 10; // 1 decimal — e.g. 25.4%
 }
 
 // ---------------------------------------------------------------------------
@@ -275,7 +265,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   // ── IRR ────────────────────────────────────────────────────────────────
   const investmentAmount = askingValuation ?? suggestedPrice;
   const irrValid = hasSomePositiveFCF || exitValue > 0;
-  const irr = irrValid ? computeIRR(investmentAmount, projectedCashFlows, exitValue) : null;
+  const irr = irrValid ? computeIRR(investmentAmount, exitValue) : null;
 
   const irrAssumptions: IRRAssumptions | null = irr !== null ? {
     entryPrice: Math.round(investmentAmount),
@@ -335,18 +325,20 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   const rangeMin = Math.max(0, Math.min(comparableEV, dcfValue) * 0.9);
   const rangeMax = Math.max(0, Math.max(comparableEV, dcfValue) * 1.1);
 
-  // ── Confidence score — capped at 85% ──────────────────────────────────
+  // ── Confidence score — clamped 40–85 ─────────────────────────────────
   let confidence = 50;
   if (trustLevel === "verified") confidence += 15;
   if (hasDocuments) confidence += 10;
   if (!isLossMaking) confidence += 10;
   if (hasSomePositiveFCF) confidence += 10;
-  if (revenue > 1000) confidence += 5; // > ₹10Cr
+  if (revenue > 1000) confidence += 5;           // > ₹10Cr
+  if (revenueGrowthRate > 0.1) confidence += 5;  // consistent growth bonus
   // Penalties
   if (isLossMaking) confidence -= 15;
   if (!hasSomePositiveFCF) confidence -= 10;
   if (trustLevel === "unverified") confidence -= 10;
-  confidence = Math.max(0, Math.min(85, confidence));
+  if (!hasDocuments) confidence -= 10;           // no audited financials uploaded
+  confidence = Math.max(40, Math.min(85, confidence)); // floor 40, cap 85
 
   // ── Risk score (0–10) ─────────────────────────────────────────────────
   let riskScore = 5;
@@ -396,8 +388,11 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   if (notMeaningful) {
     warnings.push("DCF excluded from valuation — all projected free cash flows are negative");
   }
-  if (confidence < 50) {
+  if (confidence < 55) {
     warnings.push("Limited data quality — treat as indicative only, not a definitive valuation");
+  }
+  if (irr !== null && irr > 40) {
+    warnings.push("High projected return — verify exit assumptions before relying on this figure");
   }
 
   // ── Deal tag (asking price vs intrinsic) ─────────────────────────────

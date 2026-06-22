@@ -238,11 +238,11 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
               <span className="font-mono">
                 {Math.round(v.confidenceScore * 100)}%{" "}
                 <span className={
-                  v.confidenceScore * 100 >= 65 ? "text-green-400" :
-                  v.confidenceScore * 100 >= 40 ? "text-yellow-400" :
+                  v.confidenceScore * 100 >= 70 ? "text-green-400" :
+                  v.confidenceScore * 100 >= 55 ? "text-yellow-400" :
                   "text-red-400"
                 }>
-                  ({v.confidenceScore * 100 >= 65 ? "High" : v.confidenceScore * 100 >= 40 ? "Moderate" : "Low"})
+                  ({v.confidenceScore * 100 >= 70 ? "High" : v.confidenceScore * 100 >= 55 ? "Moderate" : "Low"})
                 </span>
               </span>
             </div>

@@ -38,7 +38,10 @@ const createListingSchema = z.object({
 const updateListingSchema = createListingSchema.partial();
 
 const declarationSchema = z.object({ accepted: z.literal(true) });
-const contactSchema = z.object({ message: z.string().trim().min(1).max(2000) });
+const contactSchema = z.object({
+  message: z.string().trim().min(1).max(2000),
+  ndaAgreed: z.boolean().optional().default(false),
+});
 
 // GET /api/listings — marketplace browse
 router.get("/", async (req: AuthRequest, res, next) => {
@@ -355,10 +358,13 @@ router.post("/:id/contact", requireAuth, requireRole("investor"), validateBody(c
     }
 
     try {
+      const { ndaAgreed } = req.body as z.infer<typeof contactSchema>;
       const [cr] = await db.insert(contactRequestsTable).values({
         investorId: req.dbUserId!,
         listingId,
         message,
+        ndaAgreed: ndaAgreed ?? false,
+        ndaAgreedAt: ndaAgreed ? new Date() : null,
       }).returning();
       res.status(201).json(cr);
     } catch (err) {

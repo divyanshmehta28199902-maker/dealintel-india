@@ -1,0 +1,408 @@
+UPGRADE “DealIntel India” INTO A REAL M&A DEAL EXECUTION PLATFORM (FINAL SYSTEM PROMPT)
+
+You are a senior fintech architect, private equity systems designer, and SaaS monetization strategist.
+
+This is NOT a UI tweak. This is a FULL SYSTEM UPGRADE to make the platform:
+
+* Trusted by investors
+* Capable of real deal execution
+* Monetizable at ₹1L–₹10L/month
+
+⸻
+
+🎯 CORE OBJECTIVE
+
+Transform the platform from:
+“Valuation tool + listings”
+
+→ Into:
+
+“Investor-grade deal execution platform where real transactions happen”
+
+⸻
+
+🔥 1. PRIVATE DEAL FLOW → INVESTOR-GRADE (CRITICAL)
+
+⸻
+
+DEAL CREATION MODES
+
+MODE 1: QUICK DEAL (Low friction)
+
+* Revenue
+* EBITDA
+* Growth
+* Industry
+
+Output:
+→ Tag as “Unverified Deal”
+
+CTA:
+→ “Save Draft Deal”
+
+⸻
+
+MODE 2: VERIFIED DEAL (SERIOUS DEALS)
+
+🚨 MANDATORY:
+
+📁 Upload:
+
+* P&L Statement (Required)
+* Balance Sheet (Required)
+* Optional: GST / Tax filings
+
+📊 Inputs:
+
+* Revenue (Y-1, Y-2, Y-3)
+* EBITDA
+* Growth %
+* Total Debt (NEW)
+* Customer Concentration % (NEW)
+
+⸻
+
+VALIDATION RULES (STRICT)
+
+* Disable submission until:
+    * Required documents uploaded
+    * Financial fields completed
+* Show errors:
+    * EBITDA > Revenue → Block
+    * Growth > 100% → Warning
+    * Missing historical revenue → Warning
+
+⸻
+
+DEAL QUALITY SYSTEM
+
+Auto-calculate:
+
+Score (0–100) based on:
+
+* Data completeness
+* Document presence
+* Financial consistency
+
+Display:
+→ “Deal Quality: 78 / 100”
+
+Color:
+
+* Red (0–40)
+* Yellow (40–70)
+* Green (70+)
+
+⸻
+
+DATA COMPLETENESS BAR
+
+Display at top:
+→ “Profile Completion: 72%”
+
+Live updating progress bar
+
+⸻
+
+TRUST LAYER
+
+Assign:
+
+* 🔴 Unverified
+* 🟡 Partially Verified
+* 🟢 Verified
+
+⸻
+
+LEGAL CONFIRMATION
+
+Before submission:
+
+Checkbox:
+“I confirm this data is accurate”
+
+Store:
+
+* User ID
+* Timestamp
+
+⸻
+
+DOCUMENT VAULT
+
+* Secure storage
+* Show uploaded files
+* Track:
+    * Who uploaded
+    * When uploaded
+    * Who accessed
+
+⸻
+
+🧠 2. VALUATION SYSTEM → SIMPLIFIED + POWERFUL
+
+⸻
+
+ADD TWO MODES
+
+QUICK VALUATION
+
+* Revenue
+* EBITDA
+* Growth
+
+→ Instant EV + rough DCF
+
+⸻
+
+ADVANCED VALUATION
+
+(Current system but improved)
+
+Add:
+
+* IRR %
+* MOIC
+* Payback period
+
+⸻
+
+ADD SCENARIO ANALYSIS
+
+Display:
+
+Case	Valuation
+Bear	₹X
+Base	₹X
+Bull	₹X
+
+⸻
+
+ADD SENSITIVITY ANALYSIS
+
+* Growth vs Discount Rate grid
+
+⸻
+
+OUTPUT MUST INCLUDE:
+
+* EV Valuation
+* DCF Valuation
+* Suggested Deal Price
+* Overvalued / Undervalued tag
+* Confidence Score
+
+⸻
+
+📊 3. DEAL NARRATIVE (MANDATORY)
+
+Each deal must include:
+
+* Business Overview
+* Why Selling
+* Growth Drivers
+* Key Risks
+
+Make at least 2 fields required.
+
+⸻
+
+🤝 4. DEAL EXECUTION SYSTEM (REAL PIPELINE)
+
+⸻
+
+When user clicks:
+→ “Add to Pipeline”
+
+Create DB record:
+
+* sme_id
+* buyer_id
+* stage = Interested
+
+⸻
+
+PIPELINE STAGES:
+
+1. Interested
+2. Contacted
+3. Due Diligence
+4. Negotiation
+5. Closed
+
+⸻
+
+ADD:
+
+* Notes per stage
+* Activity timeline
+* Last updated timestamp
+
+⸻
+
+🔐 5. ANTI-COMMISSION BYPASS SYSTEM (VERY IMPORTANT)
+
+⸻
+
+CONTACT GATING
+
+* Hide phone/email
+* Unlock only after:
+    * Request approval
+
+⸻
+
+PLATFORM MESSAGING
+
+Force:
+
+* Initial conversation inside platform
+
+⸻
+
+NDA SYSTEM
+
+Before contact:
+
+Require:
+
+* NDA checkbox
+
+Store:
+
+* Timestamp
+* User ID
+
+⸻
+
+DEAL LOCK
+
+When stage = Due Diligence:
+
+* Mark deal as “Active Engagement”
+* Track both parties
+
+⸻
+
+SUCCESS FEE TRACKING
+
+When deal = Closed:
+
+Prompt:
+“Was this deal completed?”
+
+If YES:
+
+* Generate invoice (1–2%)
+
+⸻
+
+RISK DETECTION
+
+Flag:
+
+* Rapid contact attempts
+* Repeated same interactions
+
+⸻
+
+💰 6. MONETIZATION SYSTEM
+
+⸻
+
+FREE PLAN
+
+* Limited deals
+* Basic valuation
+
+⸻
+
+INVESTOR PRO (₹2,999–₹9,999/month)
+
+* Private deals
+* Full valuation
+* Document access
+* Pipeline
+
+⸻
+
+SELLER PREMIUM (₹4,999–₹15,000/listing)
+
+* Featured listing
+* Verified badge
+
+⸻
+
+SUCCESS FEE
+
+* 1%–2% per closed deal
+
+⸻
+
+ADD-ONS
+
+* Deal Boost (₹2,000)
+* Broker tools subscription
+
+⸻
+
+🎯 7. UX IMPROVEMENTS
+
+⸻
+
+* Rename CTA:
+
+Instead of:
+“Create & Audit Deal”
+
+Use:
+
+* “Create Deal Room” (verified)
+* “Save Draft Deal” (quick)
+
+⸻
+
+* Group sections:
+
+1. Basic Info
+2. Financials
+3. Narrative
+4. Documents
+
+⸻
+
+* Highlight key inputs:
+    Revenue, EBITDA, Growth
+
+⸻
+
+* Add micro-interactions:
+* Live validation
+* Progress updates
+* Button activation
+
+⸻
+
+🚨 RULES
+
+* No fake “verified” deals
+* No submission without required data
+* All features must connect to backend
+* Focus on trust, seriousness, monetization
+
+⸻
+
+🎯 FINAL RESULT
+
+Platform should feel like:
+
+“A private equity deal desk where real acquisition transactions happen”
+
+NOT:
+
+* A calculator
+* A casual listing platform
+
+⸻
+
+END

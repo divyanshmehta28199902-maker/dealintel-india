@@ -1,0 +1,5 @@
+- [Deal platform architecture](deal-platform.md) — private deals use dealMode (quick/verified), qualityScore auto-computed server-side from narrative + docs + legalConfirmedAt
+- [Pipeline + document vault](pipeline-docs.md) — pipeline stage advance is idempotent; success fee dialog triggers on closed stage; document upload uses presigned URL then registers to document_vault table
+- [Valuation shape](valuation-shape.md) — ValuationResult now has optional scenarios[], irr, moic, paybackYears; ValuationDisplay is backwards-compatible (renders base fields if extras absent)
+- [NDA flow](nda-flow.md) — ndaAgreed + ndaAgreedAt stored on contact_requests; contactSchema extended; frontend shows NDA checkbox in ListingDetail contact dialog
+- [Money/rate conventions](money-conventions.md) — INR lakhs for all money; rates 0-1 fractions; growthRate on private deals is percent (route divides /100); customerConcentration from frontend is % (route divides /100 before storing as fraction)

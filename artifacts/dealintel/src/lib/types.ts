@@ -24,6 +24,13 @@ export interface Listing {
   sellerName?: string | null;
 }
 
+export interface ScenarioResult {
+  label: "Bear" | "Base" | "Bull";
+  valuation: number;
+  growthRate: number;
+  discountRate: number;
+}
+
 export interface ValuationResult {
   listingId: number;
   comparableEV: number;
@@ -39,6 +46,10 @@ export interface ValuationResult {
   terminalGrowthRate: number;
   projectedCashFlows: number[];
   tag: string;
+  scenarios?: ScenarioResult[];
+  irr?: number;
+  moic?: number;
+  paybackYears?: number;
 }
 
 export interface RiskFactor {
@@ -66,9 +77,22 @@ export interface ContactRequest {
   message: string;
   status: string;
   threadId: number | null;
+  ndaAgreed: boolean;
+  ndaAgreedAt: string | null;
   createdAt: string;
   investorName?: string | null;
   listingName?: string | null;
+}
+
+export interface DocumentVaultEntry {
+  id: number;
+  privateDealId: number | null;
+  uploadedBy: number;
+  documentType: string;
+  objectPath: string;
+  fileName: string;
+  fileSize: number | null;
+  createdAt: string;
 }
 
 export interface PrivateDeal {
@@ -79,12 +103,52 @@ export interface PrivateDeal {
   revenue: number;
   ebitda: number;
   growthRate: number;
+  revenueY1: number | null;
+  revenueY2: number | null;
+  revenueY3: number | null;
+  totalDebt: number | null;
+  customerConcentration: number | null;
+  dealMode: string;
+  qualityScore: number | null;
+  trustLevel: string;
+  businessOverview: string | null;
+  whySelling: string | null;
+  growthDrivers: string | null;
+  keyRisks: string | null;
   description: string | null;
+  legalConfirmedAt: string | null;
   status: string;
   valuation: ValuationResult | null;
   intelligence: IntelligenceResult | null;
+  documents?: DocumentVaultEntry[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface PipelineActivity {
+  ts: string;
+  stage: string;
+  note?: string;
+}
+
+export interface Pipeline {
+  id: number;
+  investorId: number;
+  listingId: number;
+  stage: string;
+  notes: string | null;
+  activityLog: PipelineActivity[];
+  successFeePrompted: string | null;
+  createdAt: string;
+  updatedAt: string;
+  listing: {
+    name: string | null;
+    industry: string | null;
+    revenue: number | null;
+    askingValuation: number | null;
+    status: string | null;
+  };
+  sellerName: string | null;
 }
 
 export interface WatchlistItem {

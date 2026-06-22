@@ -1,14 +1,20 @@
-import { TrendingUp, Calculator, Target, Gauge } from "lucide-react";
+import { TrendingUp, Calculator, Target, Gauge, TrendingDown, BarChart3 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { formatINR } from "@/lib/format";
-import type { ValuationResult } from "@/lib/types";
+import type { ValuationResult, ScenarioResult } from "@/lib/types";
 
 function tagColor(tag: string) {
   if (tag === "Undervalued") return "bg-green-500/15 text-green-400 border-green-500/30";
   if (tag === "Overvalued") return "bg-destructive/15 text-destructive border-destructive/30";
   return "bg-blue-500/15 text-blue-400 border-blue-500/30";
+}
+
+function scenarioColor(label: ScenarioResult["label"]) {
+  if (label === "Bear") return "text-destructive";
+  if (label === "Bull") return "text-green-400";
+  return "text-primary";
 }
 
 export function ValuationDisplay({ v }: { v: ValuationResult }) {
@@ -34,6 +40,52 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
           <Progress value={v.confidenceScore * 100} className="h-1.5" />
         </div>
       </Card>
+
+      {/* Scenario Analysis */}
+      {v.scenarios && v.scenarios.length > 0 && (
+        <Card className="p-5 border-card-border">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <h3 className="font-semibold text-sm">Scenario Analysis</h3>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {v.scenarios.map((s) => (
+              <div key={s.label} className="text-center p-3 rounded-lg bg-muted/30 border border-border">
+                <p className={`text-xs font-semibold uppercase tracking-wider mb-1 ${scenarioColor(s.label)}`}>{s.label}</p>
+                <p className={`text-lg font-bold font-mono ${scenarioColor(s.label)}`}>{formatINR(s.valuation)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{(s.growthRate * 100).toFixed(0)}% growth · {(s.discountRate * 100).toFixed(0)}% WACC</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* IRR / MOIC / Payback */}
+      {(v.irr != null || v.moic != null || v.paybackYears != null) && (
+        <div className="grid grid-cols-3 gap-3">
+          {v.irr != null && (
+            <Card className="p-4 border-card-border text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">IRR</p>
+              <p className="text-2xl font-bold font-mono mt-1 text-primary">{v.irr}%</p>
+              <p className="text-xs text-muted-foreground">5-yr hold</p>
+            </Card>
+          )}
+          {v.moic != null && (
+            <Card className="p-4 border-card-border text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">MOIC</p>
+              <p className="text-2xl font-bold font-mono mt-1 text-green-400">{v.moic}x</p>
+              <p className="text-xs text-muted-foreground">multiple on capital</p>
+            </Card>
+          )}
+          {v.paybackYears != null && (
+            <Card className="p-4 border-card-border text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Payback</p>
+              <p className="text-2xl font-bold font-mono mt-1">{v.paybackYears}yr</p>
+              <p className="text-xs text-muted-foreground">FCF recovery</p>
+            </Card>
+          )}
+        </div>
+      )}
 
       {/* Two methods */}
       <div className="grid md:grid-cols-2 gap-4">
@@ -85,7 +137,9 @@ export function ValuationDisplay({ v }: { v: ValuationResult }) {
 
       {/* Explanation */}
       <Card className="p-5 border-card-border bg-muted/30">
-        <h3 className="font-semibold text-sm mb-2">Methodology</h3>
+        <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+          <TrendingDown className="h-4 w-4 text-muted-foreground" /> Methodology
+        </h3>
         <p className="text-sm text-muted-foreground leading-relaxed">{v.explanation}</p>
       </Card>
     </div>

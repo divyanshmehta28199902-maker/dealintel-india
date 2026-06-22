@@ -9,6 +9,13 @@ export interface ValuationInput {
   benchmark: IndustryBenchmark;
 }
 
+export interface ScenarioResult {
+  label: "Bear" | "Base" | "Bull";
+  valuation: number;
+  growthRate: number;
+  discountRate: number;
+}
+
 export interface ValuationResult {
   listingId: number;
   comparableEV: number;
@@ -24,53 +31,122 @@ export interface ValuationResult {
   terminalGrowthRate: number;
   projectedCashFlows: number[];
   tag: string;
+  scenarios: ScenarioResult[];
+  irr: number;
+  moic: number;
+  paybackYears: number;
+}
+
+function computeDCF(
+  revenue: number,
+  ebitdaMargin: number,
+  growthRate: number,
+  discountRate: number,
+  terminalGrowthRate: number,
+): { dcfValue: number; projectedCashFlows: number[] } {
+  const capexRatio = 0.04;
+  const wcChangeRatio = 0.02;
+  const cashFlows: number[] = [];
+  let currentRevenue = revenue;
+  let presentValue = 0;
+
+  for (let year = 1; year <= 5; year++) {
+    currentRevenue *= 1 + growthRate;
+    const projectedEbitda = currentRevenue * ebitdaMargin;
+    const fcf = projectedEbitda - currentRevenue * capexRatio - currentRevenue * wcChangeRatio;
+    const discounted = fcf / Math.pow(1 + discountRate, year);
+    cashFlows.push(Math.round(fcf));
+    presentValue += discounted;
+  }
+
+  const lastFCF = cashFlows[4] ?? 0;
+  const terminalValue = (lastFCF * (1 + terminalGrowthRate)) / (discountRate - terminalGrowthRate);
+  const discountedTV = terminalValue / Math.pow(1 + discountRate, 5);
+
+  return { dcfValue: presentValue + discountedTV, projectedCashFlows: cashFlows };
+}
+
+function computeIRR(investment: number, cashFlows: number[], exitValue: number): number {
+  if (investment <= 0) return 0;
+  // Bisection method for IRR (5-year hold + exit)
+  let lo = -0.5, hi = 5.0;
+  for (let i = 0; i < 100; i++) {
+    const mid = (lo + hi) / 2;
+    let npv = -investment;
+    for (let y = 0; y < cashFlows.length; y++) {
+      npv += cashFlows[y] / Math.pow(1 + mid, y + 1);
+    }
+    npv += exitValue / Math.pow(1 + mid, cashFlows.length);
+    if (Math.abs(npv) < 0.01) break;
+    if (npv > 0) lo = mid; else hi = mid;
+  }
+  return Math.round(((lo + hi) / 2) * 1000) / 10; // as %
 }
 
 export function computeValuation(listingId: number, input: ValuationInput): ValuationResult {
   const { revenue, ebitda, revenueGrowthRate = 0.12, benchmark, askingValuation } = input;
 
-  // Guard against zero/negative revenue producing NaN/Infinity in the margin-based projection.
   const ebitdaMargin = revenue > 0 ? ebitda / revenue : 0;
+  const terminalGrowthRate = 0.05;
+  const baseDiscountRate = 0.15;
 
-  // Comparable EV (EBITDA × industry multiple)
+  // Base DCF
+  const { dcfValue, projectedCashFlows } = computeDCF(
+    revenue, ebitdaMargin, revenueGrowthRate, baseDiscountRate, terminalGrowthRate,
+  );
+
+  // Comparable EV
   const comparableEV = ebitda * benchmark.ebitdaMultiple;
+  const suggestedPrice = (comparableEV * 0.5 + dcfValue * 0.5);
 
-  // 5-year DCF
-  const discountRate = 0.15; // 15% WACC — typical for Indian SME
-  const terminalGrowthRate = 0.05; // 5% perpetuity growth
-  const capexRatio = 0.04; // 4% of revenue
-  const wcChangeRatio = 0.02; // 2% of revenue
+  // Bear / Base / Bull scenarios
+  const scenarios: ScenarioResult[] = [
+    {
+      label: "Bear",
+      growthRate: revenueGrowthRate * 0.6,
+      discountRate: 0.18,
+      valuation: Math.round((computeDCF(revenue, ebitdaMargin, revenueGrowthRate * 0.6, 0.18, terminalGrowthRate).dcfValue + comparableEV * 0.8) / 2),
+    },
+    {
+      label: "Base",
+      growthRate: revenueGrowthRate,
+      discountRate: baseDiscountRate,
+      valuation: Math.round(suggestedPrice),
+    },
+    {
+      label: "Bull",
+      growthRate: revenueGrowthRate * 1.4,
+      discountRate: 0.12,
+      valuation: Math.round((computeDCF(revenue, ebitdaMargin, revenueGrowthRate * 1.4, 0.12, terminalGrowthRate).dcfValue + comparableEV * 1.2) / 2),
+    },
+  ];
 
-  const projectedCashFlows: number[] = [];
-  let currentRevenue = revenue;
-  let presentValue = 0;
+  // IRR + MOIC (assume investment at suggestedPrice, 5-year hold, exit at 6× last-year EBITDA)
+  const lastYearRevenue = revenue * Math.pow(1 + revenueGrowthRate, 5);
+  const exitEBITDA = lastYearRevenue * ebitdaMargin;
+  const exitValue = exitEBITDA * benchmark.ebitdaMultiple;
+  const investmentAmount = askingValuation ?? suggestedPrice;
+  const moic = investmentAmount > 0 ? Math.round((exitValue / investmentAmount) * 10) / 10 : 0;
+  const irr = computeIRR(investmentAmount, projectedCashFlows, exitValue);
 
-  for (let year = 1; year <= 5; year++) {
-    currentRevenue *= 1 + revenueGrowthRate;
-    const projectedEbitda = currentRevenue * ebitdaMargin;
-    const fcf = projectedEbitda - currentRevenue * capexRatio - currentRevenue * wcChangeRatio;
-    const discounted = fcf / Math.pow(1 + discountRate, year);
-    projectedCashFlows.push(Math.round(fcf));
-    presentValue += discounted;
+  // Payback period (cumulative FCF >= investment)
+  let cumulative = 0;
+  let paybackYears = 5;
+  for (let i = 0; i < projectedCashFlows.length; i++) {
+    cumulative += projectedCashFlows[i];
+    if (cumulative >= investmentAmount) { paybackYears = i + 1; break; }
   }
-
-  // Terminal value
-  const lastFCF = projectedCashFlows[4] ?? 0;
-  const terminalValue = (lastFCF * (1 + terminalGrowthRate)) / (discountRate - terminalGrowthRate);
-  const discountedTV = terminalValue / Math.pow(1 + discountRate, 5);
-  const dcfValue = presentValue + discountedTV;
-
-  // Confidence score based on data completeness and margin quality
-  const ebitdaMarginPct = ebitdaMargin;
-  let confidence = 0.7;
-  if (ebitdaMarginPct > 0.2) confidence += 0.1;
-  if (revenueGrowthRate > 0.1) confidence += 0.1;
-  if (ebitda > 0) confidence += 0.1;
-  confidence = Math.min(0.95, confidence);
 
   const rangeMin = Math.min(comparableEV, dcfValue) * 0.9;
   const rangeMax = Math.max(comparableEV, dcfValue) * 1.1;
-  const suggestedPrice = (comparableEV * 0.5 + dcfValue * 0.5);
+
+  // Confidence score
+  let confidence = 0.65;
+  if (ebitdaMargin > 0.2) confidence += 0.1;
+  if (revenueGrowthRate > 0.1) confidence += 0.1;
+  if (ebitda > 0) confidence += 0.1;
+  if (askingValuation) confidence += 0.05;
+  confidence = Math.min(0.95, confidence);
 
   let tag = "Fairly Valued";
   if (askingValuation) {
@@ -78,9 +154,10 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     else if (askingValuation > suggestedPrice * 1.1) tag = "Overvalued";
   }
 
-  const explanation = `Based on ${benchmark.industry} sector benchmarks (${benchmark.ebitdaMultiple}x EBITDA multiple), ` +
+  const explanation =
+    `Based on ${benchmark.industry} sector benchmarks (${benchmark.ebitdaMultiple}x EBITDA multiple), ` +
     `the comparable EV is ₹${Math.round(comparableEV / 10) / 10}Cr. ` +
-    `A 5-year DCF at ${discountRate * 100}% discount rate with ${revenueGrowthRate * 100}% revenue growth ` +
+    `A 5-year DCF at ${baseDiscountRate * 100}% discount rate with ${revenueGrowthRate * 100}% revenue growth ` +
     `yields ₹${Math.round(dcfValue / 10) / 10}Cr intrinsic value. ` +
     `Suggested deal price is ₹${Math.round(suggestedPrice / 10) / 10}Cr.`;
 
@@ -95,10 +172,14 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     explanation,
     ebitdaMultiple: ebitda > 0 ? Math.round((comparableEV / ebitda) * 10) / 10 : 0,
     industryBenchmarkMultiple: benchmark.ebitdaMultiple,
-    discountRate,
+    discountRate: baseDiscountRate,
     terminalGrowthRate,
     projectedCashFlows,
     tag,
+    scenarios,
+    irr,
+    moic,
+    paybackYears,
   };
 }
 
@@ -124,10 +205,8 @@ export function computeIntelligence(input: IntelligenceInput) {
     benchmark,
   } = input;
 
-  // Guard against zero/negative revenue (legacy/imported rows) producing NaN/Infinity.
   const ebitdaMargin = revenue > 0 ? ebitda / revenue : 0;
 
-  // Risk factors
   const riskFactors = [
     {
       factor: "Debt Ratio",
@@ -154,7 +233,6 @@ export function computeIntelligence(input: IntelligenceInput) {
 
   const riskScore = riskFactors.reduce((acc, f) => acc + f.score, 0) / riskFactors.length;
 
-  // Growth factors
   const growthFactors = [
     {
       factor: "Revenue Growth",
@@ -201,4 +279,42 @@ export function computeIntelligence(input: IntelligenceInput) {
     industryGrowthRate: benchmark.growthRate,
     trendSummary: benchmark.description,
   };
+}
+
+export function computeDealQualityScore(deal: {
+  businessOverview?: string | null;
+  whySelling?: string | null;
+  growthDrivers?: string | null;
+  keyRisks?: string | null;
+  revenueY1?: number | null;
+  revenueY2?: number | null;
+  revenueY3?: number | null;
+  totalDebt?: number | null;
+  customerConcentration?: number | null;
+  legalConfirmedAt?: Date | null;
+  documentCount?: number;
+}): { score: number; trustLevel: "unverified" | "partially_verified" | "verified" } {
+  let score = 20; // base for having core financials (revenue, ebitda, growth)
+
+  if (deal.businessOverview && deal.businessOverview.length > 50) score += 10;
+  if (deal.whySelling && deal.whySelling.length > 30) score += 10;
+  if (deal.growthDrivers && deal.growthDrivers.length > 30) score += 8;
+  if (deal.keyRisks && deal.keyRisks.length > 30) score += 7;
+  if (deal.revenueY1 != null) score += 7;
+  if (deal.revenueY2 != null) score += 5;
+  if (deal.revenueY3 != null) score += 5;
+  if (deal.totalDebt != null) score += 5;
+  if (deal.customerConcentration != null) score += 5;
+  if (deal.legalConfirmedAt) score += 8;
+  const docs = deal.documentCount ?? 0;
+  score += Math.min(docs * 5, 10); // up to +10 for 2 docs
+
+  const capped = Math.min(100, score);
+
+  let trustLevel: "unverified" | "partially_verified" | "verified";
+  if (capped >= 70) trustLevel = "verified";
+  else if (capped >= 40) trustLevel = "partially_verified";
+  else trustLevel = "unverified";
+
+  return { score: capped, trustLevel };
 }

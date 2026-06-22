@@ -7,8 +7,9 @@ import {
   messageThreadsTable,
 } from "@workspace/db";
 import { eq, or, and, sql } from "drizzle-orm";
+import { z } from "zod/v4";
 import { requireAuth, type AuthRequest } from "../lib/auth";
-import { parseId } from "../lib/validate";
+import { parseId, validateBody } from "../lib/validate";
 
 const router = Router();
 

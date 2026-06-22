@@ -7,6 +7,8 @@ import privateDealsRouter from "./private_deals";
 import watchlistRouter from "./watchlist";
 import messagesRouter from "./messages";
 import dashboardRouter from "./dashboard";
+import pipelineRouter from "./pipeline";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -18,5 +20,7 @@ router.use("/deals/private", privateDealsRouter);
 router.use("/watchlist", watchlistRouter);
 router.use("/messages", messagesRouter);
 router.use("/dashboard", dashboardRouter);
+router.use("/pipeline", pipelineRouter);
+router.use(storageRouter);
 
 export default router;

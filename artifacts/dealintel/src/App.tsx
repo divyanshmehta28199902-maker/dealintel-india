@@ -19,6 +19,8 @@ import Marketplace from "@/pages/investor/Marketplace";
 import ListingDetail from "@/pages/investor/ListingDetail";
 import WatchlistPage from "@/pages/investor/WatchlistPage";
 import PrivateDeals from "@/pages/investor/PrivateDeals";
+import Pipeline from "@/pages/investor/Pipeline";
+import PricingPage from "@/pages/PricingPage";
 import MessagesPage from "@/pages/MessagesPage";
 
 const clerkPubKey = publishableKeyFromHost(
@@ -181,6 +183,12 @@ function AppRoutes() {
       </Route>
       <Route path="/investor/private-deals">
         <ProtectedRoute><PrivateDeals /></ProtectedRoute>
+      </Route>
+      <Route path="/investor/pipeline">
+        <ProtectedRoute><Pipeline /></ProtectedRoute>
+      </Route>
+      <Route path="/pricing">
+        <PricingPage />
       </Route>
       {/* Messages */}
       <Route path="/messages">

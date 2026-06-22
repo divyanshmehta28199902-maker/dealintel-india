@@ -11,14 +11,30 @@ export const privateDealsTable = pgTable("private_deals", {
   revenue: doublePrecision("revenue").notNull(),
   ebitda: doublePrecision("ebitda").notNull(),
   growthRate: doublePrecision("growth_rate").notNull(),
+  revenueY1: doublePrecision("revenue_y1"),
+  revenueY2: doublePrecision("revenue_y2"),
+  revenueY3: doublePrecision("revenue_y3"),
+  totalDebt: doublePrecision("total_debt"),
+  customerConcentration: doublePrecision("customer_concentration"),
+  dealMode: text("deal_mode").notNull().default("quick"),
+  qualityScore: integer("quality_score"),
+  trustLevel: text("trust_level").notNull().default("unverified"),
+  businessOverview: text("business_overview"),
+  whySelling: text("why_selling"),
+  growthDrivers: text("growth_drivers"),
+  keyRisks: text("key_risks"),
   description: text("description"),
-  status: text("status").notNull().default("analyzing"), // analyzing | complete
+  legalConfirmedAt: timestamp("legal_confirmed_at", { withTimezone: true }),
+  status: text("status").notNull().default("analyzing"),
   valuation: jsonb("valuation"),
   intelligence: jsonb("intelligence"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
 
-export const insertPrivateDealSchema = createInsertSchema(privateDealsTable).omit({ id: true, status: true, valuation: true, intelligence: true, createdAt: true, updatedAt: true });
+export const insertPrivateDealSchema = createInsertSchema(privateDealsTable).omit({
+  id: true, status: true, valuation: true, intelligence: true,
+  qualityScore: true, trustLevel: true, createdAt: true, updatedAt: true,
+});
 export type InsertPrivateDeal = z.infer<typeof insertPrivateDealSchema>;
 export type PrivateDeal = typeof privateDealsTable.$inferSelect;

@@ -6,3 +6,5 @@ export * from "./watchlist";
 export * from "./contact_requests";
 export * from "./messages";
 export * from "./industry_benchmarks";
+export * from "./pipelines";
+export * from "./document_vault";

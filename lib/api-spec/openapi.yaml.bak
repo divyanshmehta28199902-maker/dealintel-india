@@ -1,0 +1,1107 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: DealIntel India - M&A Platform API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: listings
+    description: Company listings (seller portal)
+  - name: deals
+    description: Private deals (investor portal)
+  - name: messages
+    description: Messaging between buyers and sellers
+  - name: watchlist
+    description: Investor watchlist
+  - name: valuation
+    description: Valuation engine
+  - name: dashboard
+    description: Dashboard and summary endpoints
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ─── AUTH / USERS ───────────────────────────────────────────────────────────
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+
+  /auth/me/onboard:
+    post:
+      operationId: onboardUser
+      tags: [auth]
+      summary: Set user role (seller or investor) and complete onboarding
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardInput"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ─── LISTINGS (SELLER PORTAL) ────────────────────────────────────────────────
+
+  /listings:
+    get:
+      operationId: getListings
+      tags: [listings]
+      summary: Browse all active listings (marketplace)
+      parameters:
+        - name: industry
+          in: query
+          schema:
+            type: string
+        - name: minRevenue
+          in: query
+          schema:
+            type: number
+        - name: maxRevenue
+          in: query
+          schema:
+            type: number
+        - name: minValuation
+          in: query
+          schema:
+            type: number
+        - name: maxValuation
+          in: query
+          schema:
+            type: number
+        - name: stage
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+    post:
+      operationId: createListing
+      tags: [listings]
+      summary: Create a new company listing (seller)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+  /listings/my:
+    get:
+      operationId: getMyListings
+      tags: [listings]
+      summary: Get current seller's listings
+      responses:
+        "200":
+          description: My listings
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Listing"
+
+  /listings/{id}:
+    get:
+      operationId: getListing
+      tags: [listings]
+      summary: Get single listing detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+        "404":
+          description: Not found
+
+    patch:
+      operationId: updateListing
+      tags: [listings]
+      summary: Update a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ListingUpdate"
+      responses:
+        "200":
+          description: Updated listing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Listing"
+
+    delete:
+      operationId: deleteListing
+      tags: [listings]
+      summary: Delete a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /listings/{id}/declaration:
+    post:
+      operationId: submitDeclaration
+      tags: [listings]
+      summary: Submit digital declaration for a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeclarationInput"
+      responses:
+        "200":
+          description: Declaration recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Declaration"
+
+  /listings/{id}/valuation:
+    get:
+      operationId: getListingValuation
+      tags: [listings]
+      summary: Get computed valuation for a listing
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Valuation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValuationResult"
+
+  /listings/{id}/intelligence:
+    get:
+      operationId: getListingIntelligence
+      tags: [listings]
+      summary: Get deal intelligence (risk score, growth score, AI insights)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Intelligence report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DealIntelligence"
+
+  /listings/{id}/contact:
+    post:
+      operationId: requestContact
+      tags: [listings]
+      summary: Investor requests contact with seller
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContactRequestInput"
+      responses:
+        "201":
+          description: Contact request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactRequest"
+
+  # ─── PRIVATE DEALS (INVESTOR PORTAL) ─────────────────────────────────────────
+
+  /deals/private:
+    get:
+      operationId: getPrivateDeals
+      tags: [deals]
+      summary: Get current investor's private deals
+      responses:
+        "200":
+          description: Private deals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PrivateDeal"
+
+    post:
+      operationId: createPrivateDeal
+      tags: [deals]
+      summary: Upload a private deal for valuation analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivateDealInput"
+      responses:
+        "201":
+          description: Created with valuation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateDeal"
+
+  /deals/private/{id}:
+    get:
+      operationId: getPrivateDeal
+      tags: [deals]
+      summary: Get a private deal by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Private deal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivateDeal"
+
+    delete:
+      operationId: deletePrivateDeal
+      tags: [deals]
+      summary: Delete a private deal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── WATCHLIST ────────────────────────────────────────────────────────────────
+
+  /watchlist:
+    get:
+      operationId: getWatchlist
+      tags: [watchlist]
+      summary: Get investor's saved listings
+      responses:
+        "200":
+          description: Watchlist
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WatchlistItem"
+
+  /watchlist/{listingId}:
+    post:
+      operationId: addToWatchlist
+      tags: [watchlist]
+      summary: Add listing to watchlist
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: Added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WatchlistItem"
+
+    delete:
+      operationId: removeFromWatchlist
+      tags: [watchlist]
+      summary: Remove listing from watchlist
+      parameters:
+        - name: listingId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+
+  # ─── MESSAGES ─────────────────────────────────────────────────────────────────
+
+  /messages:
+    get:
+      operationId: getMessages
+      tags: [messages]
+      summary: Get message threads for current user
+      responses:
+        "200":
+          description: Message threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageThread"
+
+  /messages/{threadId}:
+    get:
+      operationId: getMessageThread
+      tags: [messages]
+      summary: Get messages in a thread
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Send a message in a thread
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  # ─── CONTACT REQUESTS ──────────────────────────────────────────────────────
+
+  /contact-requests:
+    get:
+      operationId: getContactRequests
+      tags: [listings]
+      summary: Get contact requests (seller sees incoming, investor sees outgoing)
+      responses:
+        "200":
+          description: Contact requests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContactRequest"
+
+  /contact-requests/{id}/accept:
+    post:
+      operationId: acceptContactRequest
+      tags: [listings]
+      summary: Seller accepts contact request (opens messaging thread)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Accepted, thread created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactRequest"
+
+  /contact-requests/{id}/decline:
+    post:
+      operationId: declineContactRequest
+      tags: [listings]
+      summary: Seller declines contact request
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Declined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactRequest"
+
+  # ─── DASHBOARD (WOW ENDPOINTS) ────────────────────────────────────────────────
+
+  /dashboard/seller:
+    get:
+      operationId: getSellerDashboard
+      tags: [dashboard]
+      summary: Seller dashboard — listing count, total views, contact request counts
+      responses:
+        "200":
+          description: Seller summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SellerDashboard"
+
+  /dashboard/investor:
+    get:
+      operationId: getInvestorDashboard
+      tags: [dashboard]
+      summary: Investor dashboard — watchlist count, deals count, recent activity
+      responses:
+        "200":
+          description: Investor summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvestorDashboard"
+
+  /dashboard/marketplace-stats:
+    get:
+      operationId: getMarketplaceStats
+      tags: [dashboard]
+      summary: Platform-level stats — active listings by industry, total deal value
+      responses:
+        "200":
+          description: Marketplace stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketplaceStats"
+
+  /industry-benchmarks:
+    get:
+      operationId: getIndustryBenchmarks
+      tags: [valuation]
+      summary: Get EBITDA multiples and benchmarks by industry
+      responses:
+        "200":
+          description: Benchmarks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/IndustryBenchmark"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    User:
+      type: object
+      required: [id, clerkId, email, role, tier, createdAt]
+      properties:
+        id:
+          type: integer
+        clerkId:
+          type: string
+        email:
+          type: string
+        name:
+          type: ["string", "null"]
+        role:
+          type: ["string", "null"]
+          description: "seller | investor | null (not onboarded)"
+        tier:
+          type: string
+          description: "free | pro | investor"
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    OnboardInput:
+      type: object
+      required: [role, name]
+      properties:
+        role:
+          type: string
+          description: "seller | investor"
+        name:
+          type: string
+
+    Listing:
+      type: object
+      required: [id, userId, companyName, industry, revenue, ebitda, askingValuation, stage, status, declarationAccepted, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        companyName:
+          type: string
+        industry:
+          type: string
+        description:
+          type: ["string", "null"]
+        revenue:
+          type: number
+          description: Annual revenue in INR lakhs
+        ebitda:
+          type: number
+          description: EBITDA in INR lakhs
+        ebitdaMargin:
+          type: ["number", "null"]
+        revenueGrowthRate:
+          type: ["number", "null"]
+          description: YoY growth % 
+        askingValuation:
+          type: number
+          description: Asking valuation in INR lakhs
+        debtRatio:
+          type: ["number", "null"]
+        customerConcentration:
+          type: ["number", "null"]
+          description: % of revenue from top customer
+        employeeCount:
+          type: ["integer", "null"]
+        foundedYear:
+          type: ["integer", "null"]
+        city:
+          type: ["string", "null"]
+        stage:
+          type: string
+          description: "seed | early | growth | mature"
+        status:
+          type: string
+          description: "draft | active | under_negotiation | closed"
+        declarationAccepted:
+          type: boolean
+        viewCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        sellerName:
+          type: ["string", "null"]
+
+    ListingInput:
+      type: object
+      required: [companyName, industry, revenue, ebitda, askingValuation, stage]
+      properties:
+        companyName:
+          type: string
+        industry:
+          type: string
+        description:
+          type: string
+        revenue:
+          type: number
+        ebitda:
+          type: number
+        ebitdaMargin:
+          type: number
+        revenueGrowthRate:
+          type: number
+        askingValuation:
+          type: number
+        debtRatio:
+          type: number
+        customerConcentration:
+          type: number
+        employeeCount:
+          type: integer
+        foundedYear:
+          type: integer
+        city:
+          type: string
+        stage:
+          type: string
+
+    ListingUpdate:
+      type: object
+      properties:
+        companyName:
+          type: string
+        industry:
+          type: string
+        description:
+          type: string
+        revenue:
+          type: number
+        ebitda:
+          type: number
+        ebitdaMargin:
+          type: number
+        revenueGrowthRate:
+          type: number
+        askingValuation:
+          type: number
+        debtRatio:
+          type: number
+        customerConcentration:
+          type: number
+        employeeCount:
+          type: integer
+        city:
+          type: string
+        stage:
+          type: string
+        status:
+          type: string
+
+    DeclarationInput:
+      type: object
+      required: [accepted]
+      properties:
+        accepted:
+          type: boolean
+
+    Declaration:
+      type: object
+      required: [id, listingId, userId, accepted, timestamp]
+      properties:
+        id:
+          type: integer
+        listingId:
+          type: integer
+        userId:
+          type: integer
+        accepted:
+          type: boolean
+        timestamp:
+          type: string
+          format: date-time
+        ipAddress:
+          type: ["string", "null"]
+
+    ValuationResult:
+      type: object
+      required: [listingId, comparableEV, dcfValue, rangeMin, rangeMax, suggestedPrice, confidenceScore, explanation, methodology]
+      properties:
+        listingId:
+          type: integer
+        comparableEV:
+          type: number
+          description: EV from comparable method (EBITDA × multiple)
+        dcfValue:
+          type: number
+          description: Intrinsic value from DCF
+        rangeMin:
+          type: number
+        rangeMax:
+          type: number
+        suggestedPrice:
+          type: number
+        confidenceScore:
+          type: number
+          description: 0-100
+        explanation:
+          type: string
+        methodology:
+          type: object
+          properties:
+            ebitdaMultiple:
+              type: number
+            industryBenchmarkMultiple:
+              type: number
+            discountRate:
+              type: number
+            terminalGrowthRate:
+              type: number
+            projectedCashFlows:
+              type: array
+              items:
+                type: number
+          required: [ebitdaMultiple, industryBenchmarkMultiple, discountRate, terminalGrowthRate, projectedCashFlows]
+
+    DealIntelligence:
+      type: object
+      required: [listingId, riskScore, growthScore, riskFactors, growthFactors, aiInsights, externalSignals]
+      properties:
+        listingId:
+          type: integer
+        riskScore:
+          type: number
+          description: 0-100 (higher = riskier)
+        growthScore:
+          type: number
+          description: 0-100
+        riskFactors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoringFactor"
+        growthFactors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ScoringFactor"
+        aiInsights:
+          type: array
+          items:
+            type: string
+          description: "e.g. 'Undervalued by ~20%', 'High risk due to declining margins'"
+        externalSignals:
+          type: object
+          properties:
+            marketSentiment:
+              type: string
+              description: "positive | neutral | negative"
+            newsMentions:
+              type: integer
+            industryGrowthRate:
+              type: number
+            trendSummary:
+              type: string
+          required: [marketSentiment, newsMentions, industryGrowthRate, trendSummary]
+
+    ScoringFactor:
+      type: object
+      required: [factor, score, description]
+      properties:
+        factor:
+          type: string
+        score:
+          type: number
+        description:
+          type: string
+
+    PrivateDeal:
+      type: object
+      required: [id, userId, companyName, industry, revenue, ebitda, growthRate, status, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        companyName:
+          type: string
+        industry:
+          type: string
+        revenue:
+          type: number
+        ebitda:
+          type: number
+        growthRate:
+          type: number
+        description:
+          type: ["string", "null"]
+        status:
+          type: string
+          description: "analyzing | complete"
+        valuation:
+          $ref: "#/components/schemas/ValuationResult"
+        intelligence:
+          $ref: "#/components/schemas/DealIntelligence"
+        createdAt:
+          type: string
+          format: date-time
+
+    PrivateDealInput:
+      type: object
+      required: [companyName, industry, revenue, ebitda, growthRate]
+      properties:
+        companyName:
+          type: string
+        industry:
+          type: string
+        revenue:
+          type: number
+        ebitda:
+          type: number
+        growthRate:
+          type: number
+        description:
+          type: string
+
+    WatchlistItem:
+      type: object
+      required: [id, userId, listingId, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        listingId:
+          type: integer
+        listing:
+          $ref: "#/components/schemas/Listing"
+        createdAt:
+          type: string
+          format: date-time
+
+    ContactRequest:
+      type: object
+      required: [id, investorId, listingId, status, createdAt]
+      properties:
+        id:
+          type: integer
+        investorId:
+          type: integer
+        listingId:
+          type: integer
+        message:
+          type: ["string", "null"]
+        status:
+          type: string
+          description: "pending | accepted | declined"
+        threadId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        investorName:
+          type: ["string", "null"]
+        listingName:
+          type: ["string", "null"]
+
+    ContactRequestInput:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    MessageThread:
+      type: object
+      required: [id, listingId, sellerId, investorId, createdAt]
+      properties:
+        id:
+          type: integer
+        listingId:
+          type: integer
+        sellerId:
+          type: integer
+        investorId:
+          type: integer
+        lastMessage:
+          type: ["string", "null"]
+        lastMessageAt:
+          type: ["string", "null"]
+          format: date-time
+        unreadCount:
+          type: integer
+        listingName:
+          type: ["string", "null"]
+        otherPartyName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      required: [id, threadId, senderId, content, createdAt]
+      properties:
+        id:
+          type: integer
+        threadId:
+          type: integer
+        senderId:
+          type: integer
+        content:
+          type: string
+        isRead:
+          type: boolean
+        senderName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    MessageInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+
+    SellerDashboard:
+      type: object
+      required: [totalListings, activeListings, totalViews, pendingContactRequests, acceptedContactRequests, totalMessages]
+      properties:
+        totalListings:
+          type: integer
+        activeListings:
+          type: integer
+        draftListings:
+          type: integer
+        totalViews:
+          type: integer
+        pendingContactRequests:
+          type: integer
+        acceptedContactRequests:
+          type: integer
+        totalMessages:
+          type: integer
+
+    InvestorDashboard:
+      type: object
+      required: [watchlistCount, privateDealsCount, contactRequestsSent, activeThreads, recentListings]
+      properties:
+        watchlistCount:
+          type: integer
+        privateDealsCount:
+          type: integer
+        contactRequestsSent:
+          type: integer
+        activeThreads:
+          type: integer
+        recentListings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Listing"
+
+    MarketplaceStats:
+      type: object
+      required: [totalListings, totalDealValue, byIndustry, byStage]
+      properties:
+        totalListings:
+          type: integer
+        totalDealValue:
+          type: number
+        byIndustry:
+          type: array
+          items:
+            type: object
+            required: [industry, count, totalValue]
+            properties:
+              industry:
+                type: string
+              count:
+                type: integer
+              totalValue:
+                type: number
+        byStage:
+          type: array
+          items:
+            type: object
+            required: [stage, count]
+            properties:
+              stage:
+                type: string
+              count:
+                type: integer
+
+    IndustryBenchmark:
+      type: object
+      required: [id, industry, ebitdaMultiple, revenueMultiple, growthRate, description]
+      properties:
+        id:
+          type: integer
+        industry:
+          type: string
+        ebitdaMultiple:
+          type: number
+        revenueMultiple:
+          type: number
+        growthRate:
+          type: number
+          description: Expected industry growth %
+        description:
+          type: string

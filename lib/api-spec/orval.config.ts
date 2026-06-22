@@ -1,7 +1,9 @@
 import { defineConfig, InputTransformerFn } from "orval";
 import path from "path";
 
-const root = path.resolve(__dirname, "..", "..");
+// process.cwd() = lib/api-spec when codegen is run via pnpm --filter @workspace/api-spec run codegen
+const apiSpecDir = process.cwd();
+const root = path.resolve(apiSpecDir, "..", "..");
 const apiClientReactSrc = path.resolve(root, "lib", "api-client-react", "src");
 const apiZodSrc = path.resolve(root, "lib", "api-zod", "src");
 
@@ -16,7 +18,7 @@ const titleTransformer: InputTransformerFn = (config) => {
 export default defineConfig({
   "api-client-react": {
     input: {
-      target: "./openapi.yaml",
+      target: path.resolve(apiSpecDir, "openapi.yaml"),
       override: {
         transformer: titleTransformer,
       },
@@ -42,7 +44,7 @@ export default defineConfig({
   },
   zod: {
     input: {
-      target: "./openapi.yaml",
+      target: path.resolve(apiSpecDir, "openapi.yaml"),
       override: {
         transformer: titleTransformer,
       },

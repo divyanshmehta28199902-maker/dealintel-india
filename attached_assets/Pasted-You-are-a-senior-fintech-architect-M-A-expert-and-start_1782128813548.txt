@@ -1,0 +1,186 @@
+You are a senior fintech architect, M&A expert, and startup builder.
+
+Upgrade my existing application “DealIntel India” into a REAL, PRODUCTION-READY M&A PLATFORM.
+
+This is NOT a UI project. This must become a functional, transaction-capable product.
+
+⸻
+
+🎯 CORE TRANSFORMATION GOAL
+
+Transform the system from:
+❌ Static dashboard
+
+Into:
+✅ Active deal execution platform
+
+⸻
+
+👥 DUAL USER SYSTEM (CRITICAL)
+
+Create two completely separate flows:
+
+1. SELLER (COMPANY PORTAL)
+
+* Register as company
+* Create listing
+* Upload:
+    * Financials
+    * Documents (P&L, GST, balance sheet)
+* Enter:
+    * Asking valuation
+    * Growth data
+* Mandatory:
+    * Digital declaration checkbox:
+        “All submitted data is true and accurate”
+* Store timestamp + IP for legal record
+
+⸻
+
+2. INVESTOR PORTAL
+
+* Browse marketplace
+* Save/watch deals
+* Contact sellers
+
+NEW FEATURE (CRITICAL):
+“UPLOAD PRIVATE DEAL”
+
+* Investor uploads:
+    * Revenue
+    * EBITDA
+    * Growth rate
+    * Documents
+* System treats this as private deal
+* Run full valuation + analysis
+
+⸻
+
+🧠 REAL VALUATION ENGINE (UPGRADE)
+
+Implement actual logic:
+
+1. Comparable Method:
+    EV = EBITDA × Industry Multiple
+
+* Store industry benchmarks in DB
+
+2. DCF Model:
+
+* Forecast cash flows (5 years)
+* Apply discount rate
+* Calculate intrinsic value
+
+Outputs:
+
+* Valuation range
+* Suggested deal price
+* Confidence score
+* Explanation breakdown
+
+⸻
+
+📊 DEAL INTELLIGENCE ENGINE
+
+For every company (listed OR uploaded):
+
+* Risk scoring:
+    * Debt ratio
+    * Revenue volatility
+    * Customer concentration
+* Growth scoring:
+    * Revenue trend
+    * Industry growth
+* AI insights:
+    * “Undervalued by X%”
+    * “High risk due to declining margins”
+
+⸻
+
+🌐 EXTERNAL DATA INTEGRATION
+
+Simulate or implement:
+
+* Fetch company data from web:
+    * News mentions
+    * Industry reports
+    * Market trends
+
+Attach to SME profile:
+
+* “External Risk Signals”
+* “Market Sentiment”
+
+⸻
+
+🤝 DEAL EXECUTION SYSTEM
+
+Enable real interactions:
+
+* “Request Contact” button
+* Messaging system (basic)
+* Deal pipeline updates
+
+⸻
+
+📁 DOCUMENT SECURITY
+
+* Store files securely
+* Restrict access:
+    * Only verified buyers
+* Track:
+    * Who viewed documents
+
+⸻
+
+💰 MONETIZATION LOGIC
+
+* Free:
+    * Limited access
+* Pro:
+    * Full analytics
+* Investor:
+    * Upload private deals
+    * Advanced valuation
+
+⸻
+
+📊 DATABASE ADDITIONS
+
+Add:
+
+PrivateDeals:
+
+* id, user_id, financial_data, valuation_output
+
+Declarations:
+
+* id, sme_id, accepted, timestamp
+
+Messages:
+
+* sender_id, receiver_id, content
+
+⸻
+
+🎯 FINAL PRODUCT REQUIREMENTS
+
+* Real backend logic (no fake outputs)
+* Real data flows
+* Functional deal lifecycle
+* Usable by real investors
+
+⸻
+
+🚨 IMPORTANT
+
+Do NOT build dummy UI.
+Do NOT skip backend logic.
+
+Focus on:
+
+* Real valuation
+* Real deal flow
+* Real interaction
+
+Build like this will be shown to investors.

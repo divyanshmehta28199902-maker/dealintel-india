@@ -1,0 +1,417 @@
+BUILD A FULL-STACK, PRODUCTION-READY SaaS PLATFORM CALLED:
+
+“DealIntel India” — Deal Intelligence + Execution Platform for Indian SME M&A
+
+You are a senior fintech architect, investment banker, and full-stack engineer.
+
+This is NOT a UI demo. Build a REAL WORKING PRODUCT with backend logic, database, APIs, and functional frontend.
+
+⸻
+
+🎯 CORE OBJECTIVE
+
+Build a platform where:
+
+* Sellers list businesses
+* Investors discover and analyze deals
+* Investors upload private deals
+* System performs real valuation (DCF + EV multiple)
+* Users interact and execute deals
+
+⸻
+
+🧱 TECH STACK
+
+Frontend:
+
+* Next.js (App Router)
+* TypeScript
+* Tailwind CSS + ShadCN UI
+
+Backend:
+
+* Next.js API routes OR Node.js (Express)
+* PostgreSQL
+* Prisma ORM
+
+Auth:
+
+* JWT-based authentication
+* Role-based access control (RBAC)
+
+Storage:
+
+* Secure document upload (AWS S3 or equivalent with signed URLs)
+
+⸻
+
+👥 USER ROLES (STRICT RBAC)
+
+Roles:
+
+* INVESTOR
+* SELLER
+* BROKER
+* ADMIN
+
+Store role in DB + include in JWT.
+
+⸻
+
+🔐 AUTH SYSTEM
+
+Single login/signup page:
+
+* Select role during signup
+* Store hashed password (bcrypt)
+* Issue JWT with role
+
+⸻
+
+🧠 RBAC RULES (BACKEND + FRONTEND)
+
+INVESTOR:
+
+* Access: Marketplace, Private Deals, Pipeline, Valuation
+* No access: Seller listing features
+
+SELLER:
+
+* Access: List Business, My Listings, Buyer Requests
+* No access: Private Deals, Pipeline, Investor analytics
+
+BROKER:
+
+* Access: Everything investor sees
+* PLUS: Manage multiple deals, commissions tracking
+
+ADMIN:
+
+* Approve listings
+* Manage users
+
+Enforce RBAC in:
+
+* API routes (middleware)
+* Frontend conditional rendering
+
+⸻
+
+🏢 SELLER FLOW
+
+Create business listing with:
+
+Fields:
+
+* Company name
+* Industry
+* City, State
+* Revenue (last 3 years)
+* EBITDA
+* Growth rate
+* Asking price
+
+Uploads:
+
+* P&L
+* Balance Sheet
+* GST filings
+
+Legal:
+
+* Checkbox: “I confirm all data is accurate”
+* Store timestamp + user_id
+
+Status:
+
+* Default = Pending
+* Admin approval required
+
+⸻
+
+💰 INVESTOR FEATURES
+
+Marketplace:
+
+* Browse listings
+* Filters: industry, valuation, growth, location
+
+Actions:
+
+* Save to watchlist
+* Request contact
+* Add to pipeline
+
+⸻
+
+🔥 PRIVATE DEAL SYSTEM
+
+Investor can upload off-market deals:
+
+Fields:
+
+* Company name (optional)
+* Revenue
+* EBITDA
+* Growth
+* Industry
+
+Uploads:
+
+* Financial docs
+
+Rules:
+
+* Private (not public)
+* Linked to investor only
+
+⸻
+
+📊 DEAL PIPELINE (REAL IMPLEMENTATION)
+
+When user clicks:
+
+* “Interested” OR “Add to Pipeline”
+
+Create DB record:
+
+* sme_id
+* buyer_id
+* stage = “Interested”
+
+Pipeline stages:
+
+* Interested
+* Contacted
+* Due Diligence
+* Negotiation
+* Closed
+
+Allow:
+
+* Stage updates
+* Real-time fetch
+
+⸻
+
+🧠 VALUATION ENGINE (REAL LOGIC)
+
+MODE 1: BASIC
+
+EV Calculation:
+
+* EV = EBITDA × industry_multiple
+* Store multiples in DB
+
+Simple DCF:
+
+* 5-year projection
+* Discount rate (10–18%)
+
+⸻
+
+MODE 2: ADVANCED DCF
+
+Inputs:
+
+* Revenue growth rate
+* EBITDA margin
+* CapEx
+* Working capital
+* Discount rate
+
+Process:
+
+1. Forecast revenue (5 years)
+2. Calculate EBITDA
+3. Compute Free Cash Flow:
+    FCF = EBITDA - CapEx - Change in WC
+4. Discount FCF
+5. Calculate Terminal Value:
+    TV = FCF × (1 + g) / (r - g)
+6. Discount TV
+7. Final DCF valuation
+
+⸻
+
+📊 OUTPUT (MANDATORY)
+
+Display:
+
+1. EV Valuation:
+    * EBITDA
+    * Multiple
+    * Enterprise Value
+2. DCF Valuation:
+    * Year-wise projections
+    * Discount rate
+    * Terminal value
+    * Final intrinsic value
+3. Final Result:
+    * Valuation range
+    * Suggested deal price
+    * Tag:
+        “Undervalued” / “Overvalued”
+4. Confidence Score
+5. Step-by-step breakdown
+
+⸻
+
+📈 DEAL INTELLIGENCE
+
+Generate:
+
+Risk Score:
+
+* Debt ratio
+* Revenue volatility
+* Customer concentration
+
+Growth Score:
+
+* Revenue trend
+* Industry growth
+
+AI Insights:
+
+* “Undervalued by X%”
+* “High risk due to declining margins”
+* “Strong growth opportunity”
+
+⸻
+
+🌐 EXTERNAL SIGNALS (SIMULATED OR API)
+
+Show:
+
+* Company news
+* Industry trends
+* Market sentiment
+
+⸻
+
+🤝 DEAL INTERACTION
+
+Features:
+
+* Request Contact
+* Messaging system (Investor ↔ Seller)
+
+When triggered:
+
+* Create interaction record
+
+⸻
+
+📁 DOCUMENT SYSTEM
+
+* Secure uploads (S3)
+* Role-based access
+* Signed URLs
+* Track:
+    * Who accessed
+    * When accessed
+
+⸻
+
+💰 MONETIZATION
+
+Plans:
+
+FREE:
+
+* Limited listings
+* Basic analytics
+
+PRO:
+
+* Full analytics
+* Unlimited deals
+
+INVESTOR PRO:
+
+* Private deals
+* Advanced valuation
+* Full document access
+
+Also:
+
+* Featured listings (paid)
+
+⸻
+
+📊 DATABASE (PRISMA MODELS)
+
+Users:
+
+* id, name, email, password_hash, role
+
+SMEs:
+
+* id, name, industry, location, revenue, EBITDA, asking_price, status
+
+Financials:
+
+* id, sme_id, year, revenue, profit
+
+PrivateDeals:
+
+* id, user_id, revenue, EBITDA, valuation_output
+
+Deals:
+
+* id, sme_id, buyer_id, stage, status
+
+Documents:
+
+* id, sme_id, file_url, access_control
+
+Messages:
+
+* id, sender_id, receiver_id, content
+
+Declarations:
+
+* id, sme_id, accepted, timestamp
+
+Subscriptions:
+
+* id, user_id, plan, status
+
+⸻
+
+🎨 UI REQUIREMENTS
+
+* Bloomberg-style fintech UI
+* Dark mode default
+* Theme switcher:
+    * Dark
+    * Light
+    * Finance Blue (store in localStorage)
+
+Navbar must be dynamic based on role.
+
+⸻
+
+🚨 RULES
+
+* No mock data for valuation
+* All buttons must hit backend APIs
+* Full CRUD operations
+* Secure authentication
+* Production-ready structure
+
+⸻
+
+🎯 FINAL OUTPUT
+
+Deliver:
+
+* Working backend APIs
+* Functional frontend
+* Real valuation engine
+* Deal pipeline system
+* Messaging system
+* Seed data
+
+System must be deployable and usable by real investors and SMEs.

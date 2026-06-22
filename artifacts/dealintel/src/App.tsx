@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { ClerkProvider, SignIn, SignUp, Show, useClerk, useAuth } from "@clerk/react";
+import { ClerkProvider, SignIn, SignUp, Show, useClerk } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { dark } from "@clerk/themes";
 import { Switch, Route, useLocation, Router as WouterRouter, Redirect } from "wouter";
@@ -91,24 +91,28 @@ const clerkAppearance = {
 };
 
 function SignInPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return null;
-  if (isSignedIn) return <Redirect to="/" />;
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
-    </div>
+    <>
+      <Show when="signed-in"><Redirect to="/" /></Show>
+      <Show when="signed-out">
+        <div className="flex min-h-screen items-center justify-center bg-background px-4">
+          <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} />
+        </div>
+      </Show>
+    </>
   );
 }
 
 function SignUpPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  if (!isLoaded) return null;
-  if (isSignedIn) return <Redirect to="/" />;
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
-    </div>
+    <>
+      <Show when="signed-in"><Redirect to="/" /></Show>
+      <Show when="signed-out">
+        <div className="flex min-h-screen items-center justify-center bg-background px-4">
+          <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} />
+        </div>
+      </Show>
+    </>
   );
 }
 

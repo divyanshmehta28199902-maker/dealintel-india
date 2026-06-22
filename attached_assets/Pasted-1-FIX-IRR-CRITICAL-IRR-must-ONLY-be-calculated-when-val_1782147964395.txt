@@ -1,0 +1,237 @@
+1. FIX IRR (CRITICAL)
+
+-----------------------------------
+
+IRR must ONLY be calculated when valid:
+
+Conditions:
+
+- At least 1 positive future cash flow OR
+
+- Valid exit value exists
+
+ELSE:
+
+  IRR = null
+
+  IRR_label = "Not meaningful"
+
+Do NOT show % if meaningless.
+
+-----------------------------------
+
+2. FIX MOIC (MAKE REALISTIC)
+
+-----------------------------------
+
+IF EBITDA < 0:
+
+  - Do NOT show standard MOIC
+
+  - Use speculative logic:
+
+  entry = current valuation
+
+  exit = revenue × higher multiple (only if growth > 30%)
+
+  MOIC = exit / entry
+
+  Label:
+
+  "Speculative (growth-based)"
+
+ELSE:
+
+  MOIC = standard calculation
+
+-----------------------------------
+
+3. FIX PAYBACK PERIOD
+
+-----------------------------------
+
+IF all projected FCF < 0:
+
+  payback = null
+
+  label = "Not meaningful"
+
+ELSE:
+
+  calculate normally
+
+-----------------------------------
+
+4. BUILD REAL CONFIDENCE SCORE
+
+-----------------------------------
+
+confidence = 50
+
+IF verified → +20
+
+IF EBITDA > 0 → +15
+
+IF documents available → +10
+
+IF revenue > ₹5Cr → +5
+
+IF growth > 30% → +5
+
+IF EBITDA < 0 → -10
+
+IF FCF negative → -10
+
+Clamp between 0–95
+
+-----------------------------------
+
+5. ADD INVESTOR-GRADE DEAL SCORING (NEW USP)
+
+-----------------------------------
+
+Create a deal score (0–100):
+
+score = 0
+
+Profitability (30 pts):
+
+  EBITDA margin > 20% → +30
+
+  10–20% → +20
+
+  0–10% → +10
+
+  <0 → 0
+
+Growth (25 pts):
+
+  >50% → +25
+
+  20–50% → +15
+
+  <20% → +5
+
+Size (15 pts):
+
+  Revenue > ₹10Cr → +15
+
+  ₹1–10Cr → +10
+
+  <₹1Cr → +5
+
+Risk (20 pts):
+
+  Verified → +20
+
+  Partial → +10
+
+  None → +5
+
+Cash Flow (10 pts):
+
+  Positive FCF → +10
+
+  Negative → 0
+
+-----------------------------------
+
+6. ADD DEAL RATING OUTPUT
+
+-----------------------------------
+
+Score → Rating:
+
+90+ → "A+ (Institutional Grade)"
+
+75–89 → "A (High Quality)"
+
+60–74 → "B (Good Deal)"
+
+40–59 → "C (Risky)"
+
+<40 → "D (Speculative)"
+
+-----------------------------------
+
+7. UI IMPROVEMENTS
+
+-----------------------------------
+
+Replace:
+
+IRR:
+
+  null → "Not meaningful"
+
+MOIC:
+
+  speculative → show label
+
+Payback:
+
+  null → "Not meaningful"
+
+Add badges:
+
+  - High Growth
+
+  - Profitable
+
+  - Turnaround
+
+  - Speculative
+
+-----------------------------------
+
+8. FINAL OUTPUT STRUCTURE
+
+-----------------------------------
+
+Return:
+
+{
+
+  valuation: number,
+
+  method: "EBITDA" | "Revenue" | "DCF",
+
+  irr: number | null,
+
+  moic: number | string,
+
+  payback: string,
+
+  confidence: number,
+
+  score: number,
+
+  rating: string,
+
+  risk: string,
+
+  tags: string[],
+
+  notes: string
+
+}
+
+-----------------------------------
+
+9. UX WARNING (IMPORTANT)
+
+-----------------------------------
+
+If EBITDA < 0:
+
+Show banner:
+
+"⚠️ Loss-making company. Valuation is based on revenue and growth assumptions. Returns are speculative."
+
+-----------------------------------
+
+Goal:
+
+Make this system something a serious investor can trust for ₹5Cr–₹50Cr decisions.
+
+Avoid fake precision. Show truth, even if uncertain.

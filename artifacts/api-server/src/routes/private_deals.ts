@@ -149,6 +149,8 @@ router.post("/", requireAuth, requireRole("investor"), validateBody(createDealSc
           revenue, ebitda,
           revenueGrowthRate: growthRate / 100,
           benchmark,
+          trustLevel,
+          hasDocuments: false,
         });
 
         const intelligence = computeIntelligence({

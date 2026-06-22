@@ -54,7 +54,11 @@ export interface ValuationResult {
   scenarios: ScenarioResult[];
   irr: number | null;
   moic: number | null;
-  paybackYears: number;
+  moicLabel: string;
+  paybackYears: number | null;
+  dealScore: number;
+  dealRating: string;
+  tags: string[];
 }
 
 export interface RiskFactor {

@@ -29,6 +29,7 @@ export interface ScenarioResult {
   valuation: number;
   growthRate: number;
   discountRate: number;
+  pctFromBase: number;
 }
 
 export interface ValuationResult {
@@ -46,10 +47,14 @@ export interface ValuationResult {
   terminalGrowthRate: number;
   projectedCashFlows: number[];
   tag: string;
-  scenarios?: ScenarioResult[];
-  irr?: number;
-  moic?: number;
-  paybackYears?: number;
+  riskLabel: string;
+  valuationMethod: "EBITDA" | "Revenue";
+  isLossMaking: boolean;
+  dcfNotMeaningful: boolean;
+  scenarios: ScenarioResult[];
+  irr: number | null;
+  moic: number | null;
+  paybackYears: number;
 }
 
 export interface RiskFactor {

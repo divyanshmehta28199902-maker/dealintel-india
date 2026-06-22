@@ -1,0 +1,199 @@
+You are a senior financial engineer and full-stack developer.
+
+Fix my M&A valuation engine to handle real-world financial logic correctly.
+
+Current issues:
+- Negative EBITDA results in negative valuations
+- DCF produces unrealistic negative outputs
+- Scenario analysis is reversed (Bear > Base > Bull)
+- IRR and MOIC return 0 incorrectly
+- Comparable EV shows invalid values when EBITDA is negative
+
+Your task:
+
+1. Fix valuation logic with proper fallbacks:
+
+IF EBITDA > 0:
+  - Use EBITDA multiple (industry-based)
+  - EV = EBITDA × Multiple
+
+IF EBITDA <= 0:
+  - DO NOT use EBITDA multiple
+  - Switch to revenue multiple:
+    EV = Revenue × industry revenue multiple (1x–5x depending on sector)
+
+2. Fix DCF model:
+
+- If Free Cash Flow is negative for all projected years:
+  - Do NOT calculate DCF normally
+  - Return:
+    value = 0
+    label = "DCF not meaningful (negative cash flow business)"
+
+- Ensure:
+  - Growth increases cash flow (not decreases it)
+  - Terminal value is calculated correctly:
+    TV = FCF × (1 + g) / (WACC - g)
+
+3. Fix Scenario Analysis:
+
+Ensure logical order:
+  Bear < Base < Bull
+
+Use:
+  Bear:
+    growth = base_growth - 20–40%
+    WACC = base_wacc + 2–5%
+
+  Base:
+    normal inputs
+
+  Bull:
+    growth = base_growth + 20–40%
+    WACC = base_wacc - 2–5%
+
+4. Fix IRR and MOIC:
+
+- IRR should be calculated using real projected cash flows
+- If cash flows are invalid or negative:
+  return IRR = null
+
+- MOIC:
+  MOIC = Total Cash Inflows / Initial Investment
+
+- If invalid:
+  show "Not meaningful"
+
+5. Fix Comparable EV:
+
+IF EBITDA <= 0:
+  return "N/A (Negative EBITDA)"
+
+ELSE:
+  EV = EBITDA × industry_multiple
+
+6. Add Valuation Floor:
+
+IF valuation < 0:
+  valuation = 0
+  tag = "Distressed / Turnaround Case"
+
+7. Add Risk Labeling:
+
+- If EBITDA < 0 → "High Risk"
+- If Growth > 50% → "High Growth"
+- If EBITDA margin > 20% → "High Quality"
+
+8. Output clean structured object:
+
+{
+  valuation: number,
+  method: "EBITDA" | "Revenue" | "DCF",
+  risk: string,
+  confidence: number (0–100),
+  notes: string
+}
+
+Fix my scenario analysis UI and backend logic.
+
+Current issue:
+- Bear scenario shows higher valuation than Bull
+
+Fix:
+
+1. Enforce order:
+  Bear < Base < Bull ALWAYS
+
+2. Add validation:
+  If not true → auto-correct values
+
+3. Update UI:
+  - Bear = red
+  - Base = blue
+  - Bull = green
+
+4. Add tooltips:
+  - Bear: "Downside case with lower growth and higher risk"
+  - Bull: "Optimistic case with strong growth and lower risk"
+
+5. Show % difference from base:
+  Example:
+    Bear: -30%
+    Bull: +45%
+
+Improve handling of loss-making companies.
+
+If EBITDA < 0:
+
+1. Disable:
+  - EBITDA multiple
+  - IRR (if no positive cash flows)
+
+2. Switch valuation method:
+  - Use Revenue multiple
+  - Use growth-based scoring
+
+3. Show UI warning:
+
+"⚠️ This company is currently loss-making. Valuation is based on revenue and growth potential, not profitability."
+
+4. Add metrics:
+  - Burn rate
+  - Runway (if possible)
+
+5. Prevent negative outputs:
+  No valuation should be negative
+
+Rewrite my DCF model to be financially correct.
+
+Requirements:
+
+1. Inputs:
+  Revenue
+  EBITDA margin
+  Growth rate
+  WACC
+  Terminal growth rate
+
+2. Steps:
+  - Project revenue for 5 years
+  - Calculate EBITDA
+  - Convert to Free Cash Flow (FCF)
+  - Discount FCF using WACC
+  - Add terminal value
+
+3. Validation:
+  - WACC must be > terminal growth
+  - FCF should not diverge negatively if growth is positive
+
+4. If FCF is negative for all years:
+  return:
+    value = 0
+    message = "DCF not applicable"
+
+5. Return:
+  clean valuation + yearly breakdown
+
+Improve valuation display UX:
+
+1. Never show:
+  negative ₹ values
+
+2. Replace with:
+  ₹0 + label:
+  "Distressed Case"
+
+3. Replace 0 IRR with:
+  "Not meaningful"
+
+4. Replace invalid multiples with:
+  "N/A"
+
+5. Add confidence bar logic:
+  - High data quality → 80–90%
+  - Low data → 50–60%
+
+6. Add tags:
+  - High Growth
+  - Profitable
+  - Turnaround

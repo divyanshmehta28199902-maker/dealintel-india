@@ -1,0 +1,201 @@
+You are a senior investment banker and financial systems architect.
+
+Refine my valuation engine to eliminate credibility gaps and make outputs investor-trustworthy.
+
+-----------------------------------
+1. FIX CONFIDENCE SCORE (CRITICAL)
+-----------------------------------
+
+Current issue:
+Confidence is unrealistically high (e.g., 95%)
+
+Fix:
+
+- Cap maximum confidence at 85%
+
+- Recalculate confidence using real factors:
+
+confidence = 50
+
+IF verified → +15
+IF audited documents uploaded → +10
+IF EBITDA > 0 → +10
+IF positive free cash flow → +10
+IF revenue > ₹10Cr → +5
+IF consistent growth (last 3 yrs) → +5
+
+IF EBITDA < 0 → -15
+IF negative FCF → -10
+IF unverified deal → -10
+
+Clamp:
+0 ≤ confidence ≤ 85
+
+-----------------------------------
+2. ADD IRR ASSUMPTION TRANSPARENCY
+-----------------------------------
+
+Current issue:
+IRR shown without explanation
+
+Fix:
+
+- Show IRR ONLY if valid
+- Add explicit assumptions:
+
+Return:
+{
+  irr: number,
+  irr_assumptions: {
+    entry_price: number,
+    exit_multiple: number,
+    holding_period: "5 years"
+  }
+}
+
+UI:
+"IRR assumes exit at X× EBITDA in Year 5"
+
+-----------------------------------
+3. FIX MOIC TRANSPARENCY
+-----------------------------------
+
+Current issue:
+MOIC shown without logic
+
+Fix:
+
+Return:
+{
+  moic: number,
+  moic_assumptions: {
+    entry_price: number,
+    exit_value: number,
+    method: "EBITDA expansion" | "Revenue growth"
+  }
+}
+
+UI:
+"Entry: ₹X Cr → Exit: ₹Y Cr"
+
+-----------------------------------
+4. FIX RISK SCORE CLARITY
+-----------------------------------
+
+Current issue:
+Risk score direction unclear
+
+Fix:
+
+- Define scale explicitly:
+
+0 = Very Low Risk
+10 = Very High Risk
+
+Return:
+{
+  risk_score: number,
+  risk_label: "Low" | "Medium" | "High"
+}
+
+UI:
+Add subtitle:
+"Scale: 0 (low risk) → 10 (high risk)"
+
+-----------------------------------
+5. FIX DEAL QUALITY CONFUSION
+-----------------------------------
+
+Current issue:
+Two similar metrics:
+- Deal Quality
+- Deal Score
+
+Fix:
+
+Rename:
+
+Deal Quality → "Listing Completeness Score"
+Deal Score → "Investment Grade Score"
+
+-----------------------------------
+6. ADD VALUATION BREAKDOWN (VERY IMPORTANT)
+-----------------------------------
+
+Current issue:
+Final valuation looks like a black box
+
+Fix:
+
+Return:
+
+{
+  valuation_breakdown: {
+    dcf_value: number,
+    comparable_value: number,
+    final_value: number,
+    weightage: {
+      dcf: percentage,
+      comparable: percentage
+    }
+  }
+}
+
+UI:
+"Valuation derived from:
+60% DCF + 40% Comparable Analysis"
+
+-----------------------------------
+7. ADD UNCERTAINTY LANGUAGE
+-----------------------------------
+
+Add controlled realism:
+
+IF private deal:
+  show:
+  "Estimates based on limited private market data"
+
+IF no audited docs:
+  show:
+  "Financials not independently verified"
+
+-----------------------------------
+8. PREVENT FALSE PRECISION
+-----------------------------------
+
+- Round outputs:
+  ₹109.23 Cr → ₹109 Cr
+
+- Limit decimals:
+  IRR: 31.83% → 31.8%
+
+-----------------------------------
+9. FINAL OUTPUT STRUCTURE
+-----------------------------------
+
+Return:
+
+{
+  valuation: number,
+  valuation_range: [min, max],
+  confidence: number,
+  irr: number | null,
+  irr_assumptions: object | null,
+  moic: number | string,
+  moic_assumptions: object | null,
+  payback: string,
+  risk_score: number,
+  risk_label: string,
+  score: number,
+  rating: string,
+  valuation_breakdown: object,
+  warnings: string[]
+}
+
+-----------------------------------
+GOAL:
+Make outputs feel like a professional investment memo, not a black-box calculator.
+
+Avoid overconfidence.
+Show assumptions clearly.
+Increase trust over impressiveness.

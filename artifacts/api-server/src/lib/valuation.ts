@@ -19,6 +19,26 @@ export interface ScenarioResult {
   pctFromBase: number;
 }
 
+export interface IRRAssumptions {
+  entryPrice: number;
+  exitMultiple: number;
+  holdingPeriod: string;
+}
+
+export interface MOICAssumptions {
+  entryPrice: number;
+  exitValue: number;
+  method: "EBITDA expansion" | "Revenue growth";
+}
+
+export interface ValuationBreakdown {
+  dcfValue: number;
+  comparableValue: number;
+  finalValue: number;
+  dcfWeight: number;
+  comparableWeight: number;
+}
+
 export interface ValuationResult {
   listingId: number;
   comparableEV: number;
@@ -35,17 +55,23 @@ export interface ValuationResult {
   projectedCashFlows: number[];
   tag: string;
   riskLabel: string;
+  riskScore: number;
+  riskBand: "Low" | "Medium" | "High";
   valuationMethod: "EBITDA" | "Revenue";
   isLossMaking: boolean;
   dcfNotMeaningful: boolean;
   scenarios: ScenarioResult[];
   irr: number | null;
+  irrAssumptions: IRRAssumptions | null;
   moic: number | null;
   moicLabel: string;
+  moicAssumptions: MOICAssumptions | null;
   paybackYears: number | null;
   dealScore: number;
   dealRating: string;
   tags: string[];
+  valuationBreakdown: ValuationBreakdown;
+  warnings: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -81,18 +107,17 @@ function computeDCF(
 
   const lastPositiveFCF = cashFlows.filter((f) => f > 0).at(-1) ?? 0;
   const safeWacc = Math.max(discountRate, terminalGrowthRate + 0.03);
-  const terminalValue = (lastPositiveFCF * (1 + terminalGrowthRate)) / (safeWacc - terminalGrowthRate);
-  const discountedTV = terminalValue / Math.pow(1 + discountRate, 5);
+  const tv = (lastPositiveFCF * (1 + terminalGrowthRate)) / (safeWacc - terminalGrowthRate);
 
   return {
-    dcfValue: Math.max(0, presentValue + discountedTV),
+    dcfValue: Math.max(0, presentValue + tv / Math.pow(1 + discountRate, 5)),
     projectedCashFlows: cashFlows,
     notMeaningful: false,
   };
 }
 
 // ---------------------------------------------------------------------------
-// IRR via bisection — null when inputs are invalid or convergence fails
+// IRR via bisection — null when invalid
 // ---------------------------------------------------------------------------
 function computeIRR(investment: number, cashFlows: number[], exitValue: number): number | null {
   if (investment <= 0 || exitValue <= 0) return null;
@@ -111,64 +136,50 @@ function computeIRR(investment: number, cashFlows: number[], exitValue: number):
   }
   const irrRaw = (lo + hi) / 2;
   if (irrRaw < -0.99 || irrRaw > 5) return null;
-  return Math.round(irrRaw * 1000) / 10;
+  return Math.round(irrRaw * 1000) / 10; // 1 decimal — e.g. 31.8%
 }
 
 // ---------------------------------------------------------------------------
 // Scenario blend helper
 // ---------------------------------------------------------------------------
 function scenarioValuation(
-  revenue: number,
-  ebitda: number,
-  ebitdaMargin: number,
-  growthRate: number,
-  discountRate: number,
-  terminalGrowthRate: number,
-  benchmark: IndustryBenchmark,
-  evScale: number,
+  revenue: number, ebitda: number, ebitdaMargin: number,
+  growthRate: number, discountRate: number, terminalGrowthRate: number,
+  benchmark: IndustryBenchmark, evScale: number,
 ): number {
   const { dcfValue } = computeDCF(revenue, ebitdaMargin, growthRate, discountRate, terminalGrowthRate);
-  const compEV =
-    ebitda > 0
-      ? Math.max(0, ebitda * benchmark.ebitdaMultiple) * evScale
-      : Math.max(0, revenue * benchmark.revenueMultiple) * evScale;
+  const compEV = ebitda > 0
+    ? Math.max(0, ebitda * benchmark.ebitdaMultiple) * evScale
+    : Math.max(0, revenue * benchmark.revenueMultiple) * evScale;
   return Math.max(0, Math.round((dcfValue + compEV) / 2));
 }
 
 // ---------------------------------------------------------------------------
-// Deal score (0–100) and rating
+// Deal score (0–100) + rating
 // ---------------------------------------------------------------------------
 function computeDealScore(
-  ebitdaMargin: number,
-  revenueGrowthRate: number,
-  revenue: number,
+  ebitdaMargin: number, revenueGrowthRate: number, revenue: number,
   trustLevel: "unverified" | "partially_verified" | "verified",
   hasSomePositiveFCF: boolean,
 ): { score: number; rating: string } {
   let score = 0;
-
   // Profitability — 30 pts
   if (ebitdaMargin > 0.2) score += 30;
   else if (ebitdaMargin > 0.1) score += 20;
   else if (ebitdaMargin > 0) score += 10;
-  // < 0 → +0
-
   // Growth — 25 pts
   if (revenueGrowthRate > 0.5) score += 25;
   else if (revenueGrowthRate > 0.2) score += 15;
   else score += 5;
-
-  // Size (revenue in lakhs; ₹1Cr = 100 lakhs) — 15 pts
-  if (revenue > 1000) score += 15;       // > ₹10Cr
-  else if (revenue > 100) score += 10;   // ₹1–10Cr
-  else score += 5;                        // < ₹1Cr
-
-  // Verification / risk — 20 pts
+  // Size — 15 pts (revenue in lakhs; ₹10Cr = 1000 lakhs)
+  if (revenue > 1000) score += 15;
+  else if (revenue > 100) score += 10;
+  else score += 5;
+  // Verification — 20 pts
   if (trustLevel === "verified") score += 20;
   else if (trustLevel === "partially_verified") score += 10;
   else score += 5;
-
-  // Cash flow health — 10 pts
+  // Cash flow — 10 pts
   if (hasSomePositiveFCF) score += 10;
 
   const rating =
@@ -177,7 +188,6 @@ function computeDealScore(
     score >= 60 ? "B (Good Deal)" :
     score >= 40 ? "C (Risky)" :
     "D (Speculative)";
-
   return { score, rating };
 }
 
@@ -186,13 +196,8 @@ function computeDealScore(
 // ---------------------------------------------------------------------------
 export function computeValuation(listingId: number, input: ValuationInput): ValuationResult {
   const {
-    revenue,
-    ebitda,
-    revenueGrowthRate = 0.12,
-    benchmark,
-    askingValuation,
-    trustLevel = "unverified",
-    hasDocuments = false,
+    revenue, ebitda, revenueGrowthRate = 0.12, benchmark,
+    askingValuation, trustLevel = "unverified", hasDocuments = false,
   } = input;
 
   const ebitdaMargin = revenue > 0 ? ebitda / revenue : 0;
@@ -200,7 +205,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   const baseDiscountRate = 0.15;
   const isLossMaking = ebitda <= 0;
 
-  // ── Comparable EV ────────────────────────────────────────────────────────
+  // ── Comparable EV ─────────────────────────────────────────────────────
   let comparableEV: number;
   let valuationMethod: "EBITDA" | "Revenue";
   if (!isLossMaking) {
@@ -211,19 +216,29 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     valuationMethod = "Revenue";
   }
 
-  // ── DCF ──────────────────────────────────────────────────────────────────
+  // ── DCF ───────────────────────────────────────────────────────────────
   const { dcfValue, projectedCashFlows, notMeaningful } = computeDCF(
     revenue, ebitdaMargin, revenueGrowthRate, baseDiscountRate, terminalGrowthRate,
   );
-
   const hasSomePositiveFCF = projectedCashFlows.some((f) => f > 0);
 
-  // ── Suggested price ───────────────────────────────────────────────────────
-  const suggestedPrice = notMeaningful
-    ? Math.max(0, Math.round(comparableEV))
-    : Math.max(0, Math.round((comparableEV * 0.5 + dcfValue * 0.5)));
+  // ── Suggested price ───────────────────────────────────────────────────
+  const dcfWeight = notMeaningful ? 0 : 50;
+  const comparableWeight = notMeaningful ? 100 : 50;
+  const suggestedPrice = Math.max(0, Math.round(
+    (dcfValue * dcfWeight + comparableEV * comparableWeight) / 100,
+  ));
 
-  // ── Scenarios ─────────────────────────────────────────────────────────────
+  // ── Valuation breakdown ───────────────────────────────────────────────
+  const valuationBreakdown: ValuationBreakdown = {
+    dcfValue: Math.round(dcfValue),
+    comparableValue: Math.round(comparableEV),
+    finalValue: suggestedPrice,
+    dcfWeight,
+    comparableWeight,
+  };
+
+  // ── Scenarios ─────────────────────────────────────────────────────────
   const bearGrowth = Math.max(0, revenueGrowthRate * 0.5);
   const bullGrowth = Math.min(revenueGrowthRate * 1.6, revenueGrowthRate + 0.25);
   const bearWacc = Math.min(0.25, baseDiscountRate + 0.04);
@@ -232,7 +247,6 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   const rawBear = scenarioValuation(revenue, ebitda, ebitdaMargin, bearGrowth, bearWacc, terminalGrowthRate, benchmark, 0.8);
   const rawBase = Math.max(0, suggestedPrice);
   const rawBull = scenarioValuation(revenue, ebitda, ebitdaMargin, bullGrowth, bullWacc, terminalGrowthRate, benchmark, 1.2);
-
   const [bearVal, baseVal, bullVal] = [rawBear, rawBase, rawBull].sort((a, b) => a - b);
 
   const scenarios: ScenarioResult[] = [
@@ -250,28 +264,41 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     },
   ];
 
-  // ── Exit value ───────────────────────────────────────────────────────────
+  // ── Exit value ─────────────────────────────────────────────────────────
   const lastYearRevenue = revenue * Math.pow(1 + revenueGrowthRate, 5);
+  const exitMultiple = isLossMaking ? benchmark.revenueMultiple : benchmark.ebitdaMultiple;
   const exitValue = isLossMaking
     ? lastYearRevenue * benchmark.revenueMultiple * 0.8
     : lastYearRevenue * ebitdaMargin * benchmark.ebitdaMultiple;
 
-  // ── IRR ──────────────────────────────────────────────────────────────────
+  // ── IRR ────────────────────────────────────────────────────────────────
   const investmentAmount = askingValuation ?? suggestedPrice;
-  // IRR only valid when at least 1 positive FCF or positive exit exists
   const irrValid = hasSomePositiveFCF || exitValue > 0;
   const irr = irrValid ? computeIRR(investmentAmount, projectedCashFlows, exitValue) : null;
 
-  // ── MOIC ─────────────────────────────────────────────────────────────────
+  const irrAssumptions: IRRAssumptions | null = irr !== null ? {
+    entryPrice: Math.round(investmentAmount),
+    exitMultiple,
+    holdingPeriod: "5 years",
+  } : null;
+
+  // ── MOIC ───────────────────────────────────────────────────────────────
   let moic: number | null;
   let moicLabel: string;
+  let moicAssumptions: MOICAssumptions | null = null;
 
   if (isLossMaking) {
-    // Speculative: only meaningful if there is enough growth to justify a re-rating
     if (revenueGrowthRate > 0.3 && investmentAmount > 0) {
       const speculativeExit = lastYearRevenue * benchmark.revenueMultiple * 1.2;
       moic = speculativeExit > 0 ? Math.round((speculativeExit / investmentAmount) * 10) / 10 : null;
       moicLabel = moic !== null ? "Speculative (growth-based)" : "Not meaningful";
+      if (moic !== null) {
+        moicAssumptions = {
+          entryPrice: Math.round(investmentAmount),
+          exitValue: Math.round(speculativeExit),
+          method: "Revenue growth",
+        };
+      }
     } else {
       moic = null;
       moicLabel = "Not meaningful";
@@ -281,10 +308,16 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
       ? Math.round((exitValue / investmentAmount) * 10) / 10
       : null;
     moicLabel = moic !== null ? "Standard" : "Not meaningful";
+    if (moic !== null) {
+      moicAssumptions = {
+        entryPrice: Math.round(investmentAmount),
+        exitValue: Math.round(exitValue),
+        method: "EBITDA expansion",
+      };
+    }
   }
 
-  // ── Payback ───────────────────────────────────────────────────────────────
-  // Null when all FCFs negative (no recovery within projection window)
+  // ── Payback ────────────────────────────────────────────────────────────
   let paybackYears: number | null = null;
   if (hasSomePositiveFCF) {
     let cumulative = 0;
@@ -292,31 +325,44 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
       cumulative += projectedCashFlows[i];
       if (cumulative >= investmentAmount) { paybackYears = i + 1; break; }
     }
-    if (paybackYears === null) paybackYears = 5; // beyond window but FCFs exist
+    if (paybackYears === null) paybackYears = 5;
   }
 
-  // ── Range ─────────────────────────────────────────────────────────────────
+  // ── Range ──────────────────────────────────────────────────────────────
   const rangeMin = Math.max(0, Math.min(comparableEV, dcfValue) * 0.9);
   const rangeMax = Math.max(0, Math.max(comparableEV, dcfValue) * 1.1);
 
-  // ── Confidence score (start at 50, additive/subtractive) ─────────────────
+  // ── Confidence score — capped at 85% ──────────────────────────────────
   let confidence = 50;
-  if (trustLevel === "verified") confidence += 20;
-  else if (trustLevel === "partially_verified") confidence += 8;
-  if (!isLossMaking) confidence += 15;
+  if (trustLevel === "verified") confidence += 15;
   if (hasDocuments) confidence += 10;
-  if (revenue > 500) confidence += 5;           // > ₹5Cr
-  if (revenueGrowthRate > 0.3) confidence += 5;
-  if (isLossMaking) confidence -= 10;
+  if (!isLossMaking) confidence += 10;
+  if (hasSomePositiveFCF) confidence += 10;
+  if (revenue > 1000) confidence += 5; // > ₹10Cr
+  // Penalties
+  if (isLossMaking) confidence -= 15;
   if (!hasSomePositiveFCF) confidence -= 10;
-  confidence = Math.max(0, Math.min(95, confidence));
+  if (trustLevel === "unverified") confidence -= 10;
+  confidence = Math.max(0, Math.min(85, confidence));
 
-  // ── Deal score + rating ───────────────────────────────────────────────────
+  // ── Risk score (0–10) ─────────────────────────────────────────────────
+  let riskScore = 5;
+  if (isLossMaking) riskScore += 3;
+  if (!hasSomePositiveFCF) riskScore += 2;
+  if (trustLevel === "unverified") riskScore += 1;
+  if (revenueGrowthRate > 0.3) riskScore -= 1;
+  if (!isLossMaking && ebitdaMargin > 0.2) riskScore -= 2;
+  if (trustLevel === "verified") riskScore -= 1;
+  riskScore = Math.max(0, Math.min(10, Math.round(riskScore)));
+  const riskBand: "Low" | "Medium" | "High" =
+    riskScore <= 3 ? "Low" : riskScore <= 6 ? "Medium" : "High";
+
+  // ── Deal score + rating ───────────────────────────────────────────────
   const { score: dealScore, rating: dealRating } = computeDealScore(
     ebitdaMargin, revenueGrowthRate, revenue, trustLevel, hasSomePositiveFCF,
   );
 
-  // ── Tags ──────────────────────────────────────────────────────────────────
+  // ── Tags ──────────────────────────────────────────────────────────────
   const tags: string[] = [];
   if (revenueGrowthRate > 0.3) tags.push("High Growth");
   if (!isLossMaking && ebitdaMargin > 0.1) tags.push("Profitable");
@@ -326,7 +372,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   if (hasSomePositiveFCF && !isLossMaking) tags.push("Cash Generative");
   if (trustLevel === "verified") tags.push("Verified");
 
-  // ── Risk label ────────────────────────────────────────────────────────────
+  // ── Risk label (business profile) ────────────────────────────────────
   const riskLabel =
     isLossMaking ? "Turnaround Case" :
     revenueGrowthRate > 0.5 ? "High Growth" :
@@ -334,7 +380,24 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     ebitdaMargin < 0.08 ? "High Risk" :
     "Standard";
 
-  // ── Deal tag (asking price) ───────────────────────────────────────────────
+  // ── Warnings ──────────────────────────────────────────────────────────
+  const warnings: string[] = [];
+  if (trustLevel === "unverified") {
+    warnings.push("Financials not independently verified");
+  } else if (trustLevel === "partially_verified") {
+    warnings.push("Partial verification — some financials may be unaudited");
+  }
+  if (isLossMaking) {
+    warnings.push("Loss-making company — valuation based on revenue and growth potential, not profitability");
+  }
+  if (notMeaningful) {
+    warnings.push("DCF excluded from valuation — all projected free cash flows are negative");
+  }
+  if (confidence < 50) {
+    warnings.push("Limited data quality — treat as indicative only, not a definitive valuation");
+  }
+
+  // ── Deal tag (asking price vs intrinsic) ─────────────────────────────
   let tag = "Fairly Valued";
   if (askingValuation && suggestedPrice > 0) {
     if (askingValuation < suggestedPrice * 0.9) tag = "Undervalued";
@@ -342,20 +405,21 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   }
   if (isLossMaking && suggestedPrice === 0) tag = "Distressed / Turnaround";
 
-  // ── Explanation ───────────────────────────────────────────────────────────
+  // ── Explanation ───────────────────────────────────────────────────────
   const methodNote = isLossMaking
-    ? `Revenue multiple (${benchmark.revenueMultiple}x) used because EBITDA is negative.`
+    ? `Revenue multiple (${benchmark.revenueMultiple}x) used — EBITDA is negative.`
     : `EBITDA multiple of ${benchmark.ebitdaMultiple}x applied.`;
   const dcfNote = notMeaningful
     ? "DCF not applicable (all FCFs negative)."
-    : `5-year DCF at ${baseDiscountRate * 100}% WACC yields ₹${(dcfValue / 10).toFixed(1)}Cr.`;
+    : `5-year DCF at ${baseDiscountRate * 100}% WACC yields ₹${(dcfValue / 10).toFixed(0)}Cr.`;
+  const breakdownNote = `Valuation derived from ${comparableWeight}% comparable + ${dcfWeight}% DCF.`;
 
   const explanation =
     `${benchmark.industry} benchmark — ${methodNote} ` +
-    `Comparable EV: ₹${(comparableEV / 10).toFixed(1)}Cr. ` +
+    `Comparable EV: ₹${(comparableEV / 10).toFixed(0)}Cr. ` +
     `${dcfNote} ` +
-    `Deal score: ${dealScore}/100 (${dealRating}). ` +
-    `Suggested price: ₹${(suggestedPrice / 10).toFixed(1)}Cr.`;
+    `${breakdownNote} ` +
+    `Investment Grade Score: ${dealScore}/100 (${dealRating}).`;
 
   return {
     listingId,
@@ -363,7 +427,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     dcfValue: Math.round(dcfValue),
     rangeMin: Math.round(rangeMin),
     rangeMax: Math.round(rangeMax),
-    suggestedPrice: Math.round(suggestedPrice),
+    suggestedPrice,
     confidenceScore: Math.round(confidence) / 100,
     explanation,
     ebitdaMultiple: !isLossMaking && ebitda > 0 ? Math.round((comparableEV / ebitda) * 10) / 10 : 0,
@@ -373,17 +437,23 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     projectedCashFlows,
     tag,
     riskLabel,
+    riskScore,
+    riskBand,
     valuationMethod,
     isLossMaking,
     dcfNotMeaningful: notMeaningful,
     scenarios,
     irr,
+    irrAssumptions,
     moic,
     moicLabel,
+    moicAssumptions,
     paybackYears,
     dealScore,
     dealRating,
     tags,
+    valuationBreakdown,
+    warnings,
   };
 }
 
@@ -491,7 +561,7 @@ export function computeIntelligence(input: IntelligenceInput) {
 }
 
 // ---------------------------------------------------------------------------
-// Deal quality score (unchanged)
+// Deal quality score
 // ---------------------------------------------------------------------------
 export function computeDealQualityScore(deal: {
   businessOverview?: string | null;
@@ -517,8 +587,7 @@ export function computeDealQualityScore(deal: {
   if (deal.totalDebt != null) score += 5;
   if (deal.customerConcentration != null) score += 5;
   if (deal.legalConfirmedAt) score += 8;
-  const docs = deal.documentCount ?? 0;
-  score += Math.min(docs * 5, 10);
+  score += Math.min((deal.documentCount ?? 0) * 5, 10);
   const capped = Math.min(100, score);
   const trustLevel: "unverified" | "partially_verified" | "verified" =
     capped >= 70 ? "verified" : capped >= 40 ? "partially_verified" : "unverified";

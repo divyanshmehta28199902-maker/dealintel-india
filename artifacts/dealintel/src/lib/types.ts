@@ -32,6 +32,26 @@ export interface ScenarioResult {
   pctFromBase: number;
 }
 
+export interface IRRAssumptions {
+  entryPrice: number;
+  exitMultiple: number;
+  holdingPeriod: string;
+}
+
+export interface MOICAssumptions {
+  entryPrice: number;
+  exitValue: number;
+  method: string;
+}
+
+export interface ValuationBreakdown {
+  dcfValue: number;
+  comparableValue: number;
+  finalValue: number;
+  dcfWeight: number;
+  comparableWeight: number;
+}
+
 export interface ValuationResult {
   listingId: number;
   comparableEV: number;
@@ -48,17 +68,23 @@ export interface ValuationResult {
   projectedCashFlows: number[];
   tag: string;
   riskLabel: string;
+  riskScore: number;
+  riskBand: "Low" | "Medium" | "High";
   valuationMethod: "EBITDA" | "Revenue";
   isLossMaking: boolean;
   dcfNotMeaningful: boolean;
   scenarios: ScenarioResult[];
   irr: number | null;
+  irrAssumptions: IRRAssumptions | null;
   moic: number | null;
   moicLabel: string;
+  moicAssumptions: MOICAssumptions | null;
   paybackYears: number | null;
   dealScore: number;
   dealRating: string;
   tags: string[];
+  valuationBreakdown: ValuationBreakdown;
+  warnings: string[];
 }
 
 export interface RiskFactor {

@@ -9,6 +9,7 @@ export interface ValuationInput {
   benchmark: IndustryBenchmark;
   trustLevel?: "unverified" | "partially_verified" | "verified";
   hasDocuments?: boolean;
+  isPrivateDeal?: boolean;
 }
 
 export interface ScenarioResult {
@@ -189,6 +190,7 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   const {
     revenue, ebitda, revenueGrowthRate = 0.12, benchmark,
     askingValuation, trustLevel = "unverified", hasDocuments = false,
+    isPrivateDeal = false,
   } = input;
 
   const ebitdaMargin = revenue > 0 ? ebitda / revenue : 0;
@@ -213,9 +215,25 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   );
   const hasSomePositiveFCF = projectedCashFlows.some((f) => f > 0);
 
+  // ── Dynamic DCF weighting based on FCF quality ────────────────────────
+  // Strong  (all FCFs positive) → 60 / 40
+  // Moderate (some FCFs positive) → 50 / 50
+  // Weak    (no positive FCFs, but DCF terminal value survives) → 30 / 70
+  // None    (notMeaningful — DCF excluded entirely) → 0 / 100
+  const allPositiveFCF = projectedCashFlows.every((f) => f > 0);
+  let dcfWeight: number;
+  let comparableWeight: number;
+  if (notMeaningful) {
+    dcfWeight = 0; comparableWeight = 100;
+  } else if (allPositiveFCF) {
+    dcfWeight = 60; comparableWeight = 40;
+  } else if (hasSomePositiveFCF) {
+    dcfWeight = 50; comparableWeight = 50;
+  } else {
+    dcfWeight = 30; comparableWeight = 70;
+  }
+
   // ── Suggested price ───────────────────────────────────────────────────
-  const dcfWeight = notMeaningful ? 0 : 50;
-  const comparableWeight = notMeaningful ? 100 : 50;
   const suggestedPrice = Math.max(0, Math.round(
     (dcfValue * dcfWeight + comparableEV * comparableWeight) / 100,
   ));
@@ -325,20 +343,19 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
   const rangeMin = Math.max(0, Math.min(comparableEV, dcfValue) * 0.9);
   const rangeMax = Math.max(0, Math.max(comparableEV, dcfValue) * 1.1);
 
-  // ── Confidence score — clamped 40–85 ─────────────────────────────────
+  // ── Confidence score — cap 85, no floor ──────────────────────────────
+  // Matches the spec exactly:
+  //   +15 verified | +10 EBITDA>0 | +10 positiveFCF | +5 revenue>10Cr
+  //   +5 consistentGrowth | −10 privateDeal | −10 noAuditedDocs
   let confidence = 50;
-  if (trustLevel === "verified") confidence += 15;
-  if (hasDocuments) confidence += 10;
-  if (!isLossMaking) confidence += 10;
-  if (hasSomePositiveFCF) confidence += 10;
-  if (revenue > 1000) confidence += 5;           // > ₹10Cr
-  if (revenueGrowthRate > 0.1) confidence += 5;  // consistent growth bonus
-  // Penalties
-  if (isLossMaking) confidence -= 15;
-  if (!hasSomePositiveFCF) confidence -= 10;
-  if (trustLevel === "unverified") confidence -= 10;
-  if (!hasDocuments) confidence -= 10;           // no audited financials uploaded
-  confidence = Math.max(40, Math.min(85, confidence)); // floor 40, cap 85
+  if (trustLevel === "verified")    confidence += 15;
+  if (ebitda > 0)                   confidence += 10;
+  if (hasSomePositiveFCF)           confidence += 10;
+  if (revenue > 1000)               confidence += 5;  // > ₹10Cr
+  if (revenueGrowthRate > 0.1)      confidence += 5;  // consistent growth
+  if (isPrivateDeal)                confidence -= 10;
+  if (!hasDocuments)                confidence -= 10;
+  confidence = Math.min(85, confidence); // cap — no artificial floor
 
   // ── Risk score (0–10) ─────────────────────────────────────────────────
   let riskScore = 5;
@@ -395,11 +412,14 @@ export function computeValuation(listingId: number, input: ValuationInput): Valu
     warnings.push("High projected return — verify exit assumptions before relying on this figure");
   }
 
-  // ── Deal tag (asking price vs intrinsic) ─────────────────────────────
+  // ── Deal tag — DCF vs Comparable (intrinsic signal) ─────────────────
+  // DCF > Comparable → market is underpricing → Undervalued
+  // DCF < Comparable → market is overpricing  → Overvalued
+  // Within 10% band  → Fairly Valued
   let tag = "Fairly Valued";
-  if (askingValuation && suggestedPrice > 0) {
-    if (askingValuation < suggestedPrice * 0.9) tag = "Undervalued";
-    else if (askingValuation > suggestedPrice * 1.1) tag = "Overvalued";
+  if (!notMeaningful && comparableEV > 0) {
+    if (dcfValue > comparableEV * 1.10)      tag = "Undervalued";
+    else if (dcfValue < comparableEV * 0.90) tag = "Overvalued";
   }
   if (isLossMaking && suggestedPrice === 0) tag = "Distressed / Turnaround";
 

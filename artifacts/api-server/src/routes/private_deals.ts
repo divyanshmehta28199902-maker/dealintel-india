@@ -151,6 +151,7 @@ router.post("/", requireAuth, requireRole("investor"), validateBody(createDealSc
           benchmark,
           trustLevel,
           hasDocuments: false,
+          isPrivateDeal: true,
         });
 
         const intelligence = computeIntelligence({

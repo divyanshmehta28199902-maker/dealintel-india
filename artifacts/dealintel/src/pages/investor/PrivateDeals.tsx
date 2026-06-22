@@ -34,6 +34,7 @@ import { api } from "@/lib/api";
 import { formatINR, formatPct, INDUSTRIES } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { usePlan } from "@/hooks/usePlan";
 import type { PrivateDeal, DocumentVaultEntry } from "@/lib/types";
 
 type DealMode = "quick" | "verified";
@@ -150,6 +151,7 @@ export default function PrivateDeals() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const { data: user } = useCurrentUser();
+  const { isFree } = usePlan();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<PrivateDeal | null>(null);
   const [mode, setMode] = useState<DealMode>("quick");
@@ -177,7 +179,8 @@ export default function PrivateDeals() {
     },
   });
 
-  const isInvestorPro = user?.tier === "investor_pro";
+  const isInvestorPro = !isFree;
+  const atFreeLimit = isFree && (deals?.length ?? 0) >= 1;
 
   const validQuick = !!(form.companyName && form.industry && form.revenue && form.ebitda && form.growthRate);
   const validVerified = validQuick && !!(form.businessOverview && form.whySelling && form.legalConfirmed);
@@ -212,7 +215,18 @@ export default function PrivateDeals() {
       setMode("quick");
       toast({ title: mode === "verified" ? "Deal Room created" : "Draft deal saved", description: "Valuation & intelligence are being computed." });
     },
-    onError: (e) => toast({ title: "Failed", description: (e as Error).message, variant: "destructive" }),
+    onError: (e: unknown) => {
+      const err = e as { response?: { data?: { code?: string } }; message?: string };
+      if (err?.response?.data?.code === "plan_required") {
+        toast({
+          title: "🔒 Investor Pro Required",
+          description: "Free plan allows 1 private deal. Upgrade to Investor Pro for unlimited deals.",
+          variant: "destructive",
+        });
+      } else {
+        toast({ title: "Failed", description: (e as Error).message, variant: "destructive" });
+      }
+    },
   });
 
   const del = useMutation({
@@ -233,7 +247,9 @@ export default function PrivateDeals() {
       action={
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setForm(initialForm); setPendingDocs([]); setMode("quick"); } }}>
           <DialogTrigger asChild>
-            <Button className="gap-2" data-testid="button-new-deal"><Plus className="h-4 w-4" /> New Private Deal</Button>
+            <Button className="gap-2" data-testid="button-new-deal" disabled={atFreeLimit}>
+              {atFreeLimit ? <><Lock className="h-4 w-4" /> Plan Limit Reached</> : <><Plus className="h-4 w-4" /> New Private Deal</>}
+            </Button>
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -422,13 +438,24 @@ export default function PrivateDeals() {
       }
     >
       {!isInvestorPro && (
-        <Card className="p-4 border-primary/30 bg-primary/5 mb-6 flex items-center gap-3">
-          <Sparkles className="h-5 w-5 text-primary shrink-0" />
+        <Card className={`p-4 mb-6 flex items-center gap-3 ${atFreeLimit ? "border-amber-500/30 bg-amber-500/5" : "border-primary/30 bg-primary/5"}`}>
+          <Sparkles className={`h-5 w-5 shrink-0 ${atFreeLimit ? "text-amber-400" : "text-primary"}`} />
           <div className="flex-1">
-            <p className="text-sm font-medium">Private deal analysis is an Investor Pro feature</p>
-            <p className="text-xs text-muted-foreground">You can explore here. Upgrade for unlimited private deals, document vault access, and deal pipeline.</p>
+            {atFreeLimit ? (
+              <>
+                <p className="text-sm font-medium text-amber-400">🔒 Free plan limit reached (1 of 1 deals used)</p>
+                <p className="text-xs text-muted-foreground">Upgrade to Investor Pro for unlimited deals, Bear/Base/Bull scenarios, IRR/MOIC metrics, and pipeline tracking.</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium">Free plan: 1 private deal included</p>
+                <p className="text-xs text-muted-foreground">Upgrade to Investor Pro for unlimited deals, document vault, and deal pipeline.</p>
+              </>
+            )}
           </div>
-          <Badge className="bg-primary text-primary-foreground">Investor Pro</Badge>
+          <Button size="sm" variant="outline" className="shrink-0 gap-1.5 border-primary/40 text-primary hover:bg-primary/10" onClick={() => window.location.href = "/pricing"}>
+            <Sparkles className="h-3 w-3" /> Upgrade
+          </Button>
         </Card>
       )}
 

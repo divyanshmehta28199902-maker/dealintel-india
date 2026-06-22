@@ -5,7 +5,7 @@ import {
 } from "@workspace/db";
 import { eq, sql, count } from "drizzle-orm";
 import { z } from "zod/v4";
-import { requireAuth, requireRole, type AuthRequest } from "../lib/auth";
+import { requireAuth, requireRole, requirePlan, type AuthRequest } from "../lib/auth";
 import { validateBody, parseId } from "../lib/validate";
 import { computeValuation, computeIntelligence, computeDealQualityScore } from "../lib/valuation";
 
@@ -80,6 +80,23 @@ router.post("/", requireAuth, requireRole("investor"), validateBody(createDealSc
       businessOverview, whySelling, growthDrivers, keyRisks, description,
       legalConfirmed,
     } = req.body as z.infer<typeof createDealSchema>;
+
+    // Free plan: max 1 private deal
+    const userTier = req.dbUser!.tier ?? "free";
+    if (userTier === "free") {
+      const [{ dealCount }] = await db
+        .select({ dealCount: count() })
+        .from(privateDealsTable)
+        .where(eq(privateDealsTable.userId, req.dbUserId!));
+      if (dealCount >= 1) {
+        res.status(403).json({
+          error: "Free plan allows 1 private deal analysis. Upgrade to Investor Pro for unlimited deals.",
+          code: "plan_required",
+          requiredPlan: "investor_pro",
+        });
+        return;
+      }
+    }
 
     // Validate: EBITDA cannot exceed revenue
     if (ebitda > revenue) {

@@ -103,11 +103,24 @@ export default function Navbar() {
             </Badge>
           )}
 
-          {/* Tier badge */}
-          {user?.tier && user.tier !== "free" && (
-            <Badge className="hidden sm:flex text-xs bg-primary text-primary-foreground">
-              {user.tier === "pro" ? "PRO" : "INVESTOR PRO"}
+          {/* Plan badge */}
+          {user?.tier === "investor_pro" && (
+            <Badge className="hidden sm:flex text-xs bg-primary text-primary-foreground gap-1">
+              <Sparkles className="h-3 w-3" /> PRO
             </Badge>
+          )}
+          {user?.tier === "seller_premium" && (
+            <Badge className="hidden sm:flex text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 gap-1">
+              <Sparkles className="h-3 w-3" /> PREMIUM
+            </Badge>
+          )}
+          {(!user?.tier || user.tier === "free") && user?.role && (
+            <button
+              onClick={() => navigate("/pricing")}
+              className="hidden sm:flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Sparkles className="h-3 w-3" /> Upgrade
+            </button>
           )}
 
           {/* User menu */}

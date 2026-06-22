@@ -1,3 +1,5 @@
+- [Clerk single-session fix](clerk-single-session.md) — suppress `cannot_render_single_session_enabled` in main.tsx; use `<Show>` guards not `useAuth()` in sign-in/sign-up pages.
+- [Subscription + plan gating](subscription-plan-gating.md) — tier lives on users.tier (denormalized); subscriptions table for history; requirePlan middleware in auth.ts; Upgrade button calls POST /api/subscriptions/upgrade (no payment yet).
 - [Deal platform architecture](deal-platform.md) — private deals use dealMode (quick/verified), qualityScore auto-computed server-side from narrative + docs + legalConfirmedAt
 - [Pipeline + document vault](pipeline-docs.md) — pipeline stage advance is idempotent; success fee dialog triggers on closed stage; document upload uses presigned URL then registers to document_vault table
 - [Valuation shape](valuation-shape.md) — ValuationResult now has optional scenarios[], irr, moic, paybackYears; ValuationDisplay is backwards-compatible (renders base fields if extras absent)

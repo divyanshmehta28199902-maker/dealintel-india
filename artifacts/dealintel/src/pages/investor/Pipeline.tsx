@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import PlanGate from "@/components/PlanGate";
 import {
   TrendingUp, Clock, CheckCircle2, MessageSquare, ChevronRight,
   GitBranch, ArrowRight, IndianRupee, AlertTriangle,
@@ -96,6 +97,7 @@ export default function Pipeline() {
   }, {} as Record<string, Pipeline[]>);
 
   return (
+    <PlanGate requiredPlan="investor_pro" fullPage featureName="Deal Pipeline">
     <PortalLayout
       title="Deal Pipeline"
       subtitle="Track every acquisition from interest to close"
@@ -312,5 +314,6 @@ export default function Pipeline() {
         </DialogContent>
       </Dialog>
     </PortalLayout>
+    </PlanGate>
   );
 }

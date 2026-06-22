@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import { pipelinesTable, listingsTable, usersTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 import { z } from "zod/v4";
-import { requireAuth, requireRole, type AuthRequest } from "../lib/auth";
+import { requireAuth, requireRole, requirePlan, type AuthRequest } from "../lib/auth";
 import { validateBody, parseId } from "../lib/validate";
 import type { ActivityEntry } from "@workspace/db";
 
@@ -23,7 +23,7 @@ const updateStageSchema = z.object({
 });
 
 // GET /api/pipeline — investor's pipeline with listing details
-router.get("/", requireAuth, requireRole("investor"), async (req: AuthRequest, res, next) => {
+router.get("/", requireAuth, requireRole("investor"), requirePlan("investor_pro"), async (req: AuthRequest, res, next) => {
   try {
     const rows = await db
       .select({
@@ -52,7 +52,7 @@ router.get("/", requireAuth, requireRole("investor"), async (req: AuthRequest, r
 });
 
 // POST /api/pipeline — add a listing to pipeline
-router.post("/", requireAuth, requireRole("investor"), validateBody(addToPipelineSchema), async (req: AuthRequest, res, next) => {
+router.post("/", requireAuth, requireRole("investor"), requirePlan("investor_pro"), validateBody(addToPipelineSchema), async (req: AuthRequest, res, next) => {
   try {
     const { listingId, notes } = req.body as z.infer<typeof addToPipelineSchema>;
 
@@ -90,7 +90,7 @@ router.post("/", requireAuth, requireRole("investor"), validateBody(addToPipelin
 });
 
 // PATCH /api/pipeline/:id/stage — advance stage
-router.patch("/:id/stage", requireAuth, requireRole("investor"), validateBody(updateStageSchema), async (req: AuthRequest, res, next) => {
+router.patch("/:id/stage", requireAuth, requireRole("investor"), requirePlan("investor_pro"), validateBody(updateStageSchema), async (req: AuthRequest, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (!id) { res.status(404).json({ error: "Not found" }); return; }
@@ -129,7 +129,7 @@ router.patch("/:id/stage", requireAuth, requireRole("investor"), validateBody(up
 });
 
 // DELETE /api/pipeline/:id
-router.delete("/:id", requireAuth, requireRole("investor"), async (req: AuthRequest, res, next) => {
+router.delete("/:id", requireAuth, requireRole("investor"), requirePlan("investor_pro"), async (req: AuthRequest, res, next) => {
   try {
     const id = parseId(req.params.id);
     if (!id) { res.status(404).json({ error: "Not found" }); return; }

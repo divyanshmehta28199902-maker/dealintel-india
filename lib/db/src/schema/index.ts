@@ -8,3 +8,4 @@ export * from "./messages";
 export * from "./industry_benchmarks";
 export * from "./pipelines";
 export * from "./document_vault";
+export * from "./subscriptions";

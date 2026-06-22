@@ -43,6 +43,30 @@ export function requireRole(...roles: string[]) {
   };
 }
 
+/**
+ * Gate a route behind a subscription plan.
+ * "free" always passes. Higher plans require the user's tier to match.
+ * Plans hierarchy: free < investor_pro / seller_premium
+ */
+export function requirePlan(...plans: string[]) {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.dbUser) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    const userTier = req.dbUser.tier ?? "free";
+    if (!plans.includes(userTier)) {
+      res.status(403).json({
+        error: `This feature requires the ${plans.join(" or ")} plan`,
+        code: "plan_required",
+        requiredPlan: plans[0],
+      });
+      return;
+    }
+    next();
+  };
+}
+
 // Resolves the DB user if a valid session exists, but never rejects the request.
 // Used for endpoints that are public for some resources and private for others.
 export async function optionalAuth(req: AuthRequest, _res: Response, next: NextFunction) {

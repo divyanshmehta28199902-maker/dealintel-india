@@ -1,3 +1,11 @@
-<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="180" height="180" rx="36" fill="#FF3C00"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Outer container: dark navy, thin cyan ring -->
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7" fill="#060D18" stroke="#00D1FF" stroke-opacity="0.40" stroke-width="1"/>
+
+  <!-- Ascending bars (same proportion as logo icon) -->
+  <rect x="5"  y="21" width="5" height="6"  rx="1" fill="#00D1FF" fill-opacity="0.38"/>
+  <rect x="13" y="16" width="5" height="11" rx="1" fill="#00D1FF" fill-opacity="0.68"/>
+  <rect x="21" y="10" width="5" height="17" rx="1" fill="#00D1FF"/>
+  <!-- Terminal pulse dot -->
+  <circle cx="23.5" cy="8.5" r="2" fill="#00D1FF"/>
 </svg>

@@ -62,9 +62,18 @@ export default function Navbar() {
       </div>
 
       <div className="flex h-14 items-center gap-4 px-4 md:px-6">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 shrink-0">
-          <img src={`${basePath}/logo.svg`} alt="DealIntel India" className="h-7 w-auto" />
+        {/* Logo — CSS-switches between bloomberg (dark) and off-white (light) variants */}
+        <Link href="/" className="flex items-center shrink-0 opacity-90 hover:opacity-100 transition-opacity">
+          <img
+            src={`${basePath}/logo.svg`}
+            alt="DealIntel India"
+            className="h-7 w-auto hidden dark:block"
+          />
+          <img
+            src={`${basePath}/logo-light.svg`}
+            alt="DealIntel India"
+            className="h-7 w-auto block dark:hidden"
+          />
         </Link>
 
         {/* Nav links */}

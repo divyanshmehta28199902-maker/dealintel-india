@@ -89,63 +89,66 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* DARK MODE (default - Bloomberg style) */
+/* DARK MODE — Bloomberg / institutional terminal */
 :root,
 .dark {
   --button-outline: rgba(255,255,255,.10);
   --badge-outline: rgba(255,255,255,.05);
   --opaque-button-border-intensity: 9;
-  --elevate-1: rgba(255,255,255,.04);
-  --elevate-2: rgba(255,255,255,.09);
+  --elevate-1: rgba(255,255,255,.03);
+  --elevate-2: rgba(255,255,255,.06);
 
-  /* Deep navy background */
-  --background: 222 47% 8%;
-  --foreground: 210 40% 96%;
+  /* Deep navy-black — #0A0F1C */
+  --background: 223 47% 7%;
+  --foreground: 213 31% 91%;
 
-  --border: 217 33% 18%;
+  /* Terminal border — #1E293B */
+  --border: 217 32% 18%;
 
+  /* Card — #0F172A */
   --card: 222 47% 11%;
-  --card-foreground: 210 40% 96%;
-  --card-border: 217 33% 18%;
+  --card-foreground: 213 31% 91%;
+  --card-border: 217 32% 18%;
 
-  --sidebar: 222 47% 7%;
-  --sidebar-foreground: 210 40% 90%;
-  --sidebar-border: 217 33% 16%;
-  --sidebar-primary: 45 93% 55%;
-  --sidebar-primary-foreground: 222 47% 8%;
-  --sidebar-accent: 217 33% 15%;
-  --sidebar-accent-foreground: 210 40% 90%;
-  --sidebar-ring: 45 93% 55%;
+  --sidebar: 223 47% 6%;
+  --sidebar-foreground: 210 25% 85%;
+  --sidebar-border: 217 32% 16%;
+  /* Bloomberg yellow */
+  --sidebar-primary: 48 96% 53%;
+  --sidebar-primary-foreground: 222 47% 5%;
+  --sidebar-accent: 217 32% 14%;
+  --sidebar-accent-foreground: 210 25% 85%;
+  --sidebar-ring: 48 96% 53%;
 
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 96%;
-  --popover-border: 217 33% 20%;
+  --popover: 222 47% 10%;
+  --popover-foreground: 213 31% 91%;
+  --popover-border: 217 32% 20%;
 
-  /* Amber/Gold primary */
-  --primary: 45 93% 55%;
-  --primary-foreground: 222 47% 8%;
+  /* Bloomberg yellow — #FACC15 */
+  --primary: 48 96% 53%;
+  --primary-foreground: 222 47% 5%;
 
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 90%;
+  --secondary: 217 32% 16%;
+  --secondary-foreground: 210 25% 85%;
 
-  --muted: 222 33% 14%;
-  --muted-foreground: 215 20% 55%;
+  --muted: 222 33% 13%;
+  --muted-foreground: 215 16% 47%;
 
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 90%;
+  --accent: 217 32% 16%;
+  --accent-foreground: 210 25% 85%;
 
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 217 33% 15%;
-  --ring: 45 93% 55%;
+  --input: 217 32% 14%;
+  --ring: 48 96% 53%;
 
-  /* Chart colors */
-  --chart-1: 45 93% 55%;
-  --chart-2: 142 71% 45%;
-  --chart-3: 199 89% 48%;
-  --chart-4: 266 83% 58%;
-  --chart-5: 0 72% 51%;
+  /* Terminal chart palette */
+  --chart-1: 48 96% 53%;   /* Bloomberg yellow — primary series */
+  --chart-2: 187 85% 53%;  /* Cyan-400 — secondary bars */
+  --chart-3: 142 71% 45%;  /* Green — profit / up */
+  --chart-4: 266 83% 58%;  /* Violet */
+  --chart-5: 0 72% 51%;    /* Red — loss / down */
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
@@ -315,8 +318,8 @@
 ::-webkit-scrollbar-thumb:hover { background: hsl(217 33% 30%); }
 
 /* Bloomberg-style data table rows */
-.deal-row:hover { background: rgba(255,255,255,0.03); }
-.deal-row-selected { background: rgba(245,158,11,0.08) !important; border-left: 2px solid hsl(45 93% 55%); }
+.deal-row:hover { background: rgba(255,255,255,0.025); }
+.deal-row-selected { background: rgba(250,204,21,0.07) !important; border-left: 2px solid hsl(48 96% 53%); }
 
 /* Ticker animation */
 @keyframes ticker {
@@ -326,19 +329,27 @@
 .ticker-track { animation: ticker 30s linear infinite; }
 .ticker-track:hover { animation-play-state: paused; }
 
-/* Stat card glow */
-.stat-glow { box-shadow: 0 0 20px rgba(245,158,11,0.08); }
-.stat-glow-green { box-shadow: 0 0 20px rgba(16,185,129,0.08); }
-.stat-glow-blue { box-shadow: 0 0 20px rgba(59,130,246,0.08); }
+/* Terminal stat card glows */
+.stat-glow { box-shadow: 0 0 0 1px #1E293B, 0 0 18px rgba(250,204,21,0.07); }
+.stat-glow-green { box-shadow: 0 0 0 1px #1E293B, 0 0 18px rgba(34,211,238,0.07); }
+.stat-glow-blue { box-shadow: 0 0 0 1px #1E293B, 0 0 18px rgba(34,211,238,0.07); }
 
-/* Interactive card hover */
+/* Interactive card hover — terminal lift */
 .hover-elevate {
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .hover-elevate:hover {
-  transform: translateY(-2px);
-  border-color: hsl(45 93% 55% / 0.35);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  transform: translateY(-1px);
+  border-color: rgba(250,204,21,0.25);
+  box-shadow: 0 0 0 1px rgba(250,204,21,0.15), 0 8px 24px rgba(0,0,0,0.35);
+}
+
+/* Metric card terminal ring */
+.metric-ring {
+  box-shadow: 0 0 0 1px #1E293B;
+}
+.metric-ring:hover {
+  box-shadow: 0 0 0 1px #1E293B, 0 0 10px rgba(250,204,21,0.12);
 }
 
 /* ── Dropdown / Select inside modals ──────────────────────────────────────── */

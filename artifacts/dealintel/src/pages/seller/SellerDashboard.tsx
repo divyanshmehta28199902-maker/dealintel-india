@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
-  Building2, TrendingUp, Eye, Bell, MessageSquare, Plus, FileText, CheckCircle2, Users, Zap, Lock,
+  Building2, TrendingUp, Eye, Bell, MessageSquare, Plus, FileText,
+  CheckCircle2, Users, Zap,
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { StatCard } from "@/components/StatCard";
@@ -31,66 +32,70 @@ export default function SellerDashboard() {
       subtitle="Manage your business listings and investor inquiries"
       action={
         <Link href="/seller/list">
-          <Button className="gap-2" data-testid="button-new-listing"><Plus className="h-4 w-4" /> List Business</Button>
+          <Button className="gap-1.5 px-4 py-2 h-8 text-sm" data-testid="button-new-listing">
+            <Plus className="h-3.5 w-3.5" /> List Business
+          </Button>
         </Link>
       }
     >
-      {/* Cross-role value banner */}
-      <Card className="mb-6 p-4 border-primary/20 bg-primary/5 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex-1">
-          <p className="text-sm font-semibold mb-2 flex items-center gap-2">
-            <Users className="h-4 w-4 text-primary" />
-            Connect with serious investors actively acquiring businesses
-          </p>
-          <div className="flex flex-wrap gap-x-5 gap-y-1">
-            {[["Zap", "High-intent buyers"], ["Lock", "Confidential deal room"], ["TrendingUp", "Faster deal discovery"]].map(([, label]) => (
-              <span key={label} className="text-xs text-muted-foreground flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{label}
-              </span>
-            ))}
-          </div>
-        </div>
-        <Link href="/seller/list">
-          <Button size="sm" className="shrink-0 gap-1.5">
-            <Plus className="h-3.5 w-3.5" /> List for Free
-          </Button>
-        </Link>
-      </Card>
-
+      {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Total Listings" value={stats?.totalListings ?? 0} icon={Building2} sub={`${stats?.activeListings ?? 0} active · ${stats?.draftListings ?? 0} draft`} />
+        <StatCard
+          label="Total Listings"
+          value={stats?.totalListings ?? 0}
+          icon={Building2}
+          sub={`${stats?.activeListings ?? 0} active · ${stats?.draftListings ?? 0} draft`}
+        />
         <StatCard label="Total Views" value={stats?.totalViews ?? 0} icon={Eye} accent="blue" />
-        <StatCard label="Pending Inquiries" value={stats?.pendingContactRequests ?? 0} icon={Bell} accent="green" sub={`${stats?.acceptedContactRequests ?? 0} accepted`} />
-        <StatCard label="Conversations" value={stats?.totalMessages ?? 0} icon={MessageSquare} accent="blue" />
+        <StatCard
+          label="Pending Inquiries"
+          value={stats?.pendingContactRequests ?? 0}
+          icon={Bell}
+          accent="green"
+          sub={`${stats?.acceptedContactRequests ?? 0} accepted`}
+        />
+        <StatCard label="Conversations" value={stats?.totalMessages ?? 0} icon={MessageSquare} />
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 border-card-border">
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <h2 className="font-semibold">Recent Listings</h2>
-            <Link href="/seller/listings"><Button variant="ghost" size="sm">View all</Button></Link>
+        {/* Recent listings */}
+        <Card className="lg:col-span-2 border-border">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <h2 className="text-sm font-semibold">Recent Listings</h2>
+            <Link href="/seller/listings">
+              <Button variant="ghost" size="sm" className="h-7 text-xs px-2">View all</Button>
+            </Link>
           </div>
           <div className="divide-y divide-border">
             {recent.length === 0 && (
               <div className="p-10 text-center">
-                <Building2 className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">No listings yet</p>
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold mb-1">List your first business for free</h3>
+                <p className="text-xs text-muted-foreground mb-4 max-w-xs mx-auto">
+                  Get an instant DCF valuation and connect with investors actively seeking acquisitions.
+                </p>
                 <Link href="/seller/list">
-                  <Button variant="outline" size="sm" className="mt-3 gap-2"><Plus className="h-4 w-4" /> Create your first listing</Button>
+                  <Button size="sm" className="gap-1.5 px-4 py-2">
+                    <Plus className="h-3.5 w-3.5" /> Create Listing
+                  </Button>
                 </Link>
               </div>
             )}
             {recent.map((l) => (
-              <div key={l.id} className="flex items-center justify-between p-4 deal-row">
+              <div key={l.id} className="flex items-center justify-between px-4 py-3 deal-row">
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-medium truncate">{l.companyName}</p>
+                    <p className="text-sm font-medium truncate">{l.companyName}</p>
                     <StatusBadge status={l.status} />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">{l.industry} · {l.city ?? "—"} · {l.viewCount} views</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {l.industry} · {l.city ?? "—"} · {l.viewCount} views
+                  </p>
                 </div>
                 <div className="text-right shrink-0 ml-4">
-                  <p className="font-mono font-semibold text-sm">{formatINR(l.askingValuation)}</p>
+                  <p className="text-sm num text-foreground">{formatINR(l.askingValuation)}</p>
                   <p className="text-xs text-muted-foreground">asking</p>
                 </div>
               </div>
@@ -98,31 +103,32 @@ export default function SellerDashboard() {
           </div>
         </Card>
 
-        <Card className="p-5 border-card-border h-fit">
-          <h2 className="font-semibold mb-4">Quick Actions</h2>
+        {/* Quick actions */}
+        <Card className="p-4 border-border h-fit">
+          <h2 className="text-sm font-semibold mb-4">Quick Actions</h2>
           <div className="space-y-2">
-            <Link href="/seller/list" className="block">
-              <Button variant="outline" className="w-full justify-start gap-2"><Plus className="h-4 w-4" /> List a Business</Button>
-            </Link>
-            <Link href="/seller/listings" className="block">
-              <Button variant="outline" className="w-full justify-start gap-2"><FileText className="h-4 w-4" /> Manage Listings</Button>
-            </Link>
-            <Link href="/seller/requests" className="block">
-              <Button variant="outline" className="w-full justify-start gap-2"><Bell className="h-4 w-4" /> Review Inquiries</Button>
-            </Link>
-            <Link href="/messages" className="block">
-              <Button variant="outline" className="w-full justify-start gap-2"><MessageSquare className="h-4 w-4" /> Messages</Button>
-            </Link>
+            {[
+              { href: "/seller/list", icon: Plus, label: "List a Business" },
+              { href: "/seller/listings", icon: FileText, label: "Manage Listings" },
+              { href: "/seller/requests", icon: Bell, label: "Review Inquiries" },
+              { href: "/messages", icon: MessageSquare, label: "Messages" },
+            ].map(({ href, icon: Icon, label }) => (
+              <Link key={href} href={href} className="block">
+                <Button variant="outline" className="w-full justify-start gap-2 h-8 text-sm px-3">
+                  <Icon className="h-3.5 w-3.5 shrink-0" /> {label}
+                </Button>
+              </Link>
+            ))}
           </div>
 
           <div className="mt-6 rounded-lg bg-primary/5 border border-primary/20 p-4">
-            <div className="flex items-center gap-2 text-primary mb-1">
-              <CheckCircle2 className="h-4 w-4" />
-              <p className="text-sm font-medium">Pro tip</p>
+            <div className="flex items-center gap-2 text-primary mb-2">
+              <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+              <p className="text-xs font-semibold">Pro tip</p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Listings with complete financials (EBITDA margin, growth rate) get more accurate
-              valuations and 3x more investor inquiries.
+            <p className="text-xs text-muted-foreground leading-normal">
+              Listings with complete financials — EBITDA margin and growth rate — get more accurate
+              valuations and 3× more investor inquiries.
             </p>
           </div>
         </Card>
@@ -133,12 +139,12 @@ export default function SellerDashboard() {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    active: { label: "Active", cls: "bg-green-500/15 text-green-400 border-green-500/30" },
-    draft: { label: "Draft", cls: "bg-muted text-muted-foreground border-border" },
-    pending_approval: { label: "Pending", cls: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
-    under_negotiation: { label: "In Talks", cls: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
-    closed: { label: "Closed", cls: "bg-muted text-muted-foreground border-border" },
+    active:              { label: "Active",   cls: "bg-green-500/15 text-green-400 border-green-500/30" },
+    draft:               { label: "Draft",    cls: "bg-muted text-muted-foreground border-border" },
+    pending_approval:    { label: "Pending",  cls: "bg-amber-500/15 text-amber-400 border-amber-500/30" },
+    under_negotiation:   { label: "In Talks", cls: "bg-blue-500/15 text-blue-400 border-blue-500/30" },
+    closed:              { label: "Closed",   cls: "bg-muted text-muted-foreground border-border" },
   };
   const s = map[status] ?? map.draft;
-  return <Badge variant="outline" className={`text-xs ${s.cls}`}>{s.label}</Badge>;
+  return <Badge variant="outline" className={`text-xs h-4 px-1.5 ${s.cls}`}>{s.label}</Badge>;
 }

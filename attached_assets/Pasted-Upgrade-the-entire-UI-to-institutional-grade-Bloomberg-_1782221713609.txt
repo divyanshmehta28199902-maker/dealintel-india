@@ -1,0 +1,204 @@
+Upgrade the entire UI to institutional-grade (Bloomberg / PitchBook level).
+
+Focus on:
+- Visual hierarchy
+- Spacing consistency
+- Data clarity
+- Professional styling
+- Trust perception
+
+---
+
+### 1. SPACING SYSTEM (STRICT — NO RANDOM VALUES)
+
+Use ONLY this scale:
+- 8px (gap-2)
+- 16px (gap-4)
+- 24px (gap-6)
+- 32px (gap-8)
+
+Rules:
+- Cards → p-4 or p-6 only
+- Sections → gap-6 or gap-8
+- Inside cards:
+  title → value = gap-2
+  value → description = gap-1
+  sections inside card = gap-4
+
+Remove ALL inconsistent spacing.
+
+---
+
+### 2. TYPOGRAPHY HIERARCHY (DATA-FIRST)
+
+Apply strict hierarchy:
+
+- Section Title:
+  text-lg font-medium
+
+- Card Label:
+  text-xs text-muted
+
+- Main Value (₹, IRR, etc):
+  text-xl or text-2xl font-semibold tracking-tight
+
+- Supporting Text:
+  text-xs text-muted
+
+---
+
+### 3. NUMBER FORMATTING (CRITICAL)
+
+Apply everywhere:
+
+font-variant-numeric: tabular-nums;
+
+Ensure:
+- Numbers align properly
+- No jumping digits
+
+---
+
+### 4. CARD DESIGN (SHARP, NOT SOFT)
+
+Update all cards:
+
+- border: 1px solid var(--border)
+- border-radius: 8px
+- padding: p-4 or p-6
+
+Optional:
+- very subtle shadow only:
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05)
+
+Remove:
+- heavy shadows
+- large rounded corners
+
+---
+
+### 5. COLOR SYSTEM (CONTROLLED USAGE)
+
+Use accent color ONLY for:
+- Primary buttons
+- Active states
+- Key highlights
+
+Avoid:
+- random blue text
+- multiple highlight colors
+
+All text:
+- text-[var(--text)]
+- text-[var(--muted)]
+
+---
+
+### 6. DATA ALIGNMENT (IMPORTANT)
+
+- Numbers → right aligned
+- Labels → left aligned
+
+Example:
+Revenue:         ₹120 Cr
+EBITDA:          ₹24 Cr
+
+---
+
+### 7. BUTTON SYSTEM
+
+Primary CTA:
+- px-5 py-2.5
+- strong background (primary color)
+
+Secondary:
+- outline or ghost
+
+Hover:
+- slight brightness increase
+- no heavy animation
+
+---
+
+### 8. SCROLL SYSTEM (FIX GLOBAL BUGS)
+
+Ensure:
+
+- Only ONE scroll per page
+- Remove nested scroll containers
+- Main layout:
+
+flex flex-col h-screen min-h-0
+main → overflow-y-auto
+
+Remove:
+overflow-hidden (unless required)
+
+---
+
+### 9. EMPTY STATES (MANDATORY)
+
+Replace blank screens:
+
+Investor:
+"Analyze your first deal in 10 seconds"
+
+Seller:
+"List your business for free"
+
+Add CTA buttons.
+
+---
+
+### 10. MICRO INTERACTIONS
+
+Add:
+
+- Card hover:
+  border highlight
+
+- Numbers:
+  animate count-up
+
+- Loading:
+  skeleton loaders (not spinner)
+
+---
+
+### 11. TRUST LAYER (IMPORTANT)
+
+Add small strip globally:
+
+- "Private deal intelligence platform"
+- "Confidential & secure"
+- "Used by investors, founders & advisors"
+
+---
+
+### 12. REMOVE UI NOISE
+
+Remove:
+- extra margins
+- duplicate text
+- unnecessary labels
+- cluttered sections
+
+---
+
+### 13. CONSISTENCY RULE
+
+Same component = same design everywhere
+
+No variation allowed.
+
+---
+
+### FINAL GOAL:
+
+UI should feel:
+- Dense but clean
+- Data-first
+- Professional
+- Trustworthy
+
+Like a serious financial platform, not a generic SaaS dashboard.

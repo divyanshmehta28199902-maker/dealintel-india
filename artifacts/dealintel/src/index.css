@@ -348,6 +348,18 @@
   box-shadow: 0 0 0 1px #1F2937, 0 0 12px rgba(0,209,255,0.12);
 }
 
+/* ── Skeleton loader ──────────────────────────────────────────────────────── */
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+.skeleton {
+  background: hsl(var(--muted));
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+  border-radius: 4px;
+  display: block;
+}
+
 /* ── Bloomberg Typography System ─────────────────────────────────────────── */
 /* Type scale — apply to elements that need explicit classification            */
 .type-heading-xl {

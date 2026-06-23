@@ -24,10 +24,10 @@ export function applyTheme(theme: Theme) {
 }
 
 export function ThemeSwitcher() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const saved = (localStorage.getItem("dealintel-theme") as Theme) || "dark";
+    const saved = (localStorage.getItem("dealintel-theme") as Theme) || "light";
     setTheme(saved);
     applyTheme(saved);
   }, []);

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { SignInButton, SignUpButton } from "@clerk/react";
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
@@ -8,33 +9,57 @@ import {
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
+function isDarkTheme() {
+  const cl = document.documentElement.classList;
+  return cl.contains("dark") || cl.contains("finance-blue");
+}
+
 export default function LandingPage() {
+  const [logoSrc, setLogoSrc] = useState(
+    () => `${basePath}/${isDarkTheme() ? "logo.svg" : "logo-light.svg"}`,
+  );
+
+  useEffect(() => {
+    const update = () =>
+      setLogoSrc(`${basePath}/${isDarkTheme() ? "logo.svg" : "logo-light.svg"}`);
+
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    update();
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-[#F8F9FB] text-gray-900">
+    <div className="min-h-screen bg-[#F8F9FB] dark:bg-background text-gray-900 dark:text-foreground">
 
       {/* Ticker */}
-      <div className="h-7 bg-amber-50 border-b border-amber-100 overflow-hidden flex items-center">
+      <div className="h-7 bg-amber-50 dark:bg-primary/10 border-b border-amber-100 dark:border-primary/20 overflow-hidden flex items-center">
         <div className="ticker-track flex gap-8 whitespace-nowrap text-xs font-mono">
           {Array(2).fill(null).map((_, i) => (
             <span key={i} className="flex gap-8">
-              <span className="text-amber-700">NIFTY 50 <span className="text-green-600">▲ 22,419 +0.42%</span></span>
-              <span className="text-amber-700">SENSEX <span className="text-green-600">▲ 73,667 +0.38%</span></span>
-              <span className="text-gray-500">M&A Deal Flow India Q2 2026: ₹8.2L Cr</span>
-              <span className="text-amber-700">SME PE Multiple: 8.2x avg</span>
-              <span className="text-amber-700">USDINR <span className="text-red-500">▼ 83.42</span></span>
-              <span className="text-gray-500">142 Deals Closed YTD</span>
+              <span className="text-amber-700 dark:text-primary">
+                NIFTY 50 <span className="text-green-600 dark:text-green-400">▲ 22,419 +0.42%</span>
+              </span>
+              <span className="text-amber-700 dark:text-primary">
+                SENSEX <span className="text-green-600 dark:text-green-400">▲ 73,667 +0.38%</span>
+              </span>
+              <span className="text-gray-500 dark:text-muted-foreground">M&A Deal Flow India Q2 2026: ₹8.2L Cr</span>
+              <span className="text-amber-700 dark:text-primary">SME PE Multiple: 8.2x avg</span>
+              <span className="text-amber-700 dark:text-primary">
+                USDINR <span className="text-red-500 dark:text-red-400">▼ 83.42</span>
+              </span>
+              <span className="text-gray-500 dark:text-muted-foreground">142 Deals Closed YTD</span>
             </span>
           ))}
         </div>
       </div>
 
       {/* Navbar */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-200">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-background/80 backdrop-blur border-b border-gray-200 dark:border-border">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          {/* Logo — SVG is a full wordmark, no extra text needed */}
           <div className="flex items-center">
             <img
-              src={`${basePath}/logo-light.svg`}
+              src={logoSrc}
               alt="DealIntel India"
               className="h-8 w-auto"
               onError={(e) => {
@@ -54,7 +79,11 @@ export default function LandingPage() {
           <div className="flex items-center gap-3">
             <ThemeSwitcher />
             <SignInButton mode="modal">
-              <Button variant="ghost" size="sm" className="text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 dark:text-muted-foreground hover:text-gray-900 dark:hover:text-foreground hover:bg-gray-100 dark:hover:bg-accent"
+              >
                 Sign In
               </Button>
             </SignInButton>
@@ -69,14 +98,14 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-6 py-20 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-1.5 text-xs font-medium text-amber-700 mb-6">
+        <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 dark:border-primary/30 bg-amber-50 dark:bg-primary/10 px-4 py-1.5 text-xs font-medium text-amber-700 dark:text-primary mb-6">
           <Zap className="h-3.5 w-3.5" /> India's M&A Intelligence Terminal
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto leading-tight text-gray-900">
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto leading-tight text-gray-900 dark:text-foreground">
           Where Indian SMEs meet{" "}
-          <span className="text-amber-500">smart capital</span>
+          <span className="text-amber-500 dark:text-primary">smart capital</span>
         </h1>
-        <p className="mt-6 text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-6 text-lg text-gray-600 dark:text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Institutional-grade deal intelligence for the Indian mid-market. Real DCF valuations,
           comparable analysis, and risk scoring — connecting founders with investors.
         </p>
@@ -87,7 +116,11 @@ export default function LandingPage() {
             </Button>
           </SignUpButton>
           <SignInButton mode="modal">
-            <Button size="lg" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 px-7">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-gray-300 dark:border-border text-gray-700 dark:text-foreground hover:bg-gray-50 dark:hover:bg-accent px-7"
+            >
               Sign In
             </Button>
           </SignInButton>
@@ -103,18 +136,18 @@ export default function LandingPage() {
           ].map(({ label, value, icon: Icon }) => (
             <div
               key={label}
-              className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow text-center"
+              className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow text-center"
             >
-              <Icon className="h-5 w-5 text-amber-500 mb-2 mx-auto" />
-              <p className="text-2xl font-bold font-mono text-gray-900">{value}</p>
-              <p className="text-xs text-gray-400 uppercase tracking-wider mt-1">{label}</p>
+              <Icon className="h-5 w-5 text-amber-500 dark:text-primary mb-2 mx-auto" />
+              <p className="text-2xl font-bold font-mono text-gray-900 dark:text-foreground">{value}</p>
+              <p className="text-xs text-gray-400 dark:text-muted-foreground uppercase tracking-wider mt-1">{label}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Trust strip */}
-      <div className="border-y border-gray-200 bg-white py-4">
+      <div className="border-y border-gray-200 dark:border-border bg-white dark:bg-card py-4">
         <div className="mx-auto max-w-6xl px-6 flex flex-wrap justify-center gap-x-10 gap-y-2">
           {[
             "Verified seller listings",
@@ -123,8 +156,8 @@ export default function LandingPage() {
             "Confidential deal room",
             "5-yr scenario analysis",
           ].map((item) => (
-            <span key={item} className="text-xs text-gray-500 flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-amber-500 shrink-0" /> {item}
+            <span key={item} className="text-xs text-gray-500 dark:text-muted-foreground flex items-center gap-1.5">
+              <Check className="h-3.5 w-3.5 text-amber-500 dark:text-primary shrink-0" /> {item}
             </span>
           ))}
         </div>
@@ -132,49 +165,49 @@ export default function LandingPage() {
 
       {/* Dual portal */}
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-10">
+        <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-muted-foreground mb-10">
           Built for both sides of the deal
         </p>
         <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-12 w-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center mb-5">
-              <Building2 className="h-6 w-6 text-amber-500" />
+          <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-12 w-12 rounded-xl bg-amber-50 dark:bg-primary/10 border border-amber-100 dark:border-primary/20 flex items-center justify-center mb-5">
+              <Building2 className="h-6 w-6 text-amber-500 dark:text-primary" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">For Sellers & Founders</h3>
-            <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-foreground">For Sellers & Founders</h3>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground mt-2 leading-relaxed">
               List your business, get an instant institutional valuation, and connect with
               vetted investors actively seeking deals in your sector.
             </p>
-            <ul className="mt-5 space-y-2.5 text-sm text-gray-700">
+            <ul className="mt-5 space-y-2.5 text-sm text-gray-700 dark:text-foreground/80">
               {[
                 { icon: TrendingUp, text: "Free DCF + comparable valuation" },
                 { icon: Search, text: "Reach active investors" },
                 { icon: Lock, text: "Control who sees your financials" },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-2.5">
-                  <Icon className="h-4 w-4 text-amber-500 shrink-0" /> {text}
+                  <Icon className="h-4 w-4 text-amber-500 dark:text-primary shrink-0" /> {text}
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="bg-white border border-gray-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
-            <div className="h-12 w-12 rounded-xl bg-green-50 border border-green-100 flex items-center justify-center mb-5">
-              <Search className="h-6 w-6 text-green-600" />
+          <div className="bg-white dark:bg-card border border-gray-200 dark:border-card-border rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-12 w-12 rounded-xl bg-green-50 dark:bg-green-400/10 border border-green-100 dark:border-green-500/20 flex items-center justify-center mb-5">
+              <Search className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">For Investors & Acquirers</h3>
-            <p className="text-sm text-gray-600 mt-2 leading-relaxed">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-foreground">For Investors & Acquirers</h3>
+            <p className="text-sm text-gray-600 dark:text-muted-foreground mt-2 leading-relaxed">
               Discover off-market and listed deals, run advanced valuations, score risk and
               growth, and manage your acquisition pipeline.
             </p>
-            <ul className="mt-5 space-y-2.5 text-sm text-gray-700">
+            <ul className="mt-5 space-y-2.5 text-sm text-gray-700 dark:text-foreground/80">
               {[
                 { icon: BarChart3, text: "Comparable EV + 5-yr DCF engine" },
                 { icon: Shield, text: "Upload & analyze private deals" },
                 { icon: LineChart, text: "Risk & growth intelligence scoring" },
               ].map(({ icon: Icon, text }) => (
                 <li key={text} className="flex items-center gap-2.5">
-                  <Icon className="h-4 w-4 text-green-500 shrink-0" /> {text}
+                  <Icon className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" /> {text}
                 </li>
               ))}
             </ul>
@@ -183,7 +216,7 @@ export default function LandingPage() {
       </section>
 
       {/* Bottom CTA */}
-      <section className="bg-gray-900 py-16">
+      <section className="bg-gray-900 dark:bg-[#060d18] py-16">
         <div className="mx-auto max-w-2xl px-6 text-center">
           <h2 className="text-3xl font-bold text-white mb-3">
             Get your valuation in <span className="text-amber-400">10 seconds</span>
@@ -200,10 +233,10 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200">
-        <div className="mx-auto max-w-6xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400">
+      <footer className="bg-white dark:bg-card border-t border-gray-200 dark:border-border">
+        <div className="mx-auto max-w-6xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400 dark:text-muted-foreground">
           <div className="flex items-center gap-2">
-            <img src={`${basePath}/logo.svg`} alt="" className="h-5 w-auto opacity-60" />
+            <img src={logoSrc} alt="" className="h-5 w-auto opacity-60" />
             <span>© 2026 DealIntel India. Institutional M&A intelligence.</span>
           </div>
           <span className="font-mono">Built for the Indian mid-market</span>

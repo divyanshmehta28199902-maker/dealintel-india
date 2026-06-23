@@ -1,0 +1,123 @@
+Refactor the pricing system and industry selection UX to improve marketplace liquidity, conversion, and scalability.
+
+### 1. SELLER PRICING FIX (CRITICAL)
+
+Remove paywall for basic listings.
+
+Implement new seller monetization model:
+
+- Free Tier (Default):
+  - Create listing (free)
+  - Basic visibility
+  - Standard deal score
+
+- Paid Upgrades:
+  1. Featured Listing (₹999 / listing)
+     - Higher ranking in marketplace
+     - Highlight badge
+  2. Verified + Premium (₹2,999 / listing)
+     - Verified badge
+     - Deal quality score boost
+     - Priority investor matching
+     - Faster contact approvals
+
+Update UI:
+- Replace “Seller Premium ₹2,999/month” with upgrade-based pricing
+- Add CTA: “List for Free”
+- Add tag: “Pay only for visibility & trust”
+
+---
+
+### 2. INVESTOR PRICING OPTIMIZATION
+
+Keep ₹4,999 plan but introduce anchor pricing:
+
+Plans:
+1. Free (₹0)
+2. Investor Pro (₹4,999/month) → highlight as “Most Popular”
+3. Investor Elite (₹9,999/month)
+
+Elite Features:
+- Priority deal flow (early access)
+- Advanced analytics (deeper valuation insights)
+- AI deal recommendations
+- Direct seller connect priority
+
+UI improvements:
+- Add line: “One good deal pays for your subscription”
+- Add ROI-focused copy
+- Highlight Pro plan visually
+
+---
+
+### 3. INDUSTRY DROPDOWN IMPROVEMENT
+
+Update industry selection:
+
+Add missing industries:
+- SaaS
+- IT Services
+- D2C / E-commerce
+- Pharma
+- Infrastructure / Construction
+- Chemicals
+- Automotive / EV
+
+Add:
+- “Other (Specify)” option
+
+Behavior:
+- If "Other" selected → show text input field
+- Store custom industry in DB
+
+---
+
+### 4. DATA MODEL UPDATE
+
+Update schema:
+
+- seller_plan → remove mandatory paid flag
+- add:
+  - isFeatured (boolean)
+  - isVerified (boolean)
+  - boostScore (number)
+
+- industry:
+  - predefined enum + customIndustry (string)
+
+---
+
+### 5. MARKETPLACE RANKING LOGIC
+
+Modify ranking algorithm:
+
+Base Score +
++ Featured boost (+20%)
++ Verified boost (+30%)
++ Deal quality score
+
+Ensure:
+- Free listings still visible
+- Paid listings get prioritization, not exclusivity
+
+---
+
+### 6. UI / UX IMPROVEMENTS
+
+Pricing Page:
+- Add comparison table
+- Highlight Pro plan
+- Add “Most Popular” tag
+- Add trust messaging
+
+Seller Flow:
+- Change CTA:
+  “Create Listing” → “List Your Business for Free”
+
+---
+
+### 7. GOAL
+
+- Increase seller onboarding (remove friction)
+- Improve investor conversion (better pricing psychology)
+- Enable scalable monetization via upgrades (not entry barrier)

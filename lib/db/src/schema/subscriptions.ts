@@ -3,7 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { usersTable } from "./users";
 
-export const PLANS = ["free", "investor_pro", "seller_premium"] as const;
+export const PLANS = ["free", "investor_pro", "investor_elite", "seller_premium"] as const;
 export type Plan = (typeof PLANS)[number];
 
 export const subscriptionsTable = pgTable("subscriptions", {

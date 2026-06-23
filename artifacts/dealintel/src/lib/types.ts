@@ -17,6 +17,10 @@ export interface Listing {
   state: string | null;
   stage: string;
   status: string;
+  customIndustry: string | null;
+  isFeatured: boolean;
+  isVerified: boolean;
+  boostScore: number;
   declarationAccepted: boolean;
   viewCount: number;
   createdAt: string;

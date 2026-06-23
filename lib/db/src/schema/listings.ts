@@ -22,6 +22,10 @@ export const listingsTable = pgTable("listings", {
   state: text("state"),
   stage: text("stage").notNull().default("growth"), // seed | early | growth | mature
   status: text("status").notNull().default("draft"), // draft | pending_approval | active | under_negotiation | closed
+  customIndustry: text("custom_industry"),
+  isFeatured: boolean("is_featured").notNull().default(false),
+  isVerified: boolean("is_verified").notNull().default(false),
+  boostScore: doublePrecision("boost_score").notNull().default(0),
   declarationAccepted: boolean("declaration_accepted").notNull().default(false),
   viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

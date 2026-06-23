@@ -2,11 +2,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useCurrentUser, type AppUser } from "./useCurrentUser";
 
-export type Plan = "free" | "investor_pro" | "seller_premium";
+export type Plan = "free" | "investor_pro" | "investor_elite" | "seller_premium";
 
 export const PLAN_LABELS: Record<Plan, string> = {
   free: "Free",
   investor_pro: "Investor Pro",
+  investor_elite: "Investor Elite",
   seller_premium: "Seller Premium",
 };
 
@@ -18,11 +19,15 @@ export function usePlan() {
     plan,
     label: PLAN_LABELS[plan] ?? plan,
     isInvestorPro: plan === "investor_pro",
+    isInvestorElite: plan === "investor_elite",
     isSellerPremium: plan === "seller_premium",
     isFree: plan === "free",
     hasAccess: (required: Plan) => {
       if (required === "free") return true;
-      return plan === required || plan === "investor_pro";
+      if (required === "seller_premium") return plan === "seller_premium";
+      if (required === "investor_pro") return plan === "investor_pro" || plan === "investor_elite";
+      if (required === "investor_elite") return plan === "investor_elite";
+      return false;
     },
   };
 }

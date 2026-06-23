@@ -18,17 +18,25 @@ export function formatNumber(n: number): string {
 
 export const INDUSTRIES = [
   "Technology",
+  "SaaS",
+  "IT Services",
   "Healthcare",
+  "Pharma",
   "Manufacturing",
+  "Chemicals",
+  "Automotive / EV",
   "Retail",
+  "D2C / E-commerce",
   "Financial Services",
   "Real Estate",
+  "Infrastructure / Construction",
   "Education",
   "Food & Beverage",
   "Logistics",
   "Renewable Energy",
   "Agriculture",
   "Media & Entertainment",
+  "Other",
 ];
 
 export const STAGES = [

@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Check, Sparkles, Shield, Loader2 } from "lucide-react";
+import { Check, Sparkles, Shield, Loader2, Star, Zap, Crown } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,28 +8,31 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useUpgradePlan, PLAN_LABELS, type Plan } from "@/hooks/usePlan";
 import { useToast } from "@/hooks/use-toast";
 
-const PLANS = [
+const INVESTOR_PLANS = [
   {
     id: "free" as Plan,
-    name: "Free",
+    name: "Investor Free",
     price: "₹0",
     period: "forever",
-    description: "Get started exploring deals on DealIntel India.",
+    description: "Start exploring India's M&A marketplace.",
     badge: null,
+    icon: null,
     features: [
       "Browse marketplace listings",
       "View public deal summaries",
       "1 private deal analysis",
-      "Basic valuation (comparable EV only)",
-      "Watchlist (up to 10)",
+      "Basic comparable EV valuation",
+      "Watchlist (up to 10 deals)",
     ],
     missing: [
-      "Scenario analysis (Bear / Base / Bull)",
-      "IRR / MOIC / Payback metrics",
-      "Deal Pipeline tracking",
+      "Bear / Base / Bull scenario analysis",
+      "IRR, MOIC & Payback metrics",
+      "Unlimited private deal analysis",
+      "Deal Pipeline (Kanban board)",
       "Document Vault",
-      "Verified Deal Rooms",
-      "NDA timestamping",
+      "Priority deal flow access",
+      "AI deal recommendations",
+      "Direct seller connect priority",
     ],
     cta: "Current plan",
     ctaVariant: "outline" as const,
@@ -42,42 +45,98 @@ const PLANS = [
     period: "per month",
     description: "Full deal intelligence for active acquirers.",
     badge: "Most Popular",
+    icon: Star,
     features: [
-      "Everything in Free",
+      "Everything in Investor Free",
       "Unlimited private deal analysis",
       "Bear / Base / Bull scenario analysis",
-      "IRR, MOIC & Payback metrics",
+      "IRR, MOIC & Payback period metrics",
       "Deal Pipeline (Kanban board)",
       "Verified Deal Rooms",
       "Document Vault (P&L, Balance Sheet, GST)",
       "NDA timestamping & legal confirmation",
       "Priority deal flow access",
     ],
-    missing: [],
-    cta: "Upgrade to Investor Pro",
+    missing: [
+      "AI deal recommendations",
+      "Direct seller connect priority",
+    ],
+    cta: "Upgrade to Pro",
     ctaVariant: "default" as const,
     highlight: true,
   },
   {
-    id: "seller_premium" as Plan,
-    name: "Seller Premium",
-    price: "₹2,999",
-    period: "per listing/month",
-    description: "Maximum exposure and credibility for sellers.",
+    id: "investor_elite" as Plan,
+    name: "Investor Elite",
+    price: "₹9,999",
+    period: "per month",
+    description: "Priority deal flow for institutional acquirers.",
     badge: null,
+    icon: Crown,
     features: [
-      "Everything in Free Seller",
-      "Featured placement in marketplace",
-      "Verified Seller badge",
-      "Deal quality score boost",
-      "Priority contact request review",
-      "Curated investor matching",
+      "Everything in Investor Pro",
+      "Early access to new deal listings",
+      "Advanced analytics & deeper valuation",
+      "AI deal recommendations",
+      "Direct seller connect priority",
+      "Dedicated deal sourcing support",
     ],
     missing: [],
-    cta: "Upgrade Listing",
+    cta: "Upgrade to Elite",
     ctaVariant: "outline" as const,
     highlight: false,
   },
+];
+
+const SELLER_UPGRADES = [
+  {
+    id: "featured",
+    name: "Featured Listing",
+    price: "₹999",
+    period: "per listing",
+    description: "Get noticed. Rise to the top of investor search results.",
+    badge: null,
+    icon: Zap,
+    features: [
+      "Priority placement in marketplace",
+      "⭐ Featured badge on your listing",
+      "+20% deal score boost",
+      "Higher investor impressions",
+    ],
+    cta: "Feature a Listing",
+    highlight: false,
+  },
+  {
+    id: "verified_premium",
+    name: "Verified + Premium",
+    price: "₹2,999",
+    period: "per listing",
+    description: "Maximum credibility — investors trust verified listings more.",
+    badge: "Best Value",
+    icon: Shield,
+    features: [
+      "Everything in Featured",
+      "✓ Verified Seller badge",
+      "+30% deal score boost",
+      "Priority contact request review",
+      "Curated investor matching",
+      "Faster deal closure pipeline",
+    ],
+    cta: "Verify & Upgrade",
+    highlight: true,
+  },
+];
+
+const COMPARISON_ROWS = [
+  { feature: "Browse listings", free: true, pro: true, elite: true },
+  { feature: "Private deal analysis", free: "1 deal", pro: "Unlimited", elite: "Unlimited" },
+  { feature: "Scenario analysis (Bear/Base/Bull)", free: false, pro: true, elite: true },
+  { feature: "IRR / MOIC / Payback metrics", free: false, pro: true, elite: true },
+  { feature: "Deal Pipeline board", free: false, pro: true, elite: true },
+  { feature: "Document Vault", free: false, pro: true, elite: true },
+  { feature: "Priority deal flow", free: false, pro: true, elite: true },
+  { feature: "AI deal recommendations", free: false, pro: false, elite: true },
+  { feature: "Direct seller connect priority", free: false, pro: false, elite: true },
 ];
 
 export default function PricingPage() {
@@ -104,10 +163,18 @@ export default function PricingPage() {
     }
   }
 
+  function handleSellerUpgrade() {
+    navigate("/seller/listings");
+    toast({
+      title: "Manage listing upgrades",
+      description: "Select a listing to apply Featured or Verified status.",
+    });
+  }
+
   return (
     <PortalLayout title="Plans & Pricing" subtitle="Institutional-grade M&A intelligence for the Indian SME market">
-      {/* Current plan banner — always visible */}
-      <Card className="p-4 mb-8 border-primary/30 bg-primary/5 flex items-center gap-3">
+      {/* Current plan banner */}
+      <Card className="p-4 mb-10 border-primary/30 bg-primary/5 flex items-center gap-3">
         <Sparkles className="h-5 w-5 text-primary shrink-0" />
         <div className="flex-1">
           <p className="text-sm font-medium">
@@ -131,8 +198,16 @@ export default function PricingPage() {
         )}
       </Card>
 
-      <div className="grid md:grid-cols-3 gap-6">
-        {PLANS.map((plan) => {
+      {/* ── INVESTOR PLANS ── */}
+      <div className="mb-3">
+        <h2 className="text-lg font-bold">Investor Plans</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          One good deal pays for your entire subscription.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 gap-6 mb-10">
+        {INVESTOR_PLANS.map((plan) => {
           const isCurrent = currentTier === plan.id;
           const isUpgrading = upgrade.isPending && upgrade.variables === plan.id;
           return (
@@ -147,12 +222,15 @@ export default function PricingPage() {
               )}
               {isCurrent && (
                 <Badge variant="outline" className="absolute -top-3 right-4 text-xs border-green-500/30 text-green-400 bg-background">
-                  ✓ Current Plan
+                  ✓ Your Plan
                 </Badge>
               )}
 
               <div className="mb-6">
-                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  {plan.icon && <plan.icon className="h-4 w-4 text-primary" />}
+                  <h3 className="text-lg font-bold">{plan.name}</h3>
+                </div>
                 <div className="mt-2">
                   <span className="text-3xl font-bold font-mono">{plan.price}</span>
                   <span className="text-sm text-muted-foreground ml-2">{plan.period}</span>
@@ -194,24 +272,135 @@ export default function PricingPage() {
                   plan.cta
                 )}
               </Button>
+
+              {plan.highlight && (
+                <p className="text-center text-xs text-muted-foreground mt-3">
+                  ROI: even one ₹2 Cr deal = <span className="text-green-400 font-medium">40× your annual sub</span>
+                </p>
+              )}
             </Card>
           );
         })}
       </div>
 
-      {/* Success fee notice */}
-      <Card className="mt-8 p-5 border-card-border bg-muted/20">
+      {/* ── COMPARISON TABLE ── */}
+      <Card className="mb-10 border-card-border overflow-hidden">
+        <div className="p-4 border-b border-border bg-muted/20">
+          <h3 className="font-semibold text-sm">Feature Comparison</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left px-4 py-3 font-medium text-muted-foreground">Feature</th>
+                <th className="text-center px-4 py-3 font-medium">Free</th>
+                <th className="text-center px-4 py-3 font-medium text-primary">Pro</th>
+                <th className="text-center px-4 py-3 font-medium">Elite</th>
+              </tr>
+            </thead>
+            <tbody>
+              {COMPARISON_ROWS.map((row, i) => (
+                <tr key={row.feature} className={i % 2 === 0 ? "bg-muted/10" : ""}>
+                  <td className="px-4 py-2.5 text-muted-foreground">{row.feature}</td>
+                  {(["free", "pro", "elite"] as const).map((tier) => {
+                    const val = row[tier as keyof typeof row];
+                    return (
+                      <td key={tier} className="px-4 py-2.5 text-center">
+                        {val === true ? (
+                          <Check className="h-4 w-4 text-green-400 mx-auto" />
+                        ) : val === false ? (
+                          <div className="h-px w-4 bg-muted-foreground/30 mx-auto" />
+                        ) : (
+                          <span className="text-xs font-medium text-foreground">{val}</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      {/* ── SELLER UPGRADES ── */}
+      <div className="mb-3">
+        <h2 className="text-lg font-bold">Seller Listing Upgrades</h2>
+        <p className="text-sm text-muted-foreground mt-0.5">
+          <span className="text-green-400 font-medium">List for Free.</span>{" "}
+          Pay only for visibility & trust when you need it.
+        </p>
+      </div>
+
+      <Card className="p-4 border-green-500/20 bg-green-500/5 mb-4 flex items-start gap-3">
+        <Check className="h-5 w-5 text-green-400 shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-medium text-green-400">Free Tier (Default) — always included</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Create a listing · Basic marketplace visibility · Standard deal quality score · No credit card required
+          </p>
+        </div>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-6 mb-10">
+        {SELLER_UPGRADES.map((plan) => (
+          <Card
+            key={plan.id}
+            className={`p-6 flex flex-col relative ${plan.highlight ? "border-primary/50 shadow-md shadow-primary/10" : "border-card-border"}`}
+          >
+            {plan.badge && (
+              <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs px-3">
+                {plan.badge}
+              </Badge>
+            )}
+
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-1">
+                <plan.icon className="h-4 w-4 text-primary" />
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+              </div>
+              <div className="mt-2">
+                <span className="text-3xl font-bold font-mono">{plan.price}</span>
+                <span className="text-sm text-muted-foreground ml-2">{plan.period}</span>
+              </div>
+              <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
+            </div>
+
+            <div className="flex-1 space-y-2 mb-6">
+              {plan.features.map((f) => (
+                <div key={f} className="flex items-start gap-2.5">
+                  <Check className="h-4 w-4 text-green-400 shrink-0 mt-0.5" />
+                  <span className="text-sm">{f}</span>
+                </div>
+              ))}
+            </div>
+
+            <Button
+              variant={plan.highlight ? "default" : "outline"}
+              className="w-full"
+              onClick={handleSellerUpgrade}
+            >
+              {plan.cta}
+            </Button>
+          </Card>
+        ))}
+      </div>
+
+      {/* Success fee */}
+      <Card className="mt-2 p-5 border-card-border bg-muted/20">
         <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
           <Shield className="h-4 w-4 text-primary" /> Success Fee Policy
         </h4>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          A <strong className="text-foreground">1–2% success fee</strong> applies on deals that are completed through the DealIntel India platform by Investor Pro subscribers. The fee is calculated on the total enterprise value of the closed transaction.
+          A <strong className="text-foreground">1–2% success fee</strong> applies on deals closed
+          through DealIntel India by Investor Pro subscribers. Calculated on the total enterprise
+          value of the closed transaction.
         </p>
       </Card>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">
-          All amounts in INR. Plans auto-renew monthly. Cancel anytime.{" "}
+          All amounts in INR. Investor plans auto-renew monthly. Cancel anytime.{" "}
           <button
             onClick={() => navigate(user?.role === "seller" ? "/seller/dashboard" : "/investor/marketplace")}
             className="text-primary hover:underline"

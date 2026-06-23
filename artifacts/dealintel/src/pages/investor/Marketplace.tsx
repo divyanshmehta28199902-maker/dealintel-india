@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
   Search, SlidersHorizontal, MapPin, TrendingUp, Eye, BookmarkPlus,
-  Bookmark, Building2, IndianRupee, BarChart3,
+  Bookmark, Building2, IndianRupee, BarChart3, Star, ShieldCheck,
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { StatCard } from "@/components/StatCard";
@@ -59,6 +59,9 @@ export default function Marketplace() {
     onError: (e) => toast({ title: "Failed", description: (e as Error).message, variant: "destructive" }),
   });
 
+  // Sort: featured/verified listings rise to the top via boostScore
+  const sorted = [...(listings ?? [])].sort((a, b) => (b.boostScore ?? 0) - (a.boostScore ?? 0));
+
   return (
     <PortalLayout title="Deal Marketplace" subtitle="Discover and analyze businesses for acquisition">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -96,7 +99,7 @@ export default function Marketplace() {
 
       {isLoading && <p className="text-sm text-muted-foreground">Loading deals…</p>}
 
-      {!isLoading && (listings?.length ?? 0) === 0 && (
+      {!isLoading && sorted.length === 0 && (
         <Card className="p-12 text-center border-card-border">
           <Search className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
           <h3 className="font-semibold">No deals match your filters</h3>
@@ -105,20 +108,32 @@ export default function Marketplace() {
       )}
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {listings?.map((l) => {
+        {sorted.map((l) => {
           const watched = watchedIds.has(l.id);
           return (
             <Card
               key={l.id}
-              className="p-5 border-card-border flex flex-col hover-elevate cursor-pointer"
+              className={`p-5 border-card-border flex flex-col hover-elevate cursor-pointer ${l.isFeatured || l.isVerified ? "ring-1 ring-primary/30" : ""}`}
               onClick={() => navigate(`/investor/marketplace/${l.id}`)}
               data-testid={`card-listing-${l.id}`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="font-semibold truncate">{l.companyName}</h3>
+                  <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                    <h3 className="font-semibold truncate">{l.companyName}</h3>
+                    {l.isFeatured && (
+                      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-amber-400">
+                        <Star className="h-3 w-3 fill-amber-400" /> Featured
+                      </span>
+                    )}
+                    {l.isVerified && (
+                      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-primary">
+                        <ShieldCheck className="h-3 w-3" /> Verified
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-xs">{l.industry}</Badge>
+                    <Badge variant="outline" className="text-xs">{l.customIndustry ?? l.industry}</Badge>
                     <span className="text-xs text-muted-foreground capitalize">{l.stage}</span>
                   </div>
                 </div>

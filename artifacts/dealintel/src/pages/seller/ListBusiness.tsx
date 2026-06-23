@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Building2, ArrowRight, Info } from "lucide-react";
+import { Building2, ArrowRight, Info, Check } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import type { Listing } from "@/lib/types";
 interface FormState {
   companyName: string;
   industry: string;
+  customIndustry: string;
   description: string;
   revenue: string;
   ebitda: string;
@@ -35,7 +36,7 @@ interface FormState {
 }
 
 const initial: FormState = {
-  companyName: "", industry: "", description: "", revenue: "", ebitda: "",
+  companyName: "", industry: "", customIndustry: "", description: "", revenue: "", ebitda: "",
   revenueGrowthRate: "", askingValuation: "", debtRatio: "", customerConcentration: "",
   employeeCount: "", foundedYear: "", city: "", state: "", stage: "growth",
 };
@@ -56,6 +57,7 @@ export default function ListBusiness() {
       const listing = await api.post<Listing>("/listings", {
         companyName: form.companyName,
         industry: form.industry,
+        customIndustry: form.industry === "Other" && form.customIndustry ? form.customIndustry : undefined,
         description: form.description || undefined,
         revenue,
         ebitda,
@@ -70,7 +72,6 @@ export default function ListBusiness() {
         state: form.state || undefined,
         stage: form.stage,
       });
-      // Accept declaration → activates the listing
       await api.post(`/listings/${listing.id}/declaration`, { accepted: true });
       return listing;
     },
@@ -83,12 +84,19 @@ export default function ListBusiness() {
     onError: (e) => toast({ title: "Failed to create listing", description: (e as Error).message, variant: "destructive" }),
   });
 
-  const valid =
-    form.companyName && form.industry && form.revenue && form.ebitda &&
-    form.askingValuation && declaration;
+  const industryValid = form.industry && (form.industry !== "Other" || Boolean(form.customIndustry));
+  const valid = Boolean(form.companyName && industryValid && form.revenue && form.ebitda && form.askingValuation && declaration);
 
   return (
-    <PortalLayout title="List Your Business" subtitle="Provide accurate financials for an institutional-grade valuation">
+    <PortalLayout title="List Your Business for Free" subtitle="Provide accurate financials for an institutional-grade valuation">
+      {/* Free listing callout */}
+      <Card className="p-3 mb-6 border-green-500/20 bg-green-500/5 flex items-center gap-3">
+        <Check className="h-4 w-4 text-green-400 shrink-0" />
+        <p className="text-sm text-green-400 font-medium">
+          Listing is free — pay only for Featured or Verified upgrades when you want more visibility.
+        </p>
+      </Card>
+
       <div className="max-w-3xl">
         <form
           onSubmit={(e) => { e.preventDefault(); if (valid) createListing.mutate(); }}
@@ -107,7 +115,7 @@ export default function ListBusiness() {
               </div>
               <div>
                 <Label>Industry *</Label>
-                <Select value={form.industry} onValueChange={(v) => set("industry", v)}>
+                <Select value={form.industry} onValueChange={(v) => { set("industry", v); if (v !== "Other") set("customIndustry", ""); }}>
                   <SelectTrigger className="mt-1.5" data-testid="select-industry"><SelectValue placeholder="Select industry" /></SelectTrigger>
                   <SelectContent>{INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
                 </Select>
@@ -119,6 +127,21 @@ export default function ListBusiness() {
                   <SelectContent>{STAGES.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
+
+              {/* Custom industry input — shown only when "Other" is selected */}
+              {form.industry === "Other" && (
+                <div className="md:col-span-2">
+                  <Label>Please specify your industry *</Label>
+                  <Input
+                    value={form.customIndustry}
+                    onChange={(e) => set("customIndustry", e.target.value)}
+                    placeholder="e.g. AgriTech, CleanEnergy, EdTech…"
+                    className="mt-1.5"
+                    data-testid="input-custom-industry"
+                  />
+                </div>
+              )}
+
               <div>
                 <Label>City</Label>
                 <Input value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="e.g. Mumbai" className="mt-1.5" data-testid="input-city" />

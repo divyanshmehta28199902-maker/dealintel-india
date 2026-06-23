@@ -579,18 +579,22 @@ export default function PrivateDeals() {
 
       {/* Analysis sheet */}
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-3">
-              {selected?.companyName}
-              {selected && (() => {
-                const t = trustBadge(selected.trustLevel);
-                return <Badge variant="outline" className={`text-xs flex items-center gap-1 ${t.color}`}>{t.icon} {t.label}</Badge>;
-              })()}
-            </SheetTitle>
-          </SheetHeader>
+        <SheetContent className="w-full sm:max-w-2xl flex flex-col p-0">
+          {/* Fixed header — never scrolls */}
+          <div className="flex-shrink-0 px-6 pt-6 pb-4 border-b border-border">
+            <SheetHeader>
+              <SheetTitle className="flex items-center gap-3">
+                {selected?.companyName}
+                {selected && (() => {
+                  const t = trustBadge(selected.trustLevel);
+                  return <Badge variant="outline" className={`text-xs flex items-center gap-1 ${t.color}`}>{t.icon} {t.label}</Badge>;
+                })()}
+              </SheetTitle>
+            </SheetHeader>
+          </div>
+          {/* Scrollable analysis content */}
           {selected && (
-            <div className="mt-4">
+            <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4">
               <Tabs defaultValue="valuation">
                 <TabsList className="w-full">
                   <TabsTrigger value="valuation" className="flex-1">Valuation</TabsTrigger>

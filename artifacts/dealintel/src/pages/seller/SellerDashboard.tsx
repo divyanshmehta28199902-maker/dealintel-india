@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
-  Building2, TrendingUp, Eye, Bell, MessageSquare, Plus, FileText, CheckCircle2,
+  Building2, TrendingUp, Eye, Bell, MessageSquare, Plus, FileText, CheckCircle2, Users, Zap, Lock,
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { StatCard } from "@/components/StatCard";
@@ -35,6 +35,28 @@ export default function SellerDashboard() {
         </Link>
       }
     >
+      {/* Cross-role value banner */}
+      <Card className="mb-6 p-4 border-primary/20 bg-primary/5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex-1">
+          <p className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <Users className="h-4 w-4 text-primary" />
+            Connect with serious investors actively acquiring businesses
+          </p>
+          <div className="flex flex-wrap gap-x-5 gap-y-1">
+            {[["Zap", "High-intent buyers"], ["Lock", "Confidential deal room"], ["TrendingUp", "Faster deal discovery"]].map(([, label]) => (
+              <span key={label} className="text-xs text-muted-foreground flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{label}
+              </span>
+            ))}
+          </div>
+        </div>
+        <Link href="/seller/list">
+          <Button size="sm" className="shrink-0 gap-1.5">
+            <Plus className="h-3.5 w-3.5" /> List for Free
+          </Button>
+        </Link>
+      </Card>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard label="Total Listings" value={stats?.totalListings ?? 0} icon={Building2} sub={`${stats?.activeListings ?? 0} active · ${stats?.draftListings ?? 0} draft`} />
         <StatCard label="Total Views" value={stats?.totalViews ?? 0} icon={Eye} accent="blue" />

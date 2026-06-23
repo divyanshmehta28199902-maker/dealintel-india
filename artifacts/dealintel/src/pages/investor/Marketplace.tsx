@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
   Search, SlidersHorizontal, MapPin, TrendingUp, Eye, BookmarkPlus,
-  Bookmark, Building2, IndianRupee, BarChart3, Star, ShieldCheck,
+  Bookmark, Building2, IndianRupee, BarChart3, Star, ShieldCheck, Zap, Lock,
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { StatCard } from "@/components/StatCard";
@@ -70,6 +70,26 @@ export default function Marketplace() {
         <StatCard label="Sectors" value={stats?.byIndustry.length ?? 0} icon={BarChart3} accent="blue" />
         <StatCard label="Watchlisted" value={watchlist?.length ?? 0} icon={Bookmark} accent="green" />
       </div>
+
+      {/* Cross-role value banner */}
+      <Card className="mb-6 p-4 border-primary/20 bg-primary/5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex-1">
+          <p className="text-sm font-semibold mb-2 flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-primary" />
+            Access exclusive deals from verified business owners
+          </p>
+          <div className="flex flex-wrap gap-x-5 gap-y-1">
+            {["Off-market opportunities", "Verified seller listings", "Institutional-grade deal data"].map((label) => (
+              <span key={label} className="text-xs text-muted-foreground flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />{label}
+              </span>
+            ))}
+          </div>
+        </div>
+        <span className="text-xs text-muted-foreground shrink-0 flex items-center gap-1.5">
+          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" /> Featured deals sorted first
+        </span>
+      </Card>
 
       {/* Filters */}
       <Card className="p-4 border-card-border mb-6">

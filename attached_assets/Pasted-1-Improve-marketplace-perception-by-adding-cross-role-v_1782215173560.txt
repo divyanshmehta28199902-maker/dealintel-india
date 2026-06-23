@@ -1,0 +1,189 @@
+1 : Improve marketplace perception by adding cross-role value messaging.
+
+### Investor Portal:
+
+Add section (top or pricing page):
+
+"Access exclusive deals from verified business owners"
+
+Add bullets:
+- Off-market opportunities
+- Verified seller listings
+- Institutional-grade deal data
+
+---
+
+### Seller Portal:
+
+Add section:
+
+"Connect with serious investors actively acquiring businesses"
+
+Add bullets:
+- High-intent buyers
+- Faster deal discovery
+- Confidential deal room
+
+---
+
+### UI Placement:
+
+- Add as banner above pricing cards
+- Add small trust strip below navbar
+
+---
+
+### Goal:
+
+- Show this is a TWO-SIDED marketplace
+- Increase perceived liquidity and value
+
+
+2 :Optimize pricing page for conversion using psychological anchors.
+
+### Investor Pricing:
+
+Plans:
+- Free
+- Pro (₹2,999/month) → mark as "Most Popular"
+- Elite (₹4,999/month)
+
+---
+
+### Improve Pro Plan:
+
+Add line:
+"Close 1 deal → pays for your subscription"
+
+Highlight:
+- Best value
+- Recommended for active investors
+
+---
+
+### Improve Elite Plan:
+
+Add tag:
+"For serious acquirers & funds"
+
+Add features:
+- Priority deal flow
+- Early access deals
+- Advanced analytics
+
+---
+
+### UI Improvements:
+
+- Add glow/border to Pro plan
+- Increase CTA contrast
+- Add “Most Popular” badge
+
+---
+
+### Goal:
+
+- Make ₹2,999 feel cheap
+- Use ₹4,999 as anchor
+
+
+3 :Enhance industry field with "Other (Specify)" functionality.
+
+### Behavior:
+
+- Add option: "Other (Specify)"
+- When selected:
+  → Show input field below dropdown
+
+---
+
+### Validation:
+
+- If "Other" selected → input becomes required
+
+---
+
+### Data Model:
+
+- Store:
+  industry: "Other"
+  customIndustry: string
+
+---
+
+### UI:
+
+- Placeholder: "Enter your industry"
+- Keep consistent styling
+
+---
+
+### Goal:
+
+- Avoid user drop-off
+- Capture real-world edge industries
+
+4:Improve perceived performance across key actions.
+
+### Add loading states:
+
+- While calculating valuation:
+  Show skeleton loaders (not spinner)
+
+- Add text:
+  "Analyzing deal..."
+
+---
+
+### After result:
+
+- Animate numbers (count-up effect)
+
+---
+
+### Delay strategy:
+
+- Minimum 0.8s display (feels “intelligent” not instant fake)
+
+---
+
+### Goal:
+
+- Make system feel like AI engine
+- Increase trust
+
+5 :Improve first-user activation and reduce drop-off.
+
+### Investor:
+
+Auto-show demo deal:
+- Pre-loaded example deal
+- Highlight:
+  "See how valuation works"
+
+---
+
+### Seller:
+
+After first input:
+- Auto-generate valuation preview
+
+---
+
+### Add CTA:
+
+"Get your valuation in 10 seconds"
+
+---
+
+### Empty states:
+
+Replace blank screens with:
+- "Analyze your first deal"
+- "List your business for free"
+
+---
+
+### Goal:
+
+- Deliver value in < 60 seconds

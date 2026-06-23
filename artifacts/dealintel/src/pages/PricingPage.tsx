@@ -41,9 +41,9 @@ const INVESTOR_PLANS = [
   {
     id: "investor_pro" as Plan,
     name: "Investor Pro",
-    price: "₹4,999",
+    price: "₹2,999",
     period: "per month",
-    description: "Full deal intelligence for active acquirers.",
+    description: "Full deal intelligence for active acquirers. Best value for serious buyers.",
     badge: "Most Popular",
     icon: Star,
     features: [
@@ -68,10 +68,10 @@ const INVESTOR_PLANS = [
   {
     id: "investor_elite" as Plan,
     name: "Investor Elite",
-    price: "₹9,999",
+    price: "₹4,999",
     period: "per month",
-    description: "Priority deal flow for institutional acquirers.",
-    badge: null,
+    description: "For serious acquirers & funds — priority access to every deal.",
+    badge: "For Funds & HNIs",
     icon: Crown,
     features: [
       "Everything in Investor Pro",
@@ -199,6 +199,34 @@ export default function PricingPage() {
       </Card>
 
       {/* ── INVESTOR PLANS ── */}
+      {/* Cross-role value strip */}
+      <Card className="mb-6 p-5 border-primary/20 bg-primary/5">
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-2">For Investors</p>
+            <p className="font-semibold text-sm mb-2">Access exclusive deals from verified business owners</p>
+            <ul className="space-y-1">
+              {["Off-market opportunities", "Verified seller listings", "Institutional-grade deal data"].map((b) => (
+                <li key={b} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Check className="h-3 w-3 text-primary shrink-0" />{b}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="md:border-l md:border-border md:pl-6">
+            <p className="text-xs font-semibold uppercase tracking-wider text-green-400 mb-2">For Sellers</p>
+            <p className="font-semibold text-sm mb-2">Connect with serious investors actively acquiring businesses</p>
+            <ul className="space-y-1">
+              {["High-intent buyers", "Faster deal discovery", "Confidential deal room"].map((b) => (
+                <li key={b} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Check className="h-3 w-3 text-green-400 shrink-0" />{b}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </Card>
+
       <div className="mb-3">
         <h2 className="text-lg font-bold">Investor Plans</h2>
         <p className="text-sm text-muted-foreground mt-0.5">

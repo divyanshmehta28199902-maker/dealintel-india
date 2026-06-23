@@ -157,7 +157,7 @@ export default function PrivateDeals() {
   const [mode, setMode] = useState<DealMode>("quick");
 
   const initialForm = {
-    companyName: "", industry: "", revenue: "", ebitda: "", growthRate: "",
+    companyName: "", industry: "", customIndustry: "", revenue: "", ebitda: "", growthRate: "",
     revenueY1: "", revenueY2: "", revenueY3: "",
     totalDebt: "", customerConcentration: "",
     businessOverview: "", whySelling: "", growthDrivers: "", keyRisks: "",
@@ -182,14 +182,15 @@ export default function PrivateDeals() {
   const isInvestorPro = !isFree;
   const atFreeLimit = isFree && (deals?.length ?? 0) >= 1;
 
-  const validQuick = !!(form.companyName && form.industry && form.revenue && form.ebitda && form.growthRate);
+  const industryValue = form.industry === "Other" ? form.customIndustry : form.industry;
+  const validQuick = !!(form.companyName && industryValue && form.revenue && form.ebitda && form.growthRate);
   const validVerified = validQuick && !!(form.businessOverview && form.whySelling && form.legalConfirmed);
   const canSubmit = mode === "quick" ? validQuick : validVerified;
 
   const create = useMutation({
     mutationFn: () => api.post<PrivateDeal>("/deals/private", {
       companyName: form.companyName,
-      industry: form.industry,
+      industry: industryValue,
       revenue: Number(form.revenue),
       ebitda: Number(form.ebitda),
       growthRate: Number(form.growthRate),
@@ -300,14 +301,23 @@ export default function PrivateDeals() {
                     <Label>Company Name *</Label>
                     <Input value={form.companyName} onChange={(e) => set("companyName", e.target.value)} placeholder="Target Co (or codename)" className="mt-1.5" data-testid="input-deal-name" />
                   </div>
-                  <div>
+                  <div className={form.industry === "Other" ? "col-span-2" : ""}>
                     <Label>Industry *</Label>
-                    <Select value={form.industry} onValueChange={(v) => set("industry", v)}>
+                    <Select value={form.industry} onValueChange={(v) => { set("industry", v); if (v !== "Other") set("customIndustry", ""); }}>
                       <SelectTrigger className="mt-1.5" data-testid="select-deal-industry"><SelectValue placeholder="Select industry" /></SelectTrigger>
                       <SelectContent className="max-h-64 overflow-y-auto z-[9999]">
                         {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
                       </SelectContent>
                     </Select>
+                    {form.industry === "Other" && (
+                      <Input
+                        value={form.customIndustry}
+                        onChange={(e) => set("customIndustry", e.target.value)}
+                        placeholder="Enter your industry…"
+                        className="mt-2"
+                        data-testid="input-deal-custom-industry"
+                      />
+                    )}
                   </div>
                 </div>
               </div>

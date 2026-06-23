@@ -22,8 +22,36 @@ import { ValuationDisplay } from "@/components/ValuationDisplay";
 import { IntelligenceDisplay } from "@/components/IntelligenceDisplay";
 import { api } from "@/lib/api";
 import { formatINR, formatPct } from "@/lib/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import type { Listing, ValuationResult, IntelligenceResult, WatchlistItem, Pipeline } from "@/lib/types";
+
+function ValuationSkeleton({ label }: { label: string }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center gap-2 text-xs text-muted-foreground animate-pulse">
+        <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />
+        {label}
+      </div>
+      <div className="grid md:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="border border-card-border rounded-lg p-4 space-y-3">
+            <Skeleton className="h-3 w-24" />
+            <Skeleton className="h-7 w-32" />
+            <Skeleton className="h-3 w-40" />
+            <Skeleton className="h-3 w-36" />
+          </div>
+        ))}
+      </div>
+      <div className="border border-card-border rounded-lg p-4 space-y-3">
+        <Skeleton className="h-3 w-32" />
+        <div className="grid grid-cols-5 gap-2">
+          {[1, 2, 3, 4, 5].map((i) => <Skeleton key={i} className="h-16" />)}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function ListingDetail({ id }: { id: number }) {
   const [, navigate] = useLocation();
@@ -225,10 +253,10 @@ export default function ListingDetail({ id }: { id: number }) {
           <TabsTrigger value="intelligence" className="gap-2" data-testid="tab-intelligence"><TrendingUp className="h-4 w-4" /> Deal Intelligence</TabsTrigger>
         </TabsList>
         <TabsContent value="valuation" className="mt-4">
-          {valuation ? <ValuationDisplay v={valuation} /> : <p className="text-sm text-muted-foreground">Computing valuation…</p>}
+          {valuation ? <ValuationDisplay v={valuation} /> : <ValuationSkeleton label="Analyzing deal…" />}
         </TabsContent>
         <TabsContent value="intelligence" className="mt-4">
-          {intel ? <IntelligenceDisplay intel={intel} /> : <p className="text-sm text-muted-foreground">Computing intelligence…</p>}
+          {intel ? <IntelligenceDisplay intel={intel} /> : <ValuationSkeleton label="Scoring deal intelligence…" />}
         </TabsContent>
       </Tabs>
 

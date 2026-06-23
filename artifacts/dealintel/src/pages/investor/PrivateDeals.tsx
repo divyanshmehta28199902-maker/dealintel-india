@@ -303,7 +303,9 @@ export default function PrivateDeals() {
                     <Label>Industry *</Label>
                     <Select value={form.industry} onValueChange={(v) => set("industry", v)}>
                       <SelectTrigger className="mt-1.5" data-testid="select-deal-industry"><SelectValue placeholder="Select industry" /></SelectTrigger>
-                      <SelectContent>{INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent>
+                      <SelectContent className="max-h-64 overflow-y-auto z-[9999]">
+                        {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
+                      </SelectContent>
                     </Select>
                   </div>
                 </div>
@@ -464,8 +466,21 @@ export default function PrivateDeals() {
       {!isLoading && (deals?.length ?? 0) === 0 && (
         <Card className="p-12 text-center border-card-border">
           <Shield className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-          <h3 className="font-semibold">No private deals yet</h3>
-          <p className="text-sm text-muted-foreground mt-1">Add an off-market opportunity to get instant valuation, scenario analysis, and risk scoring.</p>
+          <h3 className="font-semibold">Analyze your first private deal</h3>
+          <p className="text-sm text-muted-foreground mt-1 max-w-xs mx-auto">
+            Enter any company's financials — get valuation, IRR, scenario analysis, and risk score in seconds.
+          </p>
+          <Button
+            className="mt-5 gap-2"
+            onClick={() => setOpen(true)}
+            disabled={atFreeLimit}
+            data-testid="button-empty-new-deal"
+          >
+            <Plus className="h-4 w-4" /> Analyze a Deal in 10 sec
+          </Button>
+          <p className="text-xs text-muted-foreground mt-3 flex items-center justify-center gap-1.5">
+            <TrendingUp className="h-3 w-3" /> Get instant valuation · IRR · Scenario analysis
+          </p>
         </Card>
       )}
 

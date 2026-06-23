@@ -1,0 +1,161 @@
+Redesign onboarding funnel to be role-based, fast, and conversion-optimized for a marketplace (buyers + sellers).
+
+### GOAL:
+- Get users to value in < 60 seconds
+- Increase seller listings
+- Increase investor engagement
+- Reduce drop-offs
+
+---
+
+## 1. ADD ROLE SELECTION (FIRST SCREEN)
+
+On signup/login, show:
+
+"How do you want to use DealIntel India?"
+
+Options:
+1. Investor / Buyer
+2. Business Owner / Seller
+3. Broker / Advisor
+
+Make this mandatory.
+
+Store role in DB.
+
+---
+
+## 2. ROLE-BASED ONBOARDING FLOW
+
+### IF INVESTOR:
+
+Immediately redirect to:
+
+→ Private Deals Dashboard (not empty screen)
+
+Show:
+- 2–3 sample deals (pre-loaded)
+- Highlight:
+  "Click any deal to see valuation insights"
+
+Add tooltip:
+"Analyze your first deal in 10 seconds"
+
+---
+
+### IF SELLER:
+
+Redirect to:
+
+→ “List Your Business” flow
+
+Simplify form:
+
+STEP 1 (only show this first):
+- Company name
+- Industry
+- Revenue
+- EBITDA
+
+👉 After submit → auto-create draft deal
+
+STEP 2 (optional):
+- Narrative
+- Risks
+- Documents
+
+---
+
+## 3. REMOVE FRICTION (CRITICAL)
+
+- DO NOT show full long form initially
+- DO NOT force document upload
+- DO NOT require payment upfront
+
+---
+
+## 4. ADD PROGRESS SYSTEM
+
+For sellers:
+
+Show:
+“Deal Quality Score: 20/100”
+
+Then:
++ Add narrative → +20
++ Add financial history → +20
++ Upload docs → +30
++ Verify → +30
+
+👉 Gamification → drives completion
+
+---
+
+## 5. FIRST VALUE MOMENT (VERY IMPORTANT)
+
+For investors:
+
+Auto-trigger:
+
+- Open first deal
+- Show:
+  - Suggested price
+  - IRR
+  - Scenario analysis
+
+Add overlay:
+"⚡ This is how you evaluate deals instantly"
+
+---
+
+## 6. EMPTY STATE FIX
+
+Replace blank pages with:
+
+Investor:
+"Analyze your first private deal → Create one"
+
+Seller:
+"List your business for free → takes 30 seconds"
+
+---
+
+## 7. CTA IMPROVEMENTS
+
+Change all buttons:
+
+❌ "Create Deal"
+✅ "Analyze a Deal in 10 sec"
+
+❌ "Submit"
+✅ "Get Valuation"
+
+---
+
+## 8. TRUST + HOOK
+
+Add banner:
+
+"Private deal intelligence platform for serious investors"
+
+Add micro-proof:
+- "Used by investors, founders, advisors"
+
+---
+
+## 9. OPTIONAL (HIGH IMPACT)
+
+Add onboarding checklist:
+
+[ ] Analyze your first deal  
+[ ] Create a private deal  
+[ ] Upgrade for full insights  
+
+---
+
+## EXPECTED OUTCOME:
+
+- +2–3x more listings
+- +2x investor engagement
+- Faster aha moment
+- Higher paid conversions

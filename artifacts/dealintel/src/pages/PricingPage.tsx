@@ -273,9 +273,9 @@ export default function PricingPage() {
                 )}
               </Button>
 
-              {plan.highlight && (
+                      {plan.highlight && (
                 <p className="text-center text-xs text-muted-foreground mt-3">
-                  ROI: even one ₹2 Cr deal = <span className="text-green-400 font-medium">40× your annual sub</span>
+                  Close 1 deal → <span className="text-green-400 font-medium">pays for 12 months</span>
                 </p>
               )}
             </Card>
@@ -324,12 +324,17 @@ export default function PricingPage() {
       </Card>
 
       {/* ── SELLER UPGRADES ── */}
-      <div className="mb-3">
-        <h2 className="text-lg font-bold">Seller Listing Upgrades</h2>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          <span className="text-green-400 font-medium">List for Free.</span>{" "}
-          Pay only for visibility & trust when you need it.
-        </p>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-bold">Seller Listing Upgrades</h2>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            <span className="text-green-400 font-medium">List for Free.</span>{" "}
+            Pay only for visibility & trust when you need it.
+          </p>
+        </div>
+        <Badge className="shrink-0 mt-1 bg-amber-500/15 text-amber-400 border-amber-500/30 border">
+          Boost Visibility & Trust
+        </Badge>
       </div>
 
       <Card className="p-4 border-green-500/20 bg-green-500/5 mb-4 flex items-start gap-3">
@@ -397,6 +402,21 @@ export default function PricingPage() {
           value of the closed transaction.
         </p>
       </Card>
+
+      {/* Trust bar */}
+      <div className="mt-8 py-5 border-y border-border flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          <Shield className="h-4 w-4 text-primary" />
+          Private deal intelligence platform
+        </span>
+        <span className="hidden sm:block text-border">·</span>
+        <span>Used by investors, brokers &amp; founders across India</span>
+        <span className="hidden sm:block text-border">·</span>
+        <span className="flex items-center gap-1.5">
+          <Sparkles className="h-4 w-4 text-primary" />
+          Institutional-grade M&amp;A tools
+        </span>
+      </div>
 
       <div className="mt-6 text-center">
         <p className="text-sm text-muted-foreground">

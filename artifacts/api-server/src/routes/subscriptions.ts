@@ -9,7 +9,7 @@ import { validateBody } from "../lib/validate";
 const router = Router();
 
 const upgradeSchema = z.object({
-  plan: z.enum(["free", "investor_pro", "seller_premium"]),
+  plan: z.enum(["free", "investor_pro", "investor_elite", "seller_premium"]),
 });
 
 // GET /api/subscriptions/me — current subscription + plan

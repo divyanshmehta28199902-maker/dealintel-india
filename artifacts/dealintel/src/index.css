@@ -340,3 +340,20 @@
   border-color: hsl(45 93% 55% / 0.35);
   box-shadow: 0 8px 24px rgba(0,0,0,0.25);
 }
+
+/* ── Dropdown / Select inside modals ──────────────────────────────────────── */
+/* Radix Select content: always scrollable, always above overlays             */
+[data-radix-select-content] {
+  z-index: 9999 !important;
+  max-height: 250px;
+  overflow-y: auto;
+}
+[data-radix-select-viewport] {
+  max-height: 250px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+/* Dialog / modal containers must not clip portaled dropdowns */
+[role="dialog"] {
+  overflow: visible !important;
+}

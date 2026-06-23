@@ -251,7 +251,8 @@ export default function PrivateDeals() {
               {atFreeLimit ? <><Lock className="h-4 w-4" /> Plan Limit Reached</> : <><Plus className="h-4 w-4" /> New Private Deal</>}
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl p-0">
+            <div className="max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-4">
             <DialogHeader>
               <DialogTitle>New Private Deal</DialogTitle>
               <DialogDescription>Analyze an off-market opportunity. Only visible to you.</DialogDescription>
@@ -435,6 +436,7 @@ export default function PrivateDeals() {
                 {create.isPending ? "Creating…" : mode === "verified" ? "Create Deal Room" : "Save Draft Deal"}
               </Button>
             </DialogFooter>
+            </div>
           </DialogContent>
         </Dialog>
       }

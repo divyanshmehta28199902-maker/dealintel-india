@@ -4,7 +4,7 @@
 @import "@clerk/themes/shadcn.css";
 @plugin "@tailwindcss/typography";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.bloomberg *));
 
 @theme inline {
   --color-background: hsl(var(--background));
@@ -89,66 +89,67 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* DARK MODE — Bloomberg / institutional terminal */
+/* BLOOMBERG THEME (default) — #0B0F14 base, #00D1FF cyan accent */
 :root,
-.dark {
-  --button-outline: rgba(255,255,255,.10);
-  --badge-outline: rgba(255,255,255,.05);
+.bloomberg {
+  --button-outline: rgba(255,255,255,.08);
+  --badge-outline: rgba(255,255,255,.04);
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255,.03);
   --elevate-2: rgba(255,255,255,.06);
 
-  /* Deep navy-black — #0A0F1C */
-  --background: 223 47% 7%;
-  --foreground: 213 31% 91%;
+  /* #0B0F14 — near-black terminal bg */
+  --background: 213 30% 6%;
+  /* #E5E7EB — high-contrast text */
+  --foreground: 220 14% 91%;
 
-  /* Terminal border — #1E293B */
-  --border: 217 32% 18%;
+  /* #1F2937 — terminal border */
+  --border: 215 28% 17%;
 
-  /* Card — #0F172A */
-  --card: 222 47% 11%;
-  --card-foreground: 213 31% 91%;
-  --card-border: 217 32% 18%;
+  /* #111827 — surface / card */
+  --card: 221 39% 11%;
+  --card-foreground: 220 14% 91%;
+  --card-border: 215 28% 17%;
 
-  --sidebar: 223 47% 6%;
-  --sidebar-foreground: 210 25% 85%;
-  --sidebar-border: 217 32% 16%;
-  /* Bloomberg yellow */
-  --sidebar-primary: 48 96% 53%;
-  --sidebar-primary-foreground: 222 47% 5%;
-  --sidebar-accent: 217 32% 14%;
-  --sidebar-accent-foreground: 210 25% 85%;
-  --sidebar-ring: 48 96% 53%;
+  --sidebar: 213 30% 5%;
+  --sidebar-foreground: 220 14% 86%;
+  --sidebar-border: 215 28% 15%;
+  /* #00D1FF — bloomberg cyan */
+  --sidebar-primary: 191 100% 50%;
+  --sidebar-primary-foreground: 213 30% 6%;
+  --sidebar-accent: 215 28% 14%;
+  --sidebar-accent-foreground: 220 14% 86%;
+  --sidebar-ring: 191 100% 50%;
 
-  --popover: 222 47% 10%;
-  --popover-foreground: 213 31% 91%;
-  --popover-border: 217 32% 20%;
+  --popover: 221 39% 10%;
+  --popover-foreground: 220 14% 91%;
+  --popover-border: 215 28% 19%;
 
-  /* Bloomberg yellow — #FACC15 */
-  --primary: 48 96% 53%;
-  --primary-foreground: 222 47% 5%;
+  /* #00D1FF — bloomberg cyan primary */
+  --primary: 191 100% 50%;
+  --primary-foreground: 213 30% 6%;
 
-  --secondary: 217 32% 16%;
-  --secondary-foreground: 210 25% 85%;
+  --secondary: 215 28% 15%;
+  --secondary-foreground: 220 14% 86%;
 
-  --muted: 222 33% 13%;
-  --muted-foreground: 215 16% 47%;
+  --muted: 213 28% 12%;
+  --muted-foreground: 220 9% 65%;
 
-  --accent: 217 32% 16%;
-  --accent-foreground: 210 25% 85%;
+  --accent: 215 28% 15%;
+  --accent-foreground: 220 14% 86%;
 
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 217 32% 14%;
-  --ring: 48 96% 53%;
+  --input: 215 28% 14%;
+  --ring: 191 100% 50%;
 
   /* Terminal chart palette */
-  --chart-1: 48 96% 53%;   /* Bloomberg yellow — primary series */
-  --chart-2: 187 85% 53%;  /* Cyan-400 — secondary bars */
-  --chart-3: 142 71% 45%;  /* Green — profit / up */
-  --chart-4: 266 83% 58%;  /* Violet */
-  --chart-5: 0 72% 51%;    /* Red — loss / down */
+  --chart-1: 191 100% 50%;  /* Bloomberg cyan — primary bars */
+  --chart-2: 142 71% 45%;   /* Green — profit / up */
+  --chart-3: 48 96% 53%;    /* Yellow — highlight */
+  --chart-4: 266 83% 58%;   /* Violet */
+  --chart-5: 0 72% 51%;     /* Red — loss / down */
 
   --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: Georgia, serif;
@@ -182,7 +183,7 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* LIGHT MODE */
+/* OFF-WHITE THEME */
 .light {
   --button-outline: rgba(0,0,0,.10);
   --badge-outline: rgba(0,0,0,.05);
@@ -190,34 +191,40 @@
   --elevate-1: rgba(0,0,0,.03);
   --elevate-2: rgba(0,0,0,.08);
 
+  /* #F8FAFC — off-white bg */
   --background: 210 40% 98%;
-  --foreground: 222 47% 8%;
-  --border: 214 32% 87%;
+  /* #0F172A — dark text */
+  --foreground: 222 47% 11%;
+  /* #E5E7EB — light border */
+  --border: 220 14% 91%;
 
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 8%;
-  --card-border: 214 32% 87%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 220 14% 91%;
 
   --sidebar: 0 0% 100%;
   --sidebar-foreground: 222 47% 12%;
-  --sidebar-border: 214 32% 87%;
-  --sidebar-primary: 45 93% 48%;
+  --sidebar-border: 220 14% 91%;
+  /* #2563EB — blue primary */
+  --sidebar-primary: 221 83% 53%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 210 40% 96%;
   --sidebar-accent-foreground: 222 47% 12%;
-  --sidebar-ring: 45 93% 48%;
+  --sidebar-ring: 221 83% 53%;
 
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 8%;
-  --popover-border: 214 32% 87%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 220 14% 91%;
 
-  --primary: 45 93% 48%;
+  /* #2563EB — blue-600 primary */
+  --primary: 221 83% 53%;
   --primary-foreground: 0 0% 100%;
 
   --secondary: 210 40% 96%;
   --secondary-foreground: 222 47% 12%;
 
   --muted: 210 40% 96%;
+  /* #64748B — slate-500 muted */
   --muted-foreground: 215 16% 47%;
 
   --accent: 210 40% 96%;
@@ -226,10 +233,10 @@
   --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 214 32% 87%;
-  --ring: 45 93% 48%;
+  --input: 220 14% 91%;
+  --ring: 221 83% 53%;
 
-  --chart-1: 45 93% 48%;
+  --chart-1: 221 83% 53%;
   --chart-2: 142 71% 40%;
   --chart-3: 199 89% 44%;
   --chart-4: 266 83% 52%;
@@ -267,31 +274,6 @@
   --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
 }
 
-/* Finance Blue theme */
-.finance-blue {
-  --background: 215 50% 6%;
-  --foreground: 199 100% 92%;
-  --border: 215 40% 20%;
-  --card: 215 50% 9%;
-  --card-foreground: 199 100% 92%;
-  --card-border: 215 40% 20%;
-  --primary: 199 89% 52%;
-  --primary-foreground: 215 50% 6%;
-  --muted: 215 40% 13%;
-  --muted-foreground: 215 25% 55%;
-  --accent: 215 40% 14%;
-  --accent-foreground: 199 100% 92%;
-  --input: 215 40% 14%;
-  --ring: 199 89% 52%;
-  --sidebar: 215 50% 5%;
-  --sidebar-foreground: 199 100% 85%;
-  --sidebar-border: 215 40% 18%;
-  --sidebar-primary: 199 89% 52%;
-  --sidebar-primary-foreground: 215 50% 6%;
-  --sidebar-accent: 215 40% 12%;
-  --sidebar-accent-foreground: 199 100% 85%;
-}
-
 @layer base {
   * {
     @apply border-border;
@@ -318,8 +300,8 @@
 ::-webkit-scrollbar-thumb:hover { background: hsl(217 33% 30%); }
 
 /* Bloomberg-style data table rows */
-.deal-row:hover { background: rgba(255,255,255,0.025); }
-.deal-row-selected { background: rgba(250,204,21,0.07) !important; border-left: 2px solid hsl(48 96% 53%); }
+.deal-row:hover { background: rgba(255,255,255,0.02); }
+.deal-row-selected { background: rgba(0,209,255,0.07) !important; border-left: 2px solid #00D1FF; }
 
 /* Ticker animation */
 @keyframes ticker {
@@ -329,27 +311,28 @@
 .ticker-track { animation: ticker 30s linear infinite; }
 .ticker-track:hover { animation-play-state: paused; }
 
-/* Terminal stat card glows */
-.stat-glow { box-shadow: 0 0 0 1px #1E293B, 0 0 18px rgba(250,204,21,0.07); }
-.stat-glow-green { box-shadow: 0 0 0 1px #1E293B, 0 0 18px rgba(34,211,238,0.07); }
-.stat-glow-blue { box-shadow: 0 0 0 1px #1E293B, 0 0 18px rgba(34,211,238,0.07); }
+/* Terminal stat card glows — cyan accent */
+.stat-glow { box-shadow: 0 0 0 1px #1F2937, 0 0 18px rgba(0,209,255,0.07); }
+.stat-glow-green { box-shadow: 0 0 0 1px #1F2937, 0 0 18px rgba(34,197,94,0.07); }
+.stat-glow-blue { box-shadow: 0 0 0 1px #1F2937, 0 0 18px rgba(0,209,255,0.07); }
 
-/* Interactive card hover — terminal lift */
+/* Interactive card hover — terminal lift with cyan ring */
 .hover-elevate {
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .hover-elevate:hover {
   transform: translateY(-1px);
-  border-color: rgba(250,204,21,0.25);
-  box-shadow: 0 0 0 1px rgba(250,204,21,0.15), 0 8px 24px rgba(0,0,0,0.35);
+  border-color: rgba(0,209,255,0.25);
+  box-shadow: 0 0 0 1px rgba(0,209,255,0.15), 0 8px 24px rgba(0,0,0,0.35);
 }
 
 /* Metric card terminal ring */
 .metric-ring {
-  box-shadow: 0 0 0 1px #1E293B;
+  box-shadow: 0 0 0 1px #1F2937;
+  transition: box-shadow 0.15s ease;
 }
 .metric-ring:hover {
-  box-shadow: 0 0 0 1px #1E293B, 0 0 10px rgba(250,204,21,0.12);
+  box-shadow: 0 0 0 1px #1F2937, 0 0 12px rgba(0,209,255,0.12);
 }
 
 /* ── Dropdown / Select inside modals ──────────────────────────────────────── */

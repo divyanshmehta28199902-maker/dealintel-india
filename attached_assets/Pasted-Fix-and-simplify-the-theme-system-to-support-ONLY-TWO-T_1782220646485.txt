@@ -1,0 +1,149 @@
+Fix and simplify the theme system to support ONLY TWO THEMES:
+
+1. Bloomberg Theme (default)
+2. Off-White Theme (light mode)
+
+Remove any third theme like "finance blue" or legacy theme configs.
+
+---
+
+### 1. DEFINE THEMES (GLOBAL)
+
+Create a clean theme config:
+
+const themes = {
+  bloomberg: {
+    name: "Bloomberg",
+    background: "#0B0F14",
+    surface: "#111827",
+    primary: "#00D1FF",
+    text: "#E5E7EB",
+    muted: "#9CA3AF",
+    border: "#1F2937"
+  },
+  light: {
+    name: "Off White",
+    background: "#F8FAFC",
+    surface: "#FFFFFF",
+    primary: "#2563EB",
+    text: "#0F172A",
+    muted: "#64748B",
+    border: "#E5E7EB"
+  }
+}
+
+---
+
+### 2. REMOVE UNUSED THEMES
+
+Search and DELETE:
+- financeBlue
+- darkBlue
+- legacyTheme
+- any third theme
+
+Ensure only:
+- bloomberg
+- light
+
+---
+
+### 3. APPLY VIA ROOT CLASS
+
+Use class-based theming:
+
+<html class="theme-bloomberg"> or <html class="theme-light">
+
+---
+
+### 4. GLOBAL CSS VARIABLES
+
+Add:
+
+:root.theme-bloomberg {
+  --bg: #0B0F14;
+  --card: #111827;
+  --text: #E5E7EB;
+  --muted: #9CA3AF;
+  --primary: #00D1FF;
+  --border: #1F2937;
+}
+
+:root.theme-light {
+  --bg: #F8FAFC;
+  --card: #FFFFFF;
+  --text: #0F172A;
+  --muted: #64748B;
+  --primary: #2563EB;
+  --border: #E5E7EB;
+}
+
+---
+
+### 5. FORCE USAGE EVERYWHERE
+
+Replace ALL hardcoded colors:
+
+❌ bg-gray-900
+❌ text-white
+❌ bg-blue-500
+
+✅ Use:
+bg-[var(--bg)]
+text-[var(--text)]
+border-[var(--border)]
+bg-[var(--card)]
+
+---
+
+### 6. THEME SWITCHER
+
+Add toggle:
+
+const [theme, setTheme] = useState("bloomberg")
+
+Toggle button:
+setTheme(theme === "bloomberg" ? "light" : "bloomberg")
+
+Apply:
+document.documentElement.className = `theme-${theme}`
+
+---
+
+### 7. REMOVE CONFLICTS
+
+Check:
+- Tailwind dark mode config → REMOVE or disable
+- No `dark:` classes should remain
+
+---
+
+### 8. DEFAULT THEME
+
+Set default:
+Bloomberg theme
+
+---
+
+### 9. SAVE USER PREFERENCE
+
+localStorage:
+
+localStorage.setItem("theme", theme)
+
+Load on app start
+
+---
+
+### EXPECTED RESULT:
+
+✔ Only 2 themes exist  
+✔ No broken colors  
+✔ Clean Bloomberg look (premium)  
+✔ Clean Off-white mode (readable)  
+✔ No UI inconsistency  
+
+---
+
+IMPORTANT:
+Do NOT create additional themes. Strictly enforce only 2 themes.

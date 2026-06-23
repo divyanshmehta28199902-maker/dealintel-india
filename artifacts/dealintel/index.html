@@ -4,21 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>DealIntel India</title>
-    <meta name="description" content="DealIntel India — built on Replit. Update this description to reflect the app." />
+    <meta name="description" content="DealIntel India — India's institutional M&A intelligence platform." />
     <meta name="robots" content="index, follow" />
     <meta property="og:title" content="DealIntel India" />
-    <meta property="og:description" content="DealIntel India — built on Replit. Update this description to reflect the app." />
+    <meta property="og:description" content="Institutional-grade deal intelligence for the Indian mid-market." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="DealIntel India" />
-    <meta name="twitter:description" content="DealIntel India — built on Replit. Update this description to reflect the app." />
+    <meta name="twitter:description" content="Institutional-grade deal intelligence for the Indian mid-market." />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
       (function () {
-        var t = localStorage.getItem("dealintel-theme") || "light";
+        var t = localStorage.getItem("dealintel-theme");
+        if (t !== "bloomberg" && t !== "light") t = "bloomberg";
         document.documentElement.classList.add(t);
       })();
     </script>

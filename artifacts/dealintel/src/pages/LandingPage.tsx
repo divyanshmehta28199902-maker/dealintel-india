@@ -54,12 +54,12 @@ export default function LandingPage() {
 
       {/* Navbar */}
       <header className="sticky top-0 z-40 bg-white/90 dark:bg-[#0B0F14]/90 backdrop-blur border-b border-gray-200 dark:border-[#1F2937]">
-        <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
+        <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between">
           <div className="flex items-center">
             <img
               src={logoSrc}
               alt="DealIntel India"
-              className="h-8 w-auto"
+              className="h-7 w-auto"
               onError={(e) => {
                 const target = e.currentTarget;
                 target.style.display = "none";
@@ -68,19 +68,19 @@ export default function LandingPage() {
               }}
             />
             <div
-              className="h-8 w-8 bg-[#00D1FF] rounded-md items-center justify-center text-[#0B0F14] font-bold text-sm"
+              className="h-7 w-7 bg-[#00D1FF] rounded-md items-center justify-center text-[#0B0F14] font-semibold text-sm"
               style={{ display: "none" }}
             >
               D
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <ThemeSwitcher />
             <SignInButton mode="modal">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-600 dark:text-[#9CA3AF] hover:text-gray-900 dark:hover:text-[#E5E7EB] hover:bg-gray-100 dark:hover:bg-[#111827]"
+                className="text-gray-600 dark:text-[#9CA3AF] hover:text-gray-900 dark:hover:text-[#E5E7EB] hover:bg-gray-100 dark:hover:bg-[#111827] px-4 py-2 h-8 text-sm"
               >
                 Sign In
               </Button>
@@ -88,7 +88,7 @@ export default function LandingPage() {
             <SignUpButton mode="modal">
               <Button
                 size="sm"
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-[#00D1FF] dark:hover:bg-[#22DAFF] dark:text-[#0B0F14] text-white font-medium shadow-sm gap-1.5"
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-[#00D1FF] dark:hover:bg-[#22DAFF] dark:text-[#0B0F14] text-white font-medium px-4 py-2 h-8 text-sm gap-1.5"
               >
                 Get Started <ArrowRight className="h-3.5 w-3.5" />
               </Button>
@@ -98,40 +98,40 @@ export default function LandingPage() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-6xl px-6 py-20 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 dark:border-[#00D1FF]/25 bg-blue-50 dark:bg-[#00D1FF]/8 px-4 py-1.5 text-xs font-medium text-blue-700 dark:text-[#00D1FF] mb-6">
-          <Zap className="h-3.5 w-3.5" /> India's M&A Intelligence Terminal
+      <section className="mx-auto max-w-6xl px-6 py-12 text-center">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 dark:border-[#00D1FF]/25 bg-blue-50 dark:bg-[#00D1FF]/8 px-3 py-1 text-xs font-medium text-blue-700 dark:text-[#00D1FF] mb-6">
+          <Zap className="h-3 w-3" /> India's M&A Intelligence Terminal
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold tracking-tight max-w-3xl mx-auto leading-tight text-gray-900 dark:text-[#E5E7EB]">
+        <h1 className="text-3xl md:text-4xl font-semibold tracking-tight max-w-2xl mx-auto leading-tight text-gray-900 dark:text-[#E5E7EB]">
           Where Indian SMEs meet{" "}
           <span className="text-blue-600 dark:text-[#00D1FF]">smart capital</span>
         </h1>
-        <p className="mt-6 text-lg text-gray-600 dark:text-[#9CA3AF] max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-4 text-sm text-gray-500 dark:text-[#9CA3AF] max-w-xl mx-auto leading-normal">
           Institutional-grade deal intelligence for the Indian mid-market. Real DCF valuations,
           comparable analysis, and risk scoring — connecting founders with investors.
         </p>
-        <div className="mt-8 flex items-center justify-center gap-4 flex-wrap">
+        <div className="mt-6 flex items-center justify-center gap-3 flex-wrap">
           <SignUpButton mode="modal">
             <Button
-              size="lg"
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-[#00D1FF] dark:hover:bg-[#22DAFF] dark:text-[#0B0F14] text-white font-medium shadow-sm gap-2 px-7"
+              size="sm"
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-[#00D1FF] dark:hover:bg-[#22DAFF] dark:text-[#0B0F14] text-white font-medium px-5 py-2.5 gap-1.5"
             >
-              Launch Terminal <ArrowRight className="h-4 w-4" />
+              Launch Terminal <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </SignUpButton>
           <SignInButton mode="modal">
             <Button
-              size="lg"
+              size="sm"
               variant="outline"
-              className="border-gray-300 dark:border-[#1F2937] text-gray-700 dark:text-[#E5E7EB] hover:bg-gray-50 dark:hover:bg-[#111827] px-7"
+              className="border-gray-300 dark:border-[#1F2937] text-gray-700 dark:text-[#E5E7EB] hover:bg-gray-50 dark:hover:bg-[#111827] px-5 py-2.5"
             >
               Sign In
             </Button>
           </SignInButton>
         </div>
 
-        {/* Stats strip */}
-        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Stat cards */}
+        <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Avg EV Multiple", value: "8.2x", icon: BarChart3 },
             { label: "Sectors Tracked", value: "12", icon: LineChart },
@@ -140,10 +140,10 @@ export default function LandingPage() {
           ].map(({ label, value, icon: Icon }) => (
             <div
               key={label}
-              className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1F2937] rounded-xl p-5 shadow-sm dark:shadow-none metric-ring transition-all text-center"
+              className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1F2937] rounded-lg p-4 shadow-sm dark:shadow-none metric-ring text-center"
             >
-              <Icon className="h-5 w-5 text-blue-600 dark:text-[#00D1FF] mb-2 mx-auto" />
-              <p className="text-2xl font-bold font-mono text-gray-900 dark:text-[#E5E7EB]">{value}</p>
+              <Icon className="h-4 w-4 text-blue-600 dark:text-[#00D1FF] mb-2 mx-auto" />
+              <p className="text-xl font-semibold tracking-tight tabular-nums text-gray-900 dark:text-[#E5E7EB]">{value}</p>
               <p className="text-xs text-gray-400 dark:text-[#9CA3AF] uppercase tracking-wider mt-1">{label}</p>
             </div>
           ))}
@@ -151,8 +151,8 @@ export default function LandingPage() {
       </section>
 
       {/* Trust strip */}
-      <div className="border-y border-gray-200 dark:border-[#1F2937] bg-white dark:bg-[#111827] py-4">
-        <div className="mx-auto max-w-6xl px-6 flex flex-wrap justify-center gap-x-10 gap-y-2">
+      <div className="border-y border-gray-200 dark:border-[#1F2937] bg-white dark:bg-[#111827] py-3">
+        <div className="mx-auto max-w-6xl px-6 flex flex-wrap justify-center gap-x-8 gap-y-1.5">
           {[
             "Verified seller listings",
             "Off-market deal access",
@@ -161,59 +161,59 @@ export default function LandingPage() {
             "5-yr scenario analysis",
           ].map((item) => (
             <span key={item} className="text-xs text-gray-500 dark:text-[#9CA3AF] flex items-center gap-1.5">
-              <Check className="h-3.5 w-3.5 text-blue-600 dark:text-[#00D1FF] shrink-0" /> {item}
+              <Check className="h-3 w-3 text-blue-600 dark:text-[#00D1FF] shrink-0" /> {item}
             </span>
           ))}
         </div>
       </div>
 
       {/* Dual portal cards */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-[#9CA3AF] mb-10">
+      <section className="mx-auto max-w-6xl px-6 py-10">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-[#9CA3AF] mb-6 text-left">
           Built for both sides of the deal
         </p>
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Seller card */}
-          <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1F2937] rounded-xl p-8 shadow-sm dark:shadow-none hover-elevate">
-            <div className="h-12 w-12 rounded-xl bg-blue-50 dark:bg-[#00D1FF]/8 border border-blue-100 dark:border-[#00D1FF]/20 flex items-center justify-center mb-5">
-              <Building2 className="h-6 w-6 text-blue-600 dark:text-[#00D1FF]" />
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* Seller */}
+          <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1F2937] rounded-lg p-6 shadow-sm dark:shadow-none hover-elevate">
+            <div className="h-9 w-9 rounded-lg bg-blue-50 dark:bg-[#00D1FF]/8 border border-blue-100 dark:border-[#00D1FF]/20 flex items-center justify-center mb-4">
+              <Building2 className="h-4.5 w-4.5 text-blue-600 dark:text-[#00D1FF]" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-[#E5E7EB]">For Sellers & Founders</h3>
-            <p className="text-sm text-gray-600 dark:text-[#9CA3AF] mt-2 leading-relaxed">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-[#E5E7EB] mb-1">For Sellers & Founders</h3>
+            <p className="text-sm text-gray-500 dark:text-[#9CA3AF] leading-normal mb-4">
               List your business, get an instant institutional valuation, and connect with
-              vetted investors actively seeking deals in your sector.
+              vetted investors seeking deals in your sector.
             </p>
-            <ul className="mt-5 space-y-2.5 text-sm text-gray-700 dark:text-[#E5E7EB]">
+            <ul className="space-y-2 text-sm text-gray-700 dark:text-[#E5E7EB]">
               {[
                 { icon: TrendingUp, text: "Free DCF + comparable valuation" },
                 { icon: Search, text: "Reach active investors" },
                 { icon: Lock, text: "Control who sees your financials" },
               ].map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-center gap-2.5">
-                  <Icon className="h-4 w-4 text-blue-600 dark:text-[#00D1FF] shrink-0" /> {text}
+                <li key={text} className="flex items-center gap-2">
+                  <Icon className="h-3.5 w-3.5 text-blue-600 dark:text-[#00D1FF] shrink-0" /> {text}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Investor card */}
-          <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1F2937] rounded-xl p-8 shadow-sm dark:shadow-none hover-elevate">
-            <div className="h-12 w-12 rounded-xl bg-green-50 dark:bg-green-400/8 border border-green-100 dark:border-green-400/20 flex items-center justify-center mb-5">
-              <Search className="h-6 w-6 text-green-600 dark:text-green-400" />
+          {/* Investor */}
+          <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-[#1F2937] rounded-lg p-6 shadow-sm dark:shadow-none hover-elevate">
+            <div className="h-9 w-9 rounded-lg bg-green-50 dark:bg-green-400/8 border border-green-100 dark:border-green-400/20 flex items-center justify-center mb-4">
+              <Search className="h-4.5 w-4.5 text-green-600 dark:text-green-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-[#E5E7EB]">For Investors & Acquirers</h3>
-            <p className="text-sm text-gray-600 dark:text-[#9CA3AF] mt-2 leading-relaxed">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-[#E5E7EB] mb-1">For Investors & Acquirers</h3>
+            <p className="text-sm text-gray-500 dark:text-[#9CA3AF] leading-normal mb-4">
               Discover off-market and listed deals, run advanced valuations, score risk and
               growth, and manage your acquisition pipeline.
             </p>
-            <ul className="mt-5 space-y-2.5 text-sm text-gray-700 dark:text-[#E5E7EB]">
+            <ul className="space-y-2 text-sm text-gray-700 dark:text-[#E5E7EB]">
               {[
                 { icon: BarChart3, text: "Comparable EV + 5-yr DCF engine" },
                 { icon: Shield, text: "Upload & analyze private deals" },
                 { icon: LineChart, text: "Risk & growth intelligence scoring" },
               ].map(({ icon: Icon, text }) => (
-                <li key={text} className="flex items-center gap-2.5">
-                  <Icon className="h-4 w-4 text-green-500 dark:text-green-400 shrink-0" /> {text}
+                <li key={text} className="flex items-center gap-2">
+                  <Icon className="h-3.5 w-3.5 text-green-500 dark:text-green-400 shrink-0" /> {text}
                 </li>
               ))}
             </ul>
@@ -221,21 +221,20 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Bottom CTA — always dark */}
-      <section className="bg-gray-900 dark:bg-[#070B10] border-t border-gray-800 dark:border-[#1F2937] py-16">
-        <div className="mx-auto max-w-2xl px-6 text-center">
-          <h2 className="text-3xl font-bold text-white mb-3">
+      {/* Bottom CTA */}
+      <section className="bg-gray-900 dark:bg-[#070B10] border-t border-gray-800 dark:border-[#1F2937] py-12">
+        <div className="mx-auto max-w-xl px-6 text-center">
+          <h2 className="text-2xl font-semibold tracking-tight text-white mb-2">
             Get your valuation in <span className="text-[#00D1FF]">10 seconds</span>
           </h2>
-          <p className="text-gray-400 text-sm mb-8">
+          <p className="text-gray-400 text-sm mb-6 leading-normal">
             No spreadsheets. No bankers. Institutional-grade analysis, instantly.
           </p>
           <SignUpButton mode="modal">
             <Button
-              size="lg"
-              className="bg-[#00D1FF] hover:bg-[#22DAFF] text-[#0B0F14] font-medium shadow-md gap-2 px-8"
+              className="bg-[#00D1FF] hover:bg-[#22DAFF] text-[#0B0F14] font-medium px-5 py-2.5 gap-1.5"
             >
-              Start for Free <ArrowRight className="h-4 w-4" />
+              Start for Free <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           </SignUpButton>
         </div>
@@ -243,7 +242,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-white dark:bg-[#0B0F14] border-t border-gray-200 dark:border-[#1F2937]">
-        <div className="mx-auto max-w-6xl px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400 dark:text-[#9CA3AF]">
+        <div className="mx-auto max-w-6xl px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-400 dark:text-[#9CA3AF]">
           <div className="flex items-center gap-2">
             <img src={logoSrc} alt="" className="h-5 w-auto opacity-60" />
             <span>© 2026 DealIntel India. Institutional M&A intelligence.</span>

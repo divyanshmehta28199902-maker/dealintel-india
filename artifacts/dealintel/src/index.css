@@ -282,8 +282,21 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--app-font-sans);
-    font-feature-settings: "cv11", "ss01";
+    /* Inter features: cv11 = disambiguate i/l/1, ss01 = open digits, tnum = tabular nums */
+    font-feature-settings: "cv11", "ss01", "tnum";
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    font-size: 0.875rem;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    font-weight: 600;
+  }
+  /* Tighter line-height for dense data tables */
+  th, td {
+    line-height: 1.35;
   }
 }
 
@@ -333,6 +346,44 @@
 }
 .metric-ring:hover {
   box-shadow: 0 0 0 1px #1F2937, 0 0 12px rgba(0,209,255,0.12);
+}
+
+/* ── Bloomberg Typography System ─────────────────────────────────────────── */
+/* Type scale — apply to elements that need explicit classification            */
+.type-heading-xl {
+  font-size: 1.5rem;     /* text-2xl */
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.type-heading-l {
+  font-size: 1.25rem;    /* text-xl */
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+.type-section {
+  font-size: 1.125rem;   /* text-lg */
+  font-weight: 500;
+  line-height: 1.3;
+}
+.type-body {
+  font-size: 0.875rem;   /* text-sm */
+  font-weight: 400;
+  line-height: 1.5;
+}
+.type-label {
+  font-size: 0.75rem;    /* text-xs */
+  font-weight: 400;
+  color: hsl(var(--muted-foreground));
+}
+
+/* .num — financial values: tabular, tight, semibold */
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* ── Dropdown / Select inside modals ──────────────────────────────────────── */

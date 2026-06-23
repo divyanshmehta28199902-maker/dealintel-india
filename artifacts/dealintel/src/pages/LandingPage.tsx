@@ -29,13 +29,13 @@ export default function LandingPage() {
       </div>
 
       {/* Navbar */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200">
+      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-200">
         <div className="mx-auto max-w-6xl px-6 h-16 flex items-center justify-between">
-          {/* Logo + wordmark */}
-          <div className="flex items-center gap-2.5">
+          {/* Logo — SVG is a full wordmark, no extra text needed */}
+          <div className="flex items-center">
             <img
-              src={`${basePath}/logo.svg`}
-              alt="DealIntel"
+              src={`${basePath}/logo-light.svg`}
+              alt="DealIntel India"
               className="h-8 w-auto"
               onError={(e) => {
                 const target = e.currentTarget;
@@ -50,7 +50,6 @@ export default function LandingPage() {
             >
               D
             </div>
-            <span className="text-base font-semibold text-gray-900 tracking-tight">DealIntel India</span>
           </div>
           <div className="flex items-center gap-3">
             <ThemeSwitcher />

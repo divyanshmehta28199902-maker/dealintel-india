@@ -24,17 +24,143 @@ import { formatINR, formatPct } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import type { Listing, ValuationResult, IntelligenceResult, WatchlistItem, Pipeline } from "@/lib/types";
 
-type Tab = "overview" | "financials" | "valuation" | "dataroom" | "analytics" | "messages" | "notes";
+type Tab = "overview" | "financials" | "valuation" | "dataroom" | "diligence" | "activity" | "messages" | "notes";
 
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
-  { id: "overview",   label: "Overview",    icon: Building2 },
-  { id: "financials", label: "Financials",  icon: IndianRupee },
-  { id: "valuation",  label: "Valuation",   icon: TrendingUp },
-  { id: "dataroom",   label: "Data Room",   icon: FileText },
-  { id: "analytics",  label: "Analytics",   icon: BarChart3 },
-  { id: "messages",   label: "Messages",    icon: MessageSquare },
-  { id: "notes",      label: "Notes",       icon: StickyNote },
+  { id: "overview",   label: "Overview",        icon: Building2 },
+  { id: "financials", label: "Financials",       icon: IndianRupee },
+  { id: "valuation",  label: "Valuation",        icon: TrendingUp },
+  { id: "dataroom",   label: "Data Room",        icon: FileText },
+  { id: "diligence",  label: "Due Diligence",    icon: CheckSquare },
+  { id: "activity",   label: "Activity",         icon: Activity },
+  { id: "messages",   label: "Messages",         icon: MessageSquare },
+  { id: "notes",      label: "Notes",            icon: StickyNote },
 ];
+
+const DD_SECTIONS = [
+  {
+    title: "Business & Legal",
+    items: [
+      "Certificate of incorporation / MCA filings reviewed",
+      "Shareholding pattern verified",
+      "No material litigation / court orders confirmed",
+      "ROC annual filings up to date",
+      "IP ownership (trademarks, patents) confirmed",
+    ],
+  },
+  {
+    title: "Financials",
+    items: [
+      "3-year audited financials obtained",
+      "GST returns cross-checked with revenue",
+      "Bank statements reconciled (12 months)",
+      "Debtors & creditors ageing reviewed",
+      "Off-balance-sheet liabilities identified",
+    ],
+  },
+  {
+    title: "Operations",
+    items: [
+      "Key customer contracts reviewed",
+      "Key supplier agreements reviewed",
+      "Employee headcount and ESOP details verified",
+      "Pending regulatory approvals / licences identified",
+      "IT systems and tech infrastructure assessed",
+    ],
+  },
+  {
+    title: "Commercial",
+    items: [
+      "Revenue concentration risk assessed",
+      "Top 5 customers revenue share documented",
+      "Sales pipeline and backlog reviewed",
+      "Competitive positioning mapped",
+      "Market size and growth validated",
+    ],
+  },
+];
+
+function DueDiligenceTab({ listingId }: { listingId: number }) {
+  const storageKey = `dealintel-dd-${listingId}`;
+  const [checked, setChecked] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return new Set(saved ? JSON.parse(saved) as string[] : []);
+    } catch {
+      return new Set<string>();
+    }
+  });
+
+  function toggle(item: string) {
+    setChecked((prev) => {
+      const next = new Set(prev);
+      if (next.has(item)) next.delete(item);
+      else next.add(item);
+      localStorage.setItem(storageKey, JSON.stringify([...next]));
+      return next;
+    });
+  }
+
+  const total = DD_SECTIONS.reduce((s, sec) => s + sec.items.length, 0);
+  const done  = checked.size;
+  const pct   = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  return (
+    <div className="space-y-5 max-w-2xl">
+      {/* Progress */}
+      <Card className="p-5 border-border">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold">Due Diligence Progress</h3>
+          <span className="text-xs num font-semibold text-primary">{done} / {total} complete</span>
+        </div>
+        <div className="h-2 rounded-full bg-muted overflow-hidden">
+          <div
+            className="h-full rounded-full bg-primary transition-all"
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+        <p className="text-xs text-muted-foreground mt-2">{pct}% · Items saved locally in this browser</p>
+      </Card>
+
+      {/* Checklist sections */}
+      {DD_SECTIONS.map((section) => {
+        const secDone = section.items.filter((it) => checked.has(it)).length;
+        return (
+          <Card key={section.title} className="p-5 border-border">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold">{section.title}</h3>
+              <span className="text-xs text-muted-foreground">{secDone}/{section.items.length}</span>
+            </div>
+            <div className="space-y-0 divide-y divide-border">
+              {section.items.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-3 py-2.5 cursor-pointer group"
+                  onClick={() => toggle(item)}
+                >
+                  <div className={`mt-0.5 h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
+                    checked.has(item)
+                      ? "bg-primary border-primary"
+                      : "border-border group-hover:border-primary/50"
+                  }`}>
+                    {checked.has(item) && (
+                      <svg className="h-2.5 w-2.5 text-primary-foreground" fill="none" viewBox="0 0 12 12">
+                        <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className={`text-sm leading-relaxed ${checked.has(item) ? "line-through text-muted-foreground" : ""}`}>
+                    {item}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
 
 function ValuationSkeleton() {
   return (
@@ -521,8 +647,13 @@ export default function ListingDetail({ id }: { id: number }) {
         </div>
       )}
 
-      {/* ── ANALYTICS ── */}
-      {tab === "analytics" && (
+      {/* ── DUE DILIGENCE ── */}
+      {tab === "diligence" && (
+        <DueDiligenceTab listingId={id} />
+      )}
+
+      {/* ── ACTIVITY TIMELINE ── */}
+      {tab === "activity" && (
         <div className="space-y-5">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="p-4 border-border text-center">
@@ -545,18 +676,51 @@ export default function ListingDetail({ id }: { id: number }) {
             </Card>
           </div>
 
+          {pipelineDeal ? (
+            <Card className="p-5 border-border">
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" /> Deal Activity Timeline
+              </h3>
+              <div className="relative pl-4">
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-border" />
+                {[...(pipelineDeal.activityLog ?? [])].reverse().map((a, i) => (
+                  <div key={i} className="relative mb-5 last:mb-0">
+                    <div className="absolute -left-4 top-1 h-2 w-2 rounded-full bg-primary border-2 border-background" />
+                    <div className="flex items-start justify-between gap-4 pl-2">
+                      <div>
+                        <p className="text-sm font-medium capitalize">{a.stage.replace(/_/g, " ")}</p>
+                        {a.note && <p className="text-xs text-muted-foreground mt-0.5">{a.note}</p>}
+                      </div>
+                      <span className="text-xs text-muted-foreground shrink-0">
+                        {new Date(a.ts).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <Card className="p-8 text-center border-border">
+              <Activity className="h-8 w-8 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">Add this deal to your Pipeline to start tracking activity.</p>
+              <Button size="sm" variant="outline" className="mt-3 gap-1.5" onClick={() => setPipelineDialogOpen(true)}>
+                <GitBranch className="h-3.5 w-3.5" /> Track Deal
+              </Button>
+            </Card>
+          )}
+
           <Card className="p-5 border-border">
             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-primary" /> Deal Attractiveness
             </h3>
-            <div className="space-y-3">
+            <div className="space-y-0 divide-y divide-border">
               {[
-                { label: "Revenue multiple vs ask", value: listing.revenue > 0 ? `${(listing.askingValuation / listing.revenue).toFixed(1)}x rev` : "—", note: "Typical SME range: 1–3x" },
-                { label: "EBITDA multiple", value: listing.ebitda > 0 ? `${(listing.askingValuation / listing.ebitda).toFixed(1)}x EBITDA` : "N/A", note: "SME benchmark: 4–8x" },
-                { label: "Growth rate", value: listing.revenueGrowthRate != null ? formatPct(listing.revenueGrowthRate, true) : "—", note: "YoY revenue growth" },
+                { label: "Revenue multiple vs ask", value: listing.revenue > 0 ? `${(listing.askingValuation / listing.revenue).toFixed(1)}x` : "—", note: "Typical SME range: 1–3x" },
+                { label: "EBITDA multiple", value: listing.ebitda > 0 ? `${(listing.askingValuation / listing.ebitda).toFixed(1)}x` : "N/A", note: "SME benchmark: 4–8x" },
+                { label: "Revenue growth rate", value: listing.revenueGrowthRate != null ? formatPct(listing.revenueGrowthRate, true) : "—", note: "YoY revenue growth" },
                 { label: "Debt burden", value: listing.debtRatio != null ? formatPct(listing.debtRatio, true) : "—", note: "Lower is better" },
               ].map(({ label, value, note }) => (
-                <div key={label} className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div key={label} className="flex items-center justify-between py-2.5">
                   <div>
                     <p className="text-sm">{label}</p>
                     <p className="text-xs text-muted-foreground">{note}</p>
@@ -566,28 +730,6 @@ export default function ListingDetail({ id }: { id: number }) {
               ))}
             </div>
           </Card>
-
-          {pipelineDeal && (
-            <Card className="p-5 border-border">
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" /> Pipeline Activity
-              </h3>
-              <div className="space-y-2">
-                {[...(pipelineDeal.activityLog ?? [])].reverse().slice(0, 5).map((a, i) => (
-                  <div key={i} className="flex items-center gap-3 py-2 border-b border-border last:border-0">
-                    <div className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-                    <div className="flex-1">
-                      <span className="text-xs capitalize">{a.stage.replace("_", " ")}</span>
-                      {a.note && <span className="text-xs text-muted-foreground ml-2">— {a.note}</span>}
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {new Date(a.ts).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
         </div>
       )}
 

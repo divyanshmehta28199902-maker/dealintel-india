@@ -13,8 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import {
   TrendingUp, Building2, Search, BookmarkPlus, Shield, MessageSquare,
   LogOut, ChevronDown, Bell, BarChart3, Sparkles, User, Settings,
-  Users, Calculator, GitBranch,
+  Users, Calculator, GitBranch, X,
 } from "lucide-react";
+import { useState } from "react";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -22,6 +23,7 @@ export default function Navbar() {
   const { signOut } = useClerk();
   const { data: user } = useCurrentUser();
   const [location, navigate] = useLocation();
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const isSeller = user?.role === "seller";
   const isInvestor = user?.role === "investor";
@@ -30,6 +32,7 @@ export default function Navbar() {
     { href: "/seller/dashboard",  label: "Dashboard",        icon: BarChart3 },
     { href: "/seller/listings",   label: "My Listings",      icon: TrendingUp },
     { href: "/seller/requests",   label: "Interested Buyers", icon: Users },
+    { href: "/seller/pipeline",   label: "Pipeline",         icon: GitBranch },
     { href: "/valuation",         label: "Valuation",        icon: Calculator },
   ];
 
@@ -103,6 +106,36 @@ export default function Navbar() {
               Messages
             </Button>
           </Link>
+        )}
+
+        {/* Notifications bell */}
+        {user?.role && (
+          <div className="relative">
+            <button
+              onClick={() => setNotifOpen((p) => !p)}
+              className={`hidden md:flex items-center justify-center h-8 w-8 rounded-md transition-colors ${notifOpen ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-accent"}`}
+              aria-label="Notifications"
+            >
+              <Bell className="h-4 w-4" />
+            </button>
+            {notifOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setNotifOpen(false)} />
+                <div className="absolute right-0 top-10 z-50 w-72 rounded-lg border border-border bg-card shadow-xl">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                    <span className="text-sm font-semibold">Notifications</span>
+                    <button onClick={() => setNotifOpen(false)} className="text-muted-foreground hover:text-foreground">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <div className="py-8 text-center">
+                    <Bell className="h-8 w-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No new notifications</p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         )}
 
         <div className="ml-auto flex items-center gap-2">

@@ -28,6 +28,7 @@ import Analytics from "@/pages/investor/Analytics";
 import InvestorDashboard from "@/pages/investor/Dashboard";
 import Documents from "@/pages/investor/Documents";
 import ValuationPage from "@/pages/ValuationPage";
+import SellerPipeline from "@/pages/seller/Pipeline";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -180,6 +181,9 @@ function AppRoutes() {
       </Route>
       <Route path="/seller/requests">
         <ProtectedRoute><ContactRequests /></ProtectedRoute>
+      </Route>
+      <Route path="/seller/pipeline">
+        <ProtectedRoute><SellerPipeline /></ProtectedRoute>
       </Route>
       {/* Investor routes */}
       <Route path="/investor/dashboard">

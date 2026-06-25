@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import {
   Building2, ChevronLeft, ChevronRight, Save, DollarSign, BookOpen,
   Upload, Eye, CheckCircle2, AlertCircle, Info, FileText, Shield,
+  Sparkles, Loader2,
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -70,9 +71,9 @@ const INITIAL_FORM: WizardForm = {
 
 const STEP_TITLES = [
   "Basic Information", "Financial Information", "Business Narrative",
-  "Documents & Verification", "Review & Submit",
+  "Documents & Verification", "Review & Submit", "AI Deal Preview",
 ];
-const STEP_ICONS = [Building2, DollarSign, BookOpen, Upload, Eye];
+const STEP_ICONS = [Building2, DollarSign, BookOpen, Upload, Eye, Sparkles];
 
 const BUSINESS_TYPES = [
   "Private Limited", "LLP", "Proprietorship", "Partnership",
@@ -634,6 +635,312 @@ function Step5({ form }: { form: WizardForm }) {
   );
 }
 
+/* ─── Step 6: AI Deal Preview ─── */
+function PreviewCard({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) {
+  return (
+    <Card className="p-4 border-card-border space-y-3">
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-primary" />
+        <p className="text-sm font-semibold">{title}</p>
+      </div>
+      {children}
+    </Card>
+  );
+}
+
+function Step6({ form, isAnalyzing }: { form: WizardForm; isAnalyzing: boolean }) {
+  const rev = Number(form.revenue) || 0;
+  const ebitda = Number(form.ebitda) || 0;
+  const gr = Number(form.growthRate) || 0;
+  const totalDebt = Number(form.totalDebt) || 0;
+  const cc = Number(form.customerConcentration) || 0;
+  const rr = Number(form.recurringRevenue) || 0;
+
+  // 1. Valuation
+  let valLow: number | null = null;
+  let valHigh: number | null = null;
+  let valMethod = "";
+  let valConfidence = "";
+  let valNote = "";
+  if (ebitda > 0 && rev > 0) {
+    const margin = (ebitda / rev) * 100;
+    const growthBonus = gr > 25 ? 1.5 : gr > 15 ? 1 : gr > 5 ? 0.5 : 0;
+    const marginBonus = margin > 25 ? 1 : margin > 15 ? 0.5 : 0;
+    valLow = ebitda * (5 + growthBonus);
+    valHigh = ebitda * (8 + marginBonus + growthBonus);
+    valMethod = "EBITDA Multiple (5–8× adjusted)";
+    valConfidence = form.revenueY1 ? "Moderate" : "Low";
+    valNote = `EBITDA multiple is the standard Indian SME M&A methodology. ${margin > 20 ? "Strong margins support a higher multiple." : "Improving profitability could increase the valuation range."}`;
+  } else if (rev > 0) {
+    valLow = rev * 0.5;
+    valHigh = rev * 1.5;
+    valMethod = "Revenue Multiple (0.5–1.5×)";
+    valConfidence = "Low";
+    valNote = "Revenue multiple used because EBITDA is negative or missing. Improving profitability will significantly increase the valuation range.";
+  }
+
+  // 2. Quality score + section breakdown
+  const qualityScore = computeQualityScore(form);
+  const { text: qualityText, colorClass: qualityColorClass } = qualityInfo(qualityScore);
+  const bizPct = Math.round([form.companyName, form.industry, form.businessLocation, form.yearEstablished, form.employeeCount].filter(Boolean).length / 5 * 100);
+  const finPct = Math.round([form.revenue, form.ebitda, form.growthRate, form.revenueY1, form.totalDebt, form.customerConcentration].filter(Boolean).length / 6 * 100);
+  const narPct = Math.round([form.businessOverview, form.whySelling, form.growthDrivers, form.keyRisks].filter((v) => v && v.length > 20).length / 4 * 100);
+  const verPct = form.mode === "verified" && form.legalConfirmed ? 100 : form.mode === "verified" ? 30 : 60;
+
+  // 3. Investor readiness
+  let readiness = 0;
+  if (form.companyName && form.industry) readiness += 15;
+  if (rev > 0 && ebitda > 0) readiness += 20;
+  if (gr > 10) readiness += 15; else if (gr > 0) readiness += 7;
+  if (ebitda > 0 && rev > 0 && ebitda / rev > 0.15) readiness += 15;
+  if (form.mode === "verified" && form.legalConfirmed) readiness += 20;
+  else if (form.mode === "verified") readiness += 8;
+  if (form.businessOverview.length > 50 && form.whySelling.length > 30) readiness += 15;
+  readiness = Math.min(100, readiness);
+  const readinessLabel = readiness >= 80 ? "Excellent" : readiness >= 60 ? "Good" : readiness >= 40 ? "Fair" : "Poor";
+  const readinessColor = readiness >= 80 ? "text-green-400" : readiness >= 60 ? "text-blue-400" : readiness >= 40 ? "text-yellow-400" : "text-red-400";
+  const readinessExplain = readiness >= 80
+    ? "Well-positioned for investor interest. Strong financials, narrative, and verification."
+    : readiness >= 60
+    ? "Good listing with room to improve. Add narrative and historical financials to attract more buyers."
+    : readiness >= 40
+    ? "Adding verification documents and a stronger narrative will increase interest significantly."
+    : "Limited information available. Complete financial details and narrative before publishing.";
+
+  // 4. Strengths (data-driven only)
+  const strengths: string[] = [];
+  if (rev > 0 && ebitda > 0 && ebitda / rev > 0.20) strengths.push(`Strong EBITDA margin (${((ebitda / rev) * 100).toFixed(1)}%)`);
+  if (gr > 20) strengths.push(`High revenue growth (${gr}% YoY)`);
+  else if (gr > 10) strengths.push(`Consistent revenue growth (${gr}% YoY)`);
+  if (totalDebt === 0 && rev > 0) strengths.push("Debt-free balance sheet");
+  else if (totalDebt > 0 && rev > 0 && totalDebt / rev < 0.3) strengths.push(`Low leverage (${(totalDebt / rev * 100).toFixed(0)}% debt-to-revenue)`);
+  if (rr > 50) strengths.push(`High recurring revenue (${rr}%)`);
+  if (form.mode === "verified" && form.legalConfirmed) strengths.push("Verified Deal — legal confirmation on record");
+  if (form.competitiveAdvantages.length > 20) strengths.push("Documented competitive advantages");
+  if (form.revenueY1 && form.revenueY2 && form.revenueY3) strengths.push("Three-year financial history provided");
+  if (cc > 0 && cc < 20) strengths.push("Diversified customer base (no single client >20% revenue)");
+
+  // 5. Risks (data-driven only)
+  const risks: string[] = [];
+  if (ebitda <= 0 && rev > 0) risks.push("Negative or zero EBITDA — valuation based on revenue multiple");
+  if (cc > 40) risks.push(`High customer concentration (${cc}% in top customer)`);
+  else if (cc > 20) risks.push(`Moderate customer concentration (${cc}%)`);
+  if (totalDebt > 0 && rev > 0 && totalDebt / rev > 0.6) risks.push(`High leverage (${(totalDebt / rev * 100).toFixed(0)}% of annual revenue)`);
+  if (!form.revenueY1) risks.push("No multi-year revenue data — limits DCF depth");
+  if (form.mode === "quick") risks.push("No verification documents — investors may request due diligence materials");
+  if (!form.businessOverview || form.businessOverview.length < 50) risks.push("Brief business overview may reduce investor confidence");
+  if (!form.growthDrivers) risks.push("Growth strategy not documented");
+
+  // 6. Missing information
+  const missingItems: string[] = [];
+  if (!form.businessLocation) missingItems.push("Business location");
+  if (!form.revenueY1) missingItems.push("Historical revenue (Year -1, -2, -3)");
+  if (!form.customerConcentration) missingItems.push("Customer concentration %");
+  if (!form.businessOverview || form.businessOverview.length < 50) missingItems.push("Detailed business overview (50+ characters)");
+  if (!form.growthDrivers) missingItems.push("Growth drivers");
+  if (form.mode === "verified" && !form.whySelling) missingItems.push("Reason for sale (required for Verified Deal)");
+  if (!form.competitiveAdvantages) missingItems.push("Competitive advantages");
+
+  // 8. Publishing checklist
+  const checklist: { label: string; done: boolean }[] = [
+    { label: "Business Information Complete", done: !!(form.companyName && form.industry) },
+    { label: "Financials Complete", done: !!(form.revenue && form.ebitda && form.growthRate) },
+    { label: "Narrative Complete", done: form.businessOverview.length > 20 && form.whySelling.length > 10 },
+    { label: "Verification Complete", done: form.mode === "quick" || form.legalConfirmed },
+    { label: "Documents Uploaded", done: form.mode === "verified" && form.legalConfirmed },
+    { label: "Deal Quality Score Above 70", done: qualityScore >= 70 },
+  ];
+
+  if (isAnalyzing) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-6">
+        <div className="h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        </div>
+        <div className="text-center space-y-2">
+          <p className="text-lg font-semibold">Analyzing Your Deal…</p>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Estimating enterprise value, scoring completeness, and generating your investor readiness report.
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-3 mt-2">
+          {["Valuation Model", "Quality Score", "Investor Readiness", "Checklist"].map((label, i) => (
+            <div key={label} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <div
+                className="h-2 w-2 rounded-full bg-primary animate-pulse"
+                style={{ animationDelay: `${i * 250}ms` }}
+              />
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Disclaimer */}
+      <div className="flex items-start gap-2 text-xs text-muted-foreground p-3 rounded-lg bg-muted/30 border border-border">
+        <Info className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+        <span>
+          <span className="font-medium text-foreground">Informational estimate only.</span>{" "}
+          Generated from your submitted data — not financial advice. Actual valuations require professional due diligence.
+        </span>
+      </div>
+
+      {/* 1. Valuation */}
+      <PreviewCard title="Estimated Valuation Range" icon={DollarSign}>
+        {valLow !== null && valHigh !== null ? (
+          <div className="space-y-3">
+            <div className="flex items-end justify-between flex-wrap gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Estimated Enterprise Value</p>
+                <p className="text-2xl font-bold font-mono">{formatINR(valLow)} – {formatINR(valHigh)}</p>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="text-xs text-muted-foreground">Method: <span className="text-foreground font-medium">{valMethod}</span></p>
+                <Badge
+                  variant="outline"
+                  className={`text-xs ${valConfidence === "Moderate" ? "border-yellow-500/40 text-yellow-400" : "border-red-500/40 text-red-400"}`}
+                >
+                  {valConfidence} Confidence
+                </Badge>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">{valNote}</p>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Enter revenue and EBITDA to generate an estimated valuation range.</p>
+        )}
+      </PreviewCard>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* 2. Deal Quality Score */}
+        <PreviewCard title="Deal Quality Score" icon={Sparkles}>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <span className={`text-3xl font-bold tabular-nums ${qualityColorClass}`}>{qualityScore}</span>
+              <div>
+                <p className="text-xs text-muted-foreground">out of 100</p>
+                <Badge variant="outline" className={`text-xs border-current ${qualityColorClass}`}>{qualityText}</Badge>
+              </div>
+            </div>
+            <Progress value={qualityScore} className={`h-2 ${qualityScore >= 70 ? "[&>div]:bg-green-500" : qualityScore >= 45 ? "[&>div]:bg-yellow-500" : "[&>div]:bg-red-500"}`} />
+            <div className="space-y-2 text-xs">
+              {[
+                { label: "Business Info", val: bizPct },
+                { label: "Financials", val: finPct },
+                { label: "Narrative", val: narPct },
+                { label: "Verification", val: verPct },
+              ].map(({ label, val }) => (
+                <div key={label} className="flex items-center gap-2">
+                  <span className="text-muted-foreground w-24 shrink-0">{label}</span>
+                  <Progress value={val} className="h-1 flex-1 [&>div]:bg-primary/60" />
+                  <span className="w-8 text-right font-mono">{val}%</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </PreviewCard>
+
+        {/* 3. Investor Readiness */}
+        <PreviewCard title="Investor Readiness" icon={Eye}>
+          <div className="space-y-3">
+            <span className={`text-3xl font-bold ${readinessColor}`}>{readinessLabel}</span>
+            <Progress value={readiness} className={`h-2 ${readiness >= 80 ? "[&>div]:bg-green-500" : readiness >= 60 ? "[&>div]:bg-blue-500" : readiness >= 40 ? "[&>div]:bg-yellow-500" : "[&>div]:bg-red-500"}`} />
+            <p className="text-xs text-muted-foreground leading-relaxed">{readinessExplain}</p>
+          </div>
+        </PreviewCard>
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* 4. Strengths */}
+        {strengths.length > 0 && (
+          <PreviewCard title="Strengths" icon={CheckCircle2}>
+            <ul className="space-y-1.5">
+              {strengths.map((s) => (
+                <li key={s} className="flex items-start gap-2 text-sm">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-green-400 mt-0.5 shrink-0" />
+                  <span className="text-muted-foreground">{s}</span>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
+        )}
+
+        {/* 5. Risks */}
+        {risks.length > 0 && (
+          <PreviewCard title="Risks & Observations" icon={AlertCircle}>
+            <ul className="space-y-1.5">
+              {risks.map((r) => (
+                <li key={r} className="flex items-start gap-2 text-sm">
+                  <AlertCircle className="h-3.5 w-3.5 text-amber-400 mt-0.5 shrink-0" />
+                  <span className="text-muted-foreground">{r}</span>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
+        )}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* 6. Missing information */}
+        {missingItems.length > 0 && (
+          <PreviewCard title="Missing Information" icon={Info}>
+            <ul className="space-y-1.5">
+              {missingItems.map((m) => (
+                <li key={m} className="flex items-start gap-2 text-sm">
+                  <div className="h-1.5 w-1.5 rounded-full bg-amber-400 mt-2 shrink-0" />
+                  <span className="text-muted-foreground">{m}</span>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
+        )}
+
+        {/* 7. Verification status */}
+        <PreviewCard title="Verification Status" icon={Shield}>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              {form.mode === "verified" && form.legalConfirmed ? (
+                <><CheckCircle2 className="h-5 w-5 text-green-400" /><span className="font-semibold text-green-400">Verified Deal</span></>
+              ) : form.mode === "verified" ? (
+                <><AlertCircle className="h-5 w-5 text-amber-400" /><span className="font-semibold text-amber-400">Verified Deal (Pending)</span></>
+              ) : (
+                <><Shield className="h-5 w-5 text-muted-foreground" /><span className="font-semibold text-muted-foreground">Quick Deal</span></>
+              )}
+            </div>
+            {form.mode === "quick" && (
+              <p className="text-xs text-muted-foreground">
+                Uploading verification documents (P&L, GST filings, Balance Sheet) may significantly improve buyer confidence and your deal quality score.
+              </p>
+            )}
+            {form.mode === "verified" && !form.legalConfirmed && (
+              <p className="text-xs text-amber-400">Legal confirmation is required — go back to Step 4 to complete.</p>
+            )}
+          </div>
+        </PreviewCard>
+      </div>
+
+      {/* 8. Publishing checklist */}
+      <PreviewCard title="Publishing Checklist" icon={CheckCircle2}>
+        <div className="grid sm:grid-cols-2 gap-2">
+          {checklist.map(({ label, done }) => (
+            <div key={label} className="flex items-center gap-2 text-sm">
+              {done
+                ? <CheckCircle2 className="h-4 w-4 text-green-400 shrink-0" />
+                : <div className="h-4 w-4 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+              }
+              <span className={done ? "text-foreground" : "text-muted-foreground"}>{label}</span>
+            </div>
+          ))}
+        </div>
+      </PreviewCard>
+    </div>
+  );
+}
+
 /* ─── Main Wizard ─── */
 interface PrivateDealWizardProps {
   open: boolean;
@@ -647,6 +954,7 @@ export function PrivateDealWizard({ open, onOpenChange, onSubmit, isPending }: P
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<WizardForm>(INITIAL_FORM);
   const [hasDraft, setHasDraft] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const set = (k: keyof WizardForm, v: string | boolean) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -745,15 +1053,15 @@ export function PrivateDealWizard({ open, onOpenChange, onSubmit, isPending }: P
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <p className="text-xs text-muted-foreground">Step {step} of 5</p>
-                {step < 5 && <Badge variant="outline" className="text-xs h-5">New Private Deal</Badge>}
+                <p className="text-xs text-muted-foreground">Step {step} of 6</p>
+                {step < 6 && <Badge variant="outline" className="text-xs h-5">New Private Deal</Badge>}
               </div>
               <p className="font-semibold text-sm">{STEP_TITLES[step - 1]}</p>
             </div>
           </div>
 
           {/* Progress bar + step pills */}
-          <Progress value={(step / 5) * 100} className="h-1.5 mb-3 [&>div]:bg-primary [&>div]:transition-all [&>div]:duration-300" />
+          <Progress value={(step / 6) * 100} className="h-1.5 mb-3 [&>div]:bg-primary [&>div]:transition-all [&>div]:duration-300" />
           <div className="flex gap-1">
             {STEP_TITLES.map((title, i) => (
               <div
@@ -776,20 +1084,27 @@ export function PrivateDealWizard({ open, onOpenChange, onSubmit, isPending }: P
           {step === 3 && <Step3 form={form} set={set} mode={form.mode} />}
           {step === 4 && <Step4 form={form} set={set} />}
           {step === 5 && <Step5 form={form} />}
+          {step === 6 && <Step6 form={form} isAnalyzing={isAnalyzing} />}
         </div>
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-border shrink-0 flex items-center justify-between gap-3">
           <div className="flex gap-2">
-            <Button variant="ghost" size="sm" onClick={handleCancel} className="text-muted-foreground">
-              <ChevronLeft className="h-4 w-4 mr-1" />Cancel
-            </Button>
+            {step === 6 ? (
+              <Button variant="ghost" size="sm" onClick={() => setStep(5)} className="text-muted-foreground">
+                <ChevronLeft className="h-4 w-4 mr-1" />Back to Edit
+              </Button>
+            ) : (
+              <Button variant="ghost" size="sm" onClick={handleCancel} className="text-muted-foreground">
+                <ChevronLeft className="h-4 w-4 mr-1" />Cancel
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={handleSaveDraft} className="gap-1.5">
               <Save className="h-3.5 w-3.5" />Save Draft
             </Button>
           </div>
           <div className="flex gap-2">
-            {step > 1 && (
+            {step > 1 && step < 6 && (
               <Button variant="outline" size="sm" onClick={() => setStep((s) => s - 1)}>
                 <ChevronLeft className="h-4 w-4 mr-1" />Previous
               </Button>
@@ -798,15 +1113,29 @@ export function PrivateDealWizard({ open, onOpenChange, onSubmit, isPending }: P
               <Button size="sm" onClick={() => setStep((s) => s + 1)} disabled={!canGoNext()} data-testid="wizard-next">
                 Next<ChevronRight className="h-4 w-4 ml-1" />
               </Button>
+            ) : step === 5 ? (
+              <Button
+                size="sm"
+                onClick={() => {
+                  setStep(6);
+                  setIsAnalyzing(true);
+                  setTimeout(() => setIsAnalyzing(false), 2500);
+                }}
+                disabled={!canGoNext()}
+                data-testid="wizard-preview"
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />AI Preview
+              </Button>
             ) : (
               <Button
                 size="sm"
                 onClick={handleSubmit}
-                disabled={!canGoNext() || isPending}
+                disabled={isAnalyzing || isPending}
                 data-testid="button-create-deal"
                 className="gap-2"
               >
-                {isPending ? "Creating…" : form.mode === "verified" ? "🔒 Create Deal Room" : "⚡ Save Draft Deal"}
+                {isPending ? "Publishing…" : form.mode === "verified" ? "🔒 Publish Private Deal" : "⚡ Publish Private Deal"}
               </Button>
             )}
           </div>

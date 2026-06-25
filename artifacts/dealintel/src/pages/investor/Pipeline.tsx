@@ -326,17 +326,36 @@ function OverviewTab({
     return s + (p.listing.askingValuation ?? 0) * prob;
   }, 0);
 
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading) {
+    return (
+      <div className="space-y-4 animate-pulse">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-20 rounded-xl bg-muted" />)}
+        </div>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="h-48 rounded-xl bg-muted" />
+          <div className="h-48 rounded-xl bg-muted" />
+        </div>
+      </div>
+    );
+  }
 
   if (total === 0) {
     return (
-      <Card className="p-12 text-center border-border">
+      <Card className="p-12 text-center border-border max-w-lg mx-auto">
         <GitBranch className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="font-semibold">Pipeline is empty</h3>
-        <p className="text-sm text-muted-foreground mt-1 mb-4">
-          Add a listing to your pipeline from the marketplace to start tracking it.
+        <h3 className="text-lg font-semibold mb-2">Your Pipeline is Empty</h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          You haven't added any deals to your pipeline yet. Start by browsing the Deal Marketplace or your Private Deals.
         </p>
-        <Button variant="outline" onClick={() => navigate("/investor/marketplace")}>Browse Marketplace</Button>
+        <div className="flex gap-3 justify-center">
+          <Button onClick={() => navigate("/investor/marketplace")}>
+            Browse Marketplace
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/investor/private-deals")}>
+            View Private Deals
+          </Button>
+        </div>
       </Card>
     );
   }
@@ -423,17 +442,36 @@ function KanbanTab({
   navigate: (to: string) => void;
   onSelect: (p: PipelineDeal) => void;
 }) {
-  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
+  if (isLoading) {
+    return (
+      <div className="grid md:grid-cols-4 gap-4 animate-pulse">
+        {[1,2,3,4].map(i => (
+          <div key={i} className="space-y-3">
+            <div className="h-5 w-24 rounded bg-muted" />
+            <div className="h-28 rounded-xl bg-muted" />
+            <div className="h-28 rounded-xl bg-muted" />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (pipeline.length === 0) {
     return (
-      <Card className="p-12 text-center border-border">
+      <Card className="p-12 text-center border-border max-w-lg mx-auto">
         <GitBranch className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-        <h3 className="font-semibold">Pipeline is empty</h3>
-        <p className="text-sm text-muted-foreground mt-1 mb-4">
-          Add a listing to your pipeline from the marketplace.
+        <h3 className="text-lg font-semibold mb-2">Your Pipeline is Empty</h3>
+        <p className="text-sm text-muted-foreground mb-6">
+          You haven't added any deals to your pipeline yet. Start by browsing the Deal Marketplace or your Private Deals.
         </p>
-        <Button variant="outline" onClick={() => navigate("/investor/marketplace")}>Browse Marketplace</Button>
+        <div className="flex gap-3 justify-center">
+          <Button onClick={() => navigate("/investor/marketplace")}>
+            Browse Marketplace
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/investor/private-deals")}>
+            View Private Deals
+          </Button>
+        </div>
       </Card>
     );
   }

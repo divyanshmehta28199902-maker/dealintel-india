@@ -1,0 +1,247 @@
+DealIntel Beta Polish & Consistency Fixes
+
+IMPORTANT
+
+Do NOT redesign the application.
+
+Do NOT change the navigation.
+
+Do NOT move pages.
+
+Do NOT rename routes.
+
+Do NOT change the information architecture.
+
+Only improve the existing functionality and user experience.
+
+⸻
+
+1. Improve Empty Pipeline Experience
+
+When a user has no active deals, do NOT display a blank “No Deals Found” screen.
+
+Instead, show a professional empty state.
+
+Title:
+“Your Pipeline is Empty”
+
+Description:
+“You haven’t added any deals to your pipeline yet. Start by browsing the Deal Marketplace or your Private Deals.”
+
+Display two CTA buttons:
+
+• Browse Marketplace
+• View Private Deals
+
+If the user adds a deal, this empty state should automatically disappear.
+
+⸻
+
+2. Synchronize Dashboard Metrics
+
+Currently dashboard statistics and Pipeline data can become inconsistent.
+
+Ensure every dashboard metric updates from the same data source.
+
+Synchronize:
+
+• Active Deals
+• Pipeline Value
+• Total Deals
+• Open Deals
+• Closed Deals
+• Notifications
+• Recent Activity
+
+If Pipeline has zero deals:
+
+• Active Deals = 0
+• Pipeline Value = ₹0
+• Deal Counters = 0
+
+Never display fake or stale values.
+
+⸻
+
+3. Update Dashboard in Real Time
+
+Whenever a user:
+
+• Creates a Private Deal
+• Deletes a Deal
+• Moves a Deal
+• Wins a Deal
+• Loses a Deal
+
+Immediately update:
+
+• Dashboard
+• Pipeline
+• Private Deals
+• Statistics
+• Charts
+
+without requiring a page refresh.
+
+⸻
+
+
+5. Better Loading & Feedback
+
+Every API request should have:
+
+Loading spinner
+
+Success toast
+
+Error toast
+
+Retry option if request fails
+
+Avoid blank screens while loading.
+
+⸻
+
+6. Improve Dashboard
+
+Without changing the layout, populate empty areas with useful widgets.
+
+Examples:
+
+Recent Activity
+
+Recently Viewed Deals
+
+Recommended Deals
+
+Saved Searches
+
+Market Updates
+
+Upcoming Tasks
+
+Recent Messages
+
+These should use existing data whenever possible.
+
+⸻
+
+7. Subscription Validation
+
+Verify every feature gate.
+
+Free Investor:
+
+Marketplace ✔
+
+Private Deals ✘
+
+Pipeline ✘
+
+Messages ✘
+
+Premium Analytics ✘
+
+Investor Pro:
+
+Marketplace ✔
+
+Private Deals ✔
+
+Pipeline ✔
+
+Messages ✔
+
+Premium Analytics ✔
+
+Investor Elite:
+
+Everything included in Investor Pro
+
+PLUS Elite-only features.
+
+Ensure Investor Elite automatically inherits every Investor Pro permission.
+
+Do not duplicate permission logic.
+
+Use feature-based permissions.
+
+⸻
+
+8. Data Consistency Audit
+
+Audit the application.
+
+Whenever a deal changes:
+
+Update:
+
+Dashboard
+
+Private Deals
+
+Pipeline
+
+Notifications
+
+Analytics
+
+Recent Activity
+
+Charts
+
+Counters
+
+Everything must remain synchronized.
+
+No stale UI.
+
+No manual refresh required.
+
+⸻
+
+9. Error Handling
+
+Replace generic errors with user-friendly messages.
+
+Examples:
+
+“No Deals Yet”
+
+“Unable to load your deals. Please try again.”
+
+“Private Deal created successfully.”
+
+“Changes saved successfully.”
+
+Never leave users on a blank page.
+
+⸻
+
+10. Final QA
+
+Before finishing, automatically verify:
+
+✓ Dashboard metrics match Pipeline.
+
+✓ Dashboard metrics match Private Deals.
+
+✓ Newly created deals appear immediately.
+
+✓ Empty states display correctly.
+
+✓ Loading indicators work.
+
+✓ Success and error messages display correctly.
+
+✓ All dashboard statistics remain synchronized.
+
+✓ No placeholder or dummy values remain.
+
+Do not redesign the application.
+
+Do not modify the sidebar.
+
+Do not modify navigation.
+
+Only improve functionality, consistency, reliability, and user experience.

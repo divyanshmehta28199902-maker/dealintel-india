@@ -5,6 +5,7 @@ import {
   CheckCircle2, AlertCircle, Clock, Upload, X, Lock, TrendingUp,
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
+import PlanGate from "@/components/PlanGate";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -242,6 +243,7 @@ export default function PrivateDeals() {
   const growthWarn = form.growthRate && Number(form.growthRate) > 100;
 
   return (
+    <PlanGate requiredPlan="investor_pro" fullPage featureName="Private Deals" fallbackPath="/investor/dashboard">
     <PortalLayout
       title="Private Deals"
       subtitle="Analyze off-market opportunities privately"
@@ -669,5 +671,6 @@ export default function PrivateDeals() {
         </SheetContent>
       </Sheet>
     </PortalLayout>
+    </PlanGate>
   );
 }

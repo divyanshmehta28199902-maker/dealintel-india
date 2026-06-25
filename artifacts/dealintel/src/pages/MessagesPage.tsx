@@ -9,25 +9,32 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { usePlan } from "@/hooks/usePlan";
+import PlanGate from "@/components/PlanGate";
 import type { MessageThread, Message } from "@/lib/types";
 
 export default function MessagesPage({ threadId }: { threadId?: number }) {
   const [, navigate] = useLocation();
   const { data: user } = useCurrentUser();
+  const { isFree } = usePlan();
   const qc = useQueryClient();
   const [draft, setDraft] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Gate only applies to free investors — sellers always have messages access
+  const isGated = user?.role === "investor" && isFree;
 
   const { data: threads } = useQuery<MessageThread[]>({
     queryKey: ["messages"],
     queryFn: () => api.get("/messages"),
     refetchInterval: 5000,
+    enabled: !isGated,
   });
 
   const { data: messages } = useQuery<Message[]>({
     queryKey: ["messages", threadId],
     queryFn: () => api.get(`/messages/${threadId}`),
-    enabled: !!threadId,
+    enabled: !!threadId && !isGated,
     refetchInterval: threadId ? 3000 : false,
   });
 
@@ -45,6 +52,14 @@ export default function MessagesPage({ threadId }: { threadId?: number }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  if (isGated) {
+    return (
+      <PlanGate requiredPlan="investor_pro" fullPage featureName="Messages" fallbackPath="/investor/dashboard">
+        <span />
+      </PlanGate>
+    );
+  }
 
   return (
     <PortalLayout title="Messages" subtitle="Conversations with buyers and sellers">

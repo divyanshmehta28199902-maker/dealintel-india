@@ -152,6 +152,11 @@ export default function Navbar() {
               <Sparkles className="h-3 w-3" /> PRO
             </Badge>
           )}
+          {user?.tier === "investor_elite" && (
+            <Badge className="hidden sm:flex text-xs bg-primary text-primary-foreground gap-1">
+              <Sparkles className="h-3 w-3" /> ELITE
+            </Badge>
+          )}
           {user?.tier === "seller_premium" && (
             <Badge className="hidden sm:flex text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30 gap-1">
               <Sparkles className="h-3 w-3" /> PREMIUM

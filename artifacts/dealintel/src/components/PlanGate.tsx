@@ -2,39 +2,59 @@ import { type ReactNode } from "react";
 import { Lock, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { usePlan, type Plan } from "@/hooks/usePlan";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 
 const PLAN_LABELS: Record<string, string> = {
-  investor_pro: "Investor Pro",
-  seller_premium: "Seller Premium",
-  free: "Free",
+  investor_pro:    "Investor Pro",
+  investor_elite:  "Investor Elite",
+  seller_premium:  "Seller Premium",
+  free:            "Free",
 };
 
 interface PlanGateProps {
-  requiredPlan: "investor_pro" | "seller_premium";
+  requiredPlan: Plan;
   children: ReactNode;
   /** Show a full-page upgrade wall instead of an inline blur overlay */
   fullPage?: boolean;
   featureName?: string;
+  /** Where Go Back navigates when there is no browser history. Defaults to /investor/dashboard */
+  fallbackPath?: string;
 }
 
 /**
  * Wraps content that requires a paid plan.
- * - If the user has the required plan (or better): renders children.
- * - Otherwise: renders a blurred overlay with an upgrade CTA.
+ * - If the user has the required plan or any higher tier: renders children.
+ * - Otherwise: renders a blurred overlay or full-page upgrade wall.
+ *
+ * Access hierarchy (investor side):
+ *   investor_elite > investor_pro > free
+ * So investor_elite inherits every investor_pro feature automatically.
  */
-export default function PlanGate({ requiredPlan, children, fullPage = false, featureName }: PlanGateProps) {
-  const { data: user, isLoading } = useCurrentUser();
+export default function PlanGate({
+  requiredPlan,
+  children,
+  fullPage = false,
+  featureName,
+  fallbackPath = "/investor/dashboard",
+}: PlanGateProps) {
+  const { hasAccess } = usePlan();
+  const { isLoading } = useCurrentUser();
   const [, navigate] = useLocation();
 
   if (isLoading) return <>{children}</>;
 
-  const userPlan = user?.tier ?? "free";
-  const hasAccess = userPlan === requiredPlan || userPlan === "investor_pro";
-
-  if (hasAccess) return <>{children}</>;
+  if (hasAccess(requiredPlan)) return <>{children}</>;
 
   const label = PLAN_LABELS[requiredPlan] ?? requiredPlan;
+
+  function goBack() {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate(fallbackPath);
+    }
+  }
 
   if (fullPage) {
     return (
@@ -45,8 +65,10 @@ export default function PlanGate({ requiredPlan, children, fullPage = false, fea
         <div>
           <h2 className="text-xl font-bold mb-2">{featureName ?? "Premium Feature"}</h2>
           <p className="text-muted-foreground max-w-md">
-            This feature is available on the <strong className="text-foreground">{label}</strong> plan.
-            Upgrade to unlock {featureName?.toLowerCase() ?? "this feature"} and the full suite of deal intelligence tools.
+            This feature is available on the{" "}
+            <strong className="text-foreground">{label}</strong> plan.
+            Upgrade to unlock {featureName?.toLowerCase() ?? "this feature"} and the
+            full suite of deal intelligence tools.
           </p>
         </div>
         <div className="flex gap-3">
@@ -54,7 +76,7 @@ export default function PlanGate({ requiredPlan, children, fullPage = false, fea
             <Sparkles className="h-4 w-4" />
             Upgrade to {label}
           </Button>
-          <Button variant="outline" onClick={() => navigate(-1 as never)}>
+          <Button variant="outline" onClick={goBack}>
             Go back
           </Button>
         </div>
@@ -72,11 +94,10 @@ export default function PlanGate({ requiredPlan, children, fullPage = false, fea
           <Lock className="h-5 w-5 text-primary" />
         </div>
         <div className="text-center px-6">
-          <p className="font-semibold text-sm mb-1">
-            🔒 {label} Required
-          </p>
+          <p className="font-semibold text-sm mb-1">🔒 {label} Required</p>
           <p className="text-xs text-muted-foreground">
-            {featureName ? `${featureName} is` : "This feature is"} available on the {label} plan.
+            {featureName ? `${featureName} is` : "This feature is"} available on the{" "}
+            {label} plan.
           </p>
         </div>
         <Button size="sm" onClick={() => navigate("/pricing")} className="gap-2">

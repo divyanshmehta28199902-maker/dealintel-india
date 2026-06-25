@@ -22,6 +22,9 @@ import PrivateDeals from "@/pages/investor/PrivateDeals";
 import Pipeline from "@/pages/investor/Pipeline";
 import PricingPage from "@/pages/PricingPage";
 import MessagesPage from "@/pages/MessagesPage";
+import ProfilePage from "@/pages/ProfilePage";
+import SettingsPage from "@/pages/SettingsPage";
+import Analytics from "@/pages/investor/Analytics";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -194,12 +197,27 @@ function AppRoutes() {
       <Route path="/pricing">
         <PricingPage />
       </Route>
+      {/* Investor analytics */}
+      <Route path="/investor/analytics">
+        <ProtectedRoute><Analytics /></ProtectedRoute>
+      </Route>
       {/* Messages */}
       <Route path="/messages">
         <ProtectedRoute><MessagesPage /></ProtectedRoute>
       </Route>
       <Route path="/messages/:threadId">
         {(params) => <ProtectedRoute><MessagesPage threadId={Number(params.threadId)} /></ProtectedRoute>}
+      </Route>
+      {/* Account */}
+      <Route path="/profile">
+        <ProtectedRoute><ProfilePage /></ProtectedRoute>
+      </Route>
+      <Route path="/settings">
+        <ProtectedRoute><SettingsPage /></ProtectedRoute>
+      </Route>
+      {/* Subscription — alias to pricing */}
+      <Route path="/subscription">
+        <PricingPage />
       </Route>
       <Route component={NotFound} />
     </Switch>

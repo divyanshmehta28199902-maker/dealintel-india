@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   TrendingUp, Building2, Search, BookmarkPlus, Shield, MessageSquare,
-  LogOut, ChevronDown, Bell, BarChart3, Sparkles,
+  LogOut, ChevronDown, Bell, BarChart3, Sparkles, User, Settings,
 } from "lucide-react";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -37,6 +37,7 @@ export default function Navbar() {
     { href: "/investor/watchlist", label: "Watchlist", icon: BookmarkPlus },
     { href: "/investor/private-deals", label: "Private Deals", icon: Shield },
     { href: "/investor/pipeline", label: "Pipeline", icon: BarChart3 },
+    { href: "/investor/analytics", label: "Analytics", icon: TrendingUp },
   ];
 
   const links = isSeller ? sellerLinks : isInvestor ? investorLinks : [];
@@ -162,6 +163,12 @@ export default function Navbar() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate("/profile")}>
+                  <User className="h-3.5 w-3.5 mr-2" /> Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <Settings className="h-3.5 w-3.5 mr-2" /> Settings
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/pricing")}>
                   <Sparkles className="h-3.5 w-3.5 mr-2 text-primary" /> Plans &amp; Pricing
                 </DropdownMenuItem>

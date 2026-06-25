@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  MapPin, Users, Calendar, Bookmark, BookmarkPlus, Send,
+  MapPin, Users, Calendar, Send,
   Building2, Eye, TrendingUp, GitBranch, Shield, CheckSquare,
   FileText, BarChart3, MessageSquare, StickyNote, Lock,
   IndianRupee, Activity, Clock,
@@ -22,7 +22,7 @@ import { IntelligenceDisplay } from "@/components/IntelligenceDisplay";
 import { api } from "@/lib/api";
 import { formatINR, formatPct } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
-import type { Listing, ValuationResult, IntelligenceResult, WatchlistItem, Pipeline } from "@/lib/types";
+import type { Listing, ValuationResult, IntelligenceResult, Pipeline } from "@/lib/types";
 
 type Tab = "overview" | "financials" | "valuation" | "dataroom" | "diligence" | "activity" | "messages" | "notes";
 
@@ -217,24 +217,12 @@ export default function ListingDetail({ id }: { id: number }) {
     enabled: !!listing,
   });
 
-  const { data: watchlist } = useQuery<WatchlistItem[]>({
-    queryKey: ["watchlist"],
-    queryFn: () => api.get("/watchlist"),
-  });
-  const watched = new Set((watchlist ?? []).map((w) => w.listingId)).has(id);
-
   const { data: pipeline } = useQuery<Pipeline[]>({
     queryKey: ["pipeline"],
     queryFn: () => api.get("/pipeline"),
   });
   const inPipeline = (pipeline ?? []).some((p) => p.listingId === id);
   const pipelineDeal = (pipeline ?? []).find((p) => p.listingId === id);
-
-  const toggleWatch = useMutation({
-    mutationFn: async () =>
-      watched ? api.delete(`/watchlist/${id}`) : api.post(`/watchlist/${id}`),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["watchlist"] }),
-  });
 
   const requestContact = useMutation({
     mutationFn: () => api.post(`/listings/${id}/contact`, { message, ndaAgreed }),
@@ -254,7 +242,7 @@ export default function ListingDetail({ id }: { id: number }) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["pipeline"] });
       setPipelineDialogOpen(false);
-      toast({ title: "Added to pipeline", description: "Track this deal in your Deal Pipeline." });
+      toast({ title: "✓ Deal added to Pipeline", description: "Track and manage this deal in your Deal Pipeline." });
     },
     onError: (e) => toast({ title: "Failed", description: (e as Error).message, variant: "destructive" }),
   });
@@ -321,18 +309,6 @@ export default function ListingDetail({ id }: { id: number }) {
 
         {/* Actions */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => toggleWatch.mutate()}
-            data-testid="button-watch"
-          >
-            {watched
-              ? <><Bookmark className="h-4 w-4 fill-primary text-primary" /> Saved</>
-              : <><BookmarkPlus className="h-4 w-4" /> Watchlist</>}
-          </Button>
-
           <Button
             variant={inPipeline ? "outline" : "secondary"}
             size="sm"
@@ -496,9 +472,6 @@ export default function ListingDetail({ id }: { id: number }) {
                     : <span className="text-xs text-muted-foreground">Standard</span> },
                   { label: "In your pipeline", value: inPipeline
                     ? <Badge className="text-xs bg-blue-500/15 text-blue-400 border-blue-500/30">Yes</Badge>
-                    : <span className="text-xs text-muted-foreground">No</span> },
-                  { label: "Watchlisted", value: watched
-                    ? <Badge className="text-xs bg-amber-500/15 text-amber-400 border-amber-500/30">Yes</Badge>
                     : <span className="text-xs text-muted-foreground">No</span> },
                 ].map(({ label, value }) => (
                   <div key={label} className="flex items-center justify-between py-2.5">
@@ -669,10 +642,6 @@ export default function ListingDetail({ id }: { id: number }) {
               <p className="text-sm font-semibold mt-2 capitalize">
                 {pipelineDeal ? pipelineDeal.stage.replace("_", " ") : "Not tracked"}
               </p>
-            </Card>
-            <Card className="p-4 border-border text-center">
-              <p className="text-xs text-muted-foreground">Watchlisted</p>
-              <p className="text-sm font-semibold mt-2">{watched ? "Yes" : "No"}</p>
             </Card>
           </div>
 

@@ -55,7 +55,11 @@ export function requirePlan(...plans: string[]) {
       return;
     }
     const userTier = req.dbUser.tier ?? "free";
-    if (!plans.includes(userTier)) {
+    // investor_elite inherits all investor_pro features
+    const effectiveTiers = new Set<string>([userTier]);
+    if (userTier === "investor_elite") effectiveTiers.add("investor_pro");
+    const hasPlan = plans.some((p) => effectiveTiers.has(p));
+    if (!hasPlan) {
       res.status(403).json({
         error: `This feature requires the ${plans.join(" or ")} plan`,
         code: "plan_required",

@@ -17,7 +17,6 @@ import MyListings from "@/pages/seller/MyListings";
 import ContactRequests from "@/pages/seller/ContactRequests";
 import Marketplace from "@/pages/investor/Marketplace";
 import ListingDetail from "@/pages/investor/ListingDetail";
-import WatchlistPage from "@/pages/investor/WatchlistPage";
 import PrivateDeals from "@/pages/investor/PrivateDeals";
 import Pipeline from "@/pages/investor/Pipeline";
 import PricingPage from "@/pages/PricingPage";
@@ -194,9 +193,6 @@ function AppRoutes() {
       </Route>
       <Route path="/investor/marketplace/:id">
         {(params) => <ProtectedRoute><ListingDetail id={Number(params.id)} /></ProtectedRoute>}
-      </Route>
-      <Route path="/investor/watchlist">
-        <ProtectedRoute><WatchlistPage /></ProtectedRoute>
       </Route>
       <Route path="/investor/private-deals">
         <ProtectedRoute><PrivateDeals /></ProtectedRoute>

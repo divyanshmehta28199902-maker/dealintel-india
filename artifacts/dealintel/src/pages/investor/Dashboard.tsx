@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
-  Search, Bookmark, GitBranch, MessageSquare,
+  Search, GitBranch, MessageSquare,
   Zap, TrendingUp, IndianRupee, BarChart3,
   ArrowRight,
 } from "lucide-react";
@@ -15,7 +15,6 @@ import { formatINR } from "@/lib/format";
 import type { MarketplaceStats, Pipeline } from "@/lib/types";
 
 type InvestorStats = {
-  watchlistCount: number;
   privateDealsCount: number;
   contactRequestsSent: number;
   pipelineCount: number;
@@ -89,7 +88,7 @@ export default function Dashboard() {
           icon={IndianRupee}
           accent="green"
         />
-        <StatCard label="Watchlisted" value={stats?.watchlistCount ?? 0} icon={Bookmark} />
+        <StatCard label="Messages" value={stats?.messageThreads ?? 0} icon={MessageSquare} />
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -189,7 +188,6 @@ export default function Dashboard() {
               {[
                 { label: "Browse deals", icon: Search, to: "/investor/marketplace" },
                 { label: "View pipeline", icon: GitBranch, to: "/investor/pipeline" },
-                { label: "Watchlist", icon: Bookmark, to: "/investor/watchlist" },
                 { label: "Private deals", icon: Zap, to: "/investor/private-deals" },
                 { label: "Messages", icon: MessageSquare, to: "/messages" },
               ].map(({ label, icon: Icon, to }) => (

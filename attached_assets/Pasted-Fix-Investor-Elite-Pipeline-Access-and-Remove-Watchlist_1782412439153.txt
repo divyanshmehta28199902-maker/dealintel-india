@@ -1,0 +1,170 @@
+Fix Investor Elite Pipeline Access and Remove Watchlist
+
+IMPORTANT
+
+Do NOT redesign the application.
+
+Do NOT change the sidebar.
+
+Do NOT modify routing.
+
+Do NOT change authentication.
+
+Do NOT modify unrelated UI.
+
+Only fix the feature permissions and simplify the deal actions.
+
+⸻
+
+Bug 1 — Investor Elite cannot add deals to Pipeline
+
+Current behavior:
+
+Investor Elite opens a deal.
+
+Clicks “Track Deal.”
+
+Clicks “Add to Pipeline.”
+
+Receives:
+
+“Feature requires Pro access.”
+
+This is incorrect.
+
+Investor Elite is a higher subscription tier than Investor Pro.
+
+Investor Elite must inherit every Investor Pro feature.
+
+Audit every feature gate related to Pipeline access.
+
+Replace plan-specific checks with feature-based permission checks.
+
+Examples:
+
+❌ Incorrect:
+
+plan === “investor_pro”
+
+✅ Correct:
+
+User has pipeline_access capability.
+
+or
+
+Investor Pro OR Investor Elite both have access.
+
+Verify:
+
+* Viewing Pipeline
+* Adding to Pipeline
+* Removing from Pipeline
+* Pipeline analytics
+* Pipeline notifications
+
+Investor Elite must pass every Pipeline permission check.
+
+⸻
+
+Bug 2 — Remove Watchlist
+
+Completely remove the Watchlist feature from the application.
+
+Remove:
+
+* Watchlist button
+* Watchlist modal
+* Watchlist routes
+* Watchlist API
+* Watchlist counters
+* Watchlist menu items
+
+Do not leave unused components.
+
+⸻
+
+Replace with Pipeline
+
+Replace the Watchlist action with:
+
+Add to Pipeline
+
+Behavior:
+
+If deal is not in Pipeline:
+
+Show:
+
+Add to Pipeline
+
+After successful addition:
+
+Show:
+
+✓ In Pipeline
+
+Disable duplicate additions.
+
+Update Pipeline counters immediately.
+
+Do not require page refresh.
+
+⸻
+
+Success Messages
+
+Instead of generic toasts:
+
+Show:
+
+✓ Deal added to Pipeline.
+
+✓ Already in Pipeline.
+
+✓ Removed from Pipeline.
+
+Display success messages in the existing theme.
+
+⸻
+
+Validation
+
+Verify:
+
+Free Investor
+
+Cannot access Pipeline.
+
+Upgrade prompt appears.
+
+Investor Pro
+
+Can add deals.
+
+Investor Elite
+
+Can add deals.
+
+No permission errors.
+
+No “Feature requires Pro access” message for Elite users.
+
+⸻
+
+Final Verification
+
+Confirm:
+
+✓ Watchlist removed.
+
+✓ Add to Pipeline works.
+
+✓ Investor Elite has full Pipeline access.
+
+✓ Pipeline updates immediately.
+
+✓ No routing errors.
+
+✓ No subscription permission errors.
+
+Do not modify any other part of the application.

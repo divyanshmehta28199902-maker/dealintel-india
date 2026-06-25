@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import {
-  Search, SlidersHorizontal, MapPin, TrendingUp, Eye, BookmarkPlus,
-  Bookmark, Building2, IndianRupee, BarChart3, Star, ShieldCheck, Zap,
+  Search, SlidersHorizontal, MapPin, TrendingUp, Eye,
+  Building2, IndianRupee, BarChart3, Star, ShieldCheck, Zap,
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import { StatCard } from "@/components/StatCard";
@@ -16,16 +16,13 @@ import {
 } from "@/components/ui/select";
 import { api } from "@/lib/api";
 import { formatINR, formatPct, INDUSTRIES, STAGES } from "@/lib/format";
-import { useToast } from "@/hooks/use-toast";
-import type { Listing, WatchlistItem, MarketplaceStats } from "@/lib/types";
+import type { Listing, MarketplaceStats } from "@/lib/types";
 
 export default function Marketplace() {
   const [search, setSearch] = useState("");
   const [industry, setIndustry] = useState<string>("all");
   const [stage, setStage] = useState<string>("all");
   const [, navigate] = useLocation();
-  const qc = useQueryClient();
-  const { toast } = useToast();
 
   const params = new URLSearchParams();
   if (search) params.set("search", search);
@@ -43,32 +40,15 @@ export default function Marketplace() {
     queryFn: () => api.get("/dashboard/marketplace-stats"),
   });
 
-  const { data: watchlist } = useQuery<WatchlistItem[]>({
-    queryKey: ["watchlist"],
-    queryFn: () => api.get("/watchlist"),
-  });
-  const watchedIds = new Set((watchlist ?? []).map((w) => w.listingId));
-
-  const toggleWatch = useMutation({
-    mutationFn: async ({ id, watched }: { id: number; watched: boolean }) =>
-      watched ? api.delete(`/watchlist/${id}`) : api.post(`/watchlist/${id}`),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["watchlist"] });
-      qc.invalidateQueries({ queryKey: ["dashboard", "investor"] });
-    },
-    onError: (e) => toast({ title: "Failed", description: (e as Error).message, variant: "destructive" }),
-  });
-
   const sorted = [...(listings ?? [])].sort((a, b) => (b.boostScore ?? 0) - (a.boostScore ?? 0));
 
   return (
     <PortalLayout title="Deal Marketplace" subtitle="Discover and analyze businesses for acquisition">
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-4 mb-6">
         <StatCard label="Live Deals" value={stats?.totalListings ?? 0} icon={Building2} />
         <StatCard label="Total Deal Value" value={stats ? formatINR(stats.totalDealValue) : "—"} icon={IndianRupee} accent="green" />
         <StatCard label="Sectors" value={stats?.byIndustry.length ?? 0} icon={BarChart3} />
-        <StatCard label="Watchlisted" value={watchlist?.length ?? 0} icon={Bookmark} accent="green" />
       </div>
 
       {/* Filters */}
@@ -150,7 +130,6 @@ export default function Marketplace() {
       {!isLoading && sorted.length > 0 && (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {sorted.map((l) => {
-            const watched = watchedIds.has(l.id);
             return (
               <Card
                 key={l.id}
@@ -179,15 +158,6 @@ export default function Marketplace() {
                       <span className="text-xs text-muted-foreground capitalize">{l.stage}</span>
                     </div>
                   </div>
-                  <Button
-                    variant="ghost" size="icon" className="h-7 w-7 shrink-0"
-                    onClick={(e) => { e.stopPropagation(); toggleWatch.mutate({ id: l.id, watched }); }}
-                    data-testid={`button-watch-${l.id}`}
-                  >
-                    {watched
-                      ? <Bookmark className="h-3.5 w-3.5 fill-primary text-primary" />
-                      : <BookmarkPlus className="h-3.5 w-3.5" />}
-                  </Button>
                 </div>
 
                 {l.city && (

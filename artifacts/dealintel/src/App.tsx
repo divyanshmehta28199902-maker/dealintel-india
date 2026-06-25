@@ -25,6 +25,8 @@ import MessagesPage from "@/pages/MessagesPage";
 import ProfilePage from "@/pages/ProfilePage";
 import SettingsPage from "@/pages/SettingsPage";
 import Analytics from "@/pages/investor/Analytics";
+import InvestorDashboard from "@/pages/investor/Dashboard";
+import Documents from "@/pages/investor/Documents";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -179,6 +181,9 @@ function AppRoutes() {
         <ProtectedRoute><ContactRequests /></ProtectedRoute>
       </Route>
       {/* Investor routes */}
+      <Route path="/investor/dashboard">
+        <ProtectedRoute><InvestorDashboard /></ProtectedRoute>
+      </Route>
       <Route path="/investor/marketplace">
         <ProtectedRoute><Marketplace /></ProtectedRoute>
       </Route>
@@ -194,6 +199,10 @@ function AppRoutes() {
       <Route path="/investor/pipeline">
         <ProtectedRoute><Pipeline /></ProtectedRoute>
       </Route>
+      <Route path="/investor/documents">
+        <ProtectedRoute><Documents /></ProtectedRoute>
+      </Route>
+      {/* Standalone analytics — also embedded as a Pipeline tab */}
       <Route path="/pricing">
         <PricingPage />
       </Route>

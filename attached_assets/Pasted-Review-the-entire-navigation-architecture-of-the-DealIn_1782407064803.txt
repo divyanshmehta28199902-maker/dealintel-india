@@ -1,0 +1,106 @@
+Review the entire navigation architecture of the DealIntel platform and redesign it to follow professional M&A software standards.
+
+Primary Goal
+
+Remove unnecessary top-level navigation items and organize the application around the user’s workflow.
+
+1. Remove the standalone Documents page
+
+* Remove “Documents” from the sidebar.
+* Documents should NOT exist as a global page.
+* Documents should instead be accessible only within an individual deal as a secure Data Room.
+
+2. Move Documents into Deal Details
+
+Every deal should contain its own tabs:
+
+* Overview
+* Financials
+* Valuation
+* Documents (Data Room)
+* Activity Timeline
+* Analytics
+* Messages
+* Notes
+
+When a buyer or seller opens a deal, they should access all related documents from the deal itself.
+
+3. Simplify the sidebar
+
+Buyer Dashboard:
+
+* Dashboard
+* Marketplace
+* Pipeline
+* Valuation
+* Messages
+* Notifications
+* Profile
+* Settings
+
+Seller Dashboard:
+
+* Dashboard
+* My Listings
+* Interested Buyers
+* Pipeline
+* Valuation
+* Messages
+* Notifications
+* Profile
+* Settings
+
+Broker Dashboard:
+
+* Dashboard
+* Managed Deals
+* Clients
+* Pipeline
+* Messages
+* Reports
+* Profile
+* Settings
+
+Admin Dashboard:
+
+* Dashboard
+* Users
+* Deals
+* Marketplace
+* Reports
+* Platform Analytics
+* Moderation
+* Settings
+
+4. Remove duplicate pages
+
+If Documents, Analytics, or Valuation exist as duplicate top-level pages while also appearing inside Deal Details, consolidate them to avoid redundancy.
+
+5. Improve Deal Details
+
+Opening any deal should provide a professional workspace containing:
+
+* Company Overview
+* Financial Statements
+* Valuation Summary
+* Secure Data Room (Documents)
+* Due Diligence Checklist
+* Activity Timeline
+* Messages
+* Analytics
+* Tasks
+* Notes
+
+6. Navigation validation
+
+Verify that every sidebar item has a valid route.
+Remove orphan pages.
+Remove broken routes.
+Ensure every Back button returns to the correct page.
+Ensure no Page Not Found errors remain.
+
+7. Final audit
+
+Review the entire application and eliminate duplicate navigation items, inconsistent page hierarchy, unnecessary screens, and broken user flows.
+
+The final navigation should feel like a premium enterprise M&A platform used by investment banks, private equity firms, corporate development teams, and M&A advisors, with a clean, intuitive, and scalable information architecture.

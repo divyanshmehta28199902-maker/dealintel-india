@@ -1,0 +1,350 @@
+CRITICAL INSTRUCTION
+
+Do NOT redesign the application.
+
+Do NOT change the sidebar.
+
+Do NOT change navigation.
+
+Do NOT change routes.
+
+Do NOT modify authentication.
+
+Do NOT change any existing UI outside of the Private Deal creation modal.
+
+Only improve the Private Deal creation experience.
+
+⸻
+
+Objective
+
+Transform the current Private Deal creation modal into a professional M&A deal intake wizard similar to enterprise deal sourcing platforms while preserving the current dark theme, spacing, colors, branding, and layout.
+
+⸻
+
+1. Convert the long scrolling form into a 5-step wizard
+
+Replace the long scrolling modal with a step-by-step workflow.
+
+Progress indicator:
+
+Step 1 of 5
+Basic Information
+
+Step 2 of 5
+Financial Information
+
+Step 3 of 5
+Business Narrative
+
+Step 4 of 5
+Documents & Verification
+
+Step 5 of 5
+Review & Submit
+
+Display a progress bar at the top.
+
+Users should move using:
+
+Previous
+
+Next
+
+Save Draft
+
+Cancel
+
+The final step should display:
+
+Create Deal Room
+
+⸻
+
+Step 1 – Basic Information
+
+Include:
+
+Company Name *
+
+Industry *
+
+Business Location *
+
+Year Established
+
+Employee Count
+
+Ownership Available for Sale (%)
+
+Website (Optional)
+
+Business Type
+
+Revenue Model
+
+⸻
+
+Step 2 – Financial Information
+
+Include:
+
+Annual Revenue *
+
+EBITDA *
+
+Growth Rate *
+
+Asking Price *
+
+Total Debt
+
+Cash Balance
+
+Customer Concentration %
+
+Recurring Revenue %
+
+Revenue Last 3 Years
+
+Auto-calculate:
+
+EBITDA Margin
+
+Revenue CAGR
+
+Financial Health Score
+
+Show a financial summary card on the right.
+
+⸻
+
+Step 3 – Business Narrative
+
+Include:
+
+Business Overview *
+
+Products & Services
+
+Customer Base
+
+Competitive Advantages
+
+Growth Drivers
+
+Why Selling *
+
+Key Risks
+
+Expansion Opportunities
+
+Management Team
+
+Internal Notes
+
+⸻
+
+Step 4 – Documents & Verification
+
+Keep the Quick Deal / Verified Deal toggle.
+
+Quick Deal
+
+Minimal documentation required.
+
+Verified Deal
+
+Require additional uploads.
+
+Display upload cards for:
+
+Profit & Loss
+
+Balance Sheet
+
+GST Returns
+
+Income Tax Returns
+
+Pitch Deck
+
+Customer List (Optional)
+
+Vendor List (Optional)
+
+Certificates (Optional)
+
+Company Registration
+
+PAN / GST Verification
+
+Show upload progress.
+
+Display uploaded file names.
+
+⸻
+
+Step 5 – Review
+
+Display a professional summary.
+
+Sections:
+
+Business
+
+Financials
+
+Narrative
+
+Documents
+
+Verification Status
+
+Deal Quality
+
+Estimated Valuation
+
+Missing Information
+
+Buttons:
+
+Previous
+
+Save Draft
+
+Create Deal Room
+
+⸻
+
+Deal Quality
+
+Replace the static score.
+
+Calculate dynamically.
+
+Example:
+
+Company Name
+
+Industry
+
+Financials
+
+Narrative
+
+Documents
+
+Verification
+
+Each completed section increases the score.
+
+Display:
+
+20/100
+Needs More Information
+
+45/100
+Basic Listing
+
+70/100
+Good Quality
+
+90+/100
+Investor Ready
+
+Update instantly.
+
+⸻
+
+Validation
+
+Disable Next until required fields are complete.
+
+Highlight invalid fields.
+
+Show inline validation.
+
+Prevent duplicate submissions.
+
+⸻
+
+Save Draft
+
+Users can save progress at any step.
+
+Drafts should reopen exactly where they left off.
+
+⸻
+
+Responsive Design
+
+Desktop
+
+Two-column layout where appropriate.
+
+Tablet
+
+Optimized spacing.
+
+Mobile
+
+Single-column responsive wizard.
+
+⸻
+
+Preserve Existing Functionality
+
+Do NOT modify:
+
+Sidebar
+
+Marketplace
+
+Private Deals page
+
+Pipeline
+
+Messages
+
+Dashboard
+
+Authentication
+
+Permissions
+
+Routing
+
+Subscription logic
+
+Navigation
+
+Existing APIs
+
+Existing database schema unless absolutely required for new draft functionality.
+
+⸻
+
+Final Validation
+
+Before completing:
+
+✓ Existing Private Deal functionality still works.
+
+✓ Existing routes still work.
+
+✓ No new routing errors.
+
+✓ No UI regressions.
+
+✓ Wizard works from Step 1 to Step 5.
+
+✓ Save Draft works.
+
+✓ Create Deal Room works.
+
+✓ Verified Deal workflow works.
+
+✓ Quick Deal workflow works.
+
+The only visible change should be that the Private Deal creation modal becomes a polished multi-step wizard while the rest of the DealIntel platform remains exactly the same.

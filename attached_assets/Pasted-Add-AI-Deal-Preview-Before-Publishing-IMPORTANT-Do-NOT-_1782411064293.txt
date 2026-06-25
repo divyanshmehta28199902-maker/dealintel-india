@@ -1,0 +1,297 @@
+Add AI Deal Preview Before Publishing
+
+IMPORTANT
+
+Do NOT redesign the application.
+
+Do NOT change the sidebar.
+
+Do NOT change navigation.
+
+Do NOT modify routing.
+
+Do NOT modify authentication.
+
+Do NOT modify existing Deal Creation functionality.
+
+Only add a final “AI Deal Preview” step after the Review step and before the deal is published.
+
+⸻
+
+New Final Step
+
+After the user clicks Next on the Review page, show a new screen called:
+
+AI Deal Preview
+
+This page summarizes the deal and helps the user improve it before publishing.
+
+The analysis should complete in 2–5 seconds with a loading animation.
+
+⸻
+
+Layout
+
+Display the analysis as professional dashboard cards.
+
+⸻
+
+1. Estimated Valuation Range
+
+Estimate a valuation using the available financial data.
+
+If EBITDA is positive:
+
+* EBITDA Multiple method
+
+If EBITDA is negative:
+
+* Revenue Multiple method
+
+Display:
+
+Estimated Enterprise Value
+
+Valuation Range (Low–High)
+
+Method Used
+
+Confidence Level
+
+Explain briefly why that method was chosen.
+
+Never claim the valuation is exact.
+
+⸻
+
+2. Deal Quality Score
+
+Calculate dynamically.
+
+Score from 0–100.
+
+Breakdown:
+
+Business Information
+
+Financial Information
+
+Narrative Quality
+
+Documents
+
+Verification
+
+Display a progress bar.
+
+Examples:
+
+25/100
+
+Basic Listing
+
+65/100
+
+Good Listing
+
+90/100
+
+Investor Ready
+
+⸻
+
+3. Investor Readiness Score
+
+Separate from valuation.
+
+Rate how attractive the listing appears based on:
+
+Completeness
+
+Financial consistency
+
+Growth
+
+Profitability
+
+Verification
+
+Narrative
+
+Display:
+
+Poor
+
+Fair
+
+Good
+
+Excellent
+
+Include a short explanation.
+
+⸻
+
+4. Strengths
+
+Generate bullet points based on the submitted information.
+
+Examples:
+
+• Strong EBITDA margin
+
+• Consistent revenue growth
+
+• Low debt
+
+• Attractive industry
+
+• High recurring revenue
+
+Only display strengths supported by the entered data.
+
+⸻
+
+5. Risks
+
+Generate observations such as:
+
+• Revenue concentration
+
+• High leverage
+
+• Negative EBITDA
+
+• Limited financial history
+
+• Missing documents
+
+Only display risks supported by the entered data.
+
+⸻
+
+6. Missing Information
+
+If fields are incomplete, show suggestions.
+
+Examples:
+
+Upload financial statements.
+
+Add customer concentration.
+
+Describe competitive advantages.
+
+Complete ownership information.
+
+Explain growth strategy.
+
+⸻
+
+7. Verification Status
+
+Show:
+
+Quick Deal
+
+or
+
+Verified Deal
+
+If Quick Deal:
+
+Display:
+
+“Uploading verification documents may improve buyer confidence.”
+
+Do not force an upgrade.
+
+⸻
+
+8. Publishing Checklist
+
+Display checkmarks such as:
+
+Business Information Complete
+
+Financials Complete
+
+Narrative Complete
+
+Verification Complete
+
+Documents Uploaded
+
+Deal Quality Above 70
+
+⸻
+
+Final Actions
+
+At the bottom display three buttons:
+
+Back to Edit
+
+Save Draft
+
+Publish Private Deal
+
+The user must be able to return to editing without losing information.
+
+⸻
+
+Design Requirements
+
+Use the existing dark theme.
+
+Match existing typography.
+
+Match existing cards.
+
+Match existing spacing.
+
+No redesign.
+
+No new navigation.
+
+No new pages.
+
+This is only a final step in the existing wizard.
+
+⸻
+
+Technical Requirements
+
+Generate the preview from the data already entered.
+
+Do not require additional API calls unless AI services are already integrated.
+
+If data is missing, gracefully explain that the estimate has lower confidence.
+
+Never fabricate information.
+
+Do not present the output as financial advice.
+
+Clearly label it as an informational estimate based on user-provided data.
+
+⸻
+
+Final Validation
+
+Ensure:
+
+✓ Existing Deal Creation still works.
+
+✓ Existing routes remain unchanged.
+
+✓ Existing permissions remain unchanged.
+
+✓ Save Draft still works.
+
+✓ Publish still works.
+
+✓ No routing errors.
+
+✓ No UI regressions.
+
+The only new functionality should be a polished AI Deal Preview step immediately before publishing the Private Deal.

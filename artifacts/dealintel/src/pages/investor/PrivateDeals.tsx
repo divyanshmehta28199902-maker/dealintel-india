@@ -6,20 +6,15 @@ import {
 } from "lucide-react";
 import PortalLayout from "@/components/PortalLayout";
 import PlanGate from "@/components/PlanGate";
+import { PrivateDealWizard } from "@/components/PrivateDealWizard";
+import type { WizardPayload } from "@/components/PrivateDealWizard";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader,
-  DialogTitle, DialogTrigger,
-} from "@/components/ui/dialog";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
 } from "@/components/ui/sheet";
@@ -28,17 +23,14 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ValuationDisplay } from "@/components/ValuationDisplay";
 import { IntelligenceDisplay } from "@/components/IntelligenceDisplay";
 import { api } from "@/lib/api";
-import { formatINR, formatPct, INDUSTRIES } from "@/lib/format";
+import { formatINR, formatPct } from "@/lib/format";
 import { useToast } from "@/hooks/use-toast";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { usePlan } from "@/hooks/usePlan";
 import type { PrivateDeal, DocumentVaultEntry } from "@/lib/types";
-
-type DealMode = "quick" | "verified";
 
 const DOC_TYPE_LABELS: Record<string, string> = {
   pl_statement: "P&L Statement",
@@ -57,26 +49,6 @@ function qualityColor(score: number) {
   if (score >= 70) return "bg-green-500";
   if (score >= 40) return "bg-yellow-500";
   return "bg-red-500";
-}
-
-function computeLiveScore(form: {
-  businessOverview: string; whySelling: string; growthDrivers: string; keyRisks: string;
-  revenueY1: string; revenueY2: string; revenueY3: string;
-  totalDebt: string; customerConcentration: string; legalConfirmed: boolean;
-}, docCount: number): number {
-  let score = 20;
-  if (form.businessOverview.length > 50) score += 10;
-  if (form.whySelling.length > 30) score += 10;
-  if (form.growthDrivers.length > 30) score += 8;
-  if (form.keyRisks.length > 30) score += 7;
-  if (form.revenueY1) score += 7;
-  if (form.revenueY2) score += 5;
-  if (form.revenueY3) score += 5;
-  if (form.totalDebt) score += 5;
-  if (form.customerConcentration) score += 5;
-  if (form.legalConfirmed) score += 8;
-  score += Math.min(docCount * 5, 10);
-  return Math.min(100, score);
 }
 
 interface FileUploadProps {
@@ -155,22 +127,6 @@ export default function PrivateDeals() {
   const { isFree } = usePlan();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<PrivateDeal | null>(null);
-  const [mode, setMode] = useState<DealMode>("quick");
-
-  const initialForm = {
-    companyName: "", industry: "", customIndustry: "", revenue: "", ebitda: "", growthRate: "",
-    revenueY1: "", revenueY2: "", revenueY3: "",
-    totalDebt: "", customerConcentration: "",
-    businessOverview: "", whySelling: "", growthDrivers: "", keyRisks: "",
-    description: "", legalConfirmed: false,
-  };
-  const [form, setForm] = useState(initialForm);
-  const [pendingDocs, setPendingDocs] = useState<DocumentVaultEntry[]>([]);
-  const set = (k: keyof typeof form, v: string | boolean) =>
-    setForm((f) => ({ ...f, [k]: v }));
-
-  const liveScore = computeLiveScore(form, pendingDocs.length);
-
   const { data: deals, isLoading } = useQuery<PrivateDeal[]>({
     queryKey: ["deals", "private"],
     queryFn: () => api.get("/deals/private"),
@@ -183,39 +139,16 @@ export default function PrivateDeals() {
   const isInvestorPro = !isFree;
   const atFreeLimit = isFree && (deals?.length ?? 0) >= 1;
 
-  const industryValue = form.industry === "Other" ? form.customIndustry : form.industry;
-  const validQuick = !!(form.companyName && industryValue && form.revenue && form.ebitda && form.growthRate);
-  const validVerified = validQuick && !!(form.businessOverview && form.whySelling && form.legalConfirmed);
-  const canSubmit = mode === "quick" ? validQuick : validVerified;
-
   const create = useMutation({
-    mutationFn: () => api.post<PrivateDeal>("/deals/private", {
-      companyName: form.companyName,
-      industry: industryValue,
-      revenue: Number(form.revenue),
-      ebitda: Number(form.ebitda),
-      growthRate: Number(form.growthRate),
-      dealMode: mode,
-      revenueY1: form.revenueY1 ? Number(form.revenueY1) : undefined,
-      revenueY2: form.revenueY2 ? Number(form.revenueY2) : undefined,
-      revenueY3: form.revenueY3 ? Number(form.revenueY3) : undefined,
-      totalDebt: form.totalDebt ? Number(form.totalDebt) : undefined,
-      customerConcentration: form.customerConcentration ? Number(form.customerConcentration) / 100 : undefined,
-      businessOverview: form.businessOverview || undefined,
-      whySelling: form.whySelling || undefined,
-      growthDrivers: form.growthDrivers || undefined,
-      keyRisks: form.keyRisks || undefined,
-      description: form.description || undefined,
-      legalConfirmed: form.legalConfirmed,
-    }),
-    onSuccess: () => {
+    mutationFn: (payload: WizardPayload) => api.post<PrivateDeal>("/deals/private", payload),
+    onSuccess: (_, payload) => {
       qc.invalidateQueries({ queryKey: ["deals", "private"] });
       qc.invalidateQueries({ queryKey: ["dashboard", "investor"] });
       setOpen(false);
-      setForm(initialForm);
-      setPendingDocs([]);
-      setMode("quick");
-      toast({ title: mode === "verified" ? "Deal Room created" : "Draft deal saved", description: "Valuation & intelligence are being computed." });
+      toast({
+        title: payload.dealMode === "verified" ? "Deal Room created" : "Draft deal saved",
+        description: "Valuation & intelligence are being computed.",
+      });
     },
     onError: (e: unknown) => {
       const err = e as { response?: { data?: { code?: string } }; message?: string };
@@ -239,218 +172,15 @@ export default function PrivateDeals() {
     },
   });
 
-  const ebitdaErr = form.revenue && form.ebitda && Number(form.ebitda) > Number(form.revenue);
-  const growthWarn = form.growthRate && Number(form.growthRate) > 100;
-
   return (
     <PlanGate requiredPlan="investor_pro" fullPage featureName="Private Deals" fallbackPath="/investor/dashboard">
     <PortalLayout
       title="Private Deals"
       subtitle="Analyze off-market opportunities privately"
       action={
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) { setForm(initialForm); setPendingDocs([]); setMode("quick"); } }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2" data-testid="button-new-deal" disabled={atFreeLimit}>
-              {atFreeLimit ? <><Lock className="h-4 w-4" /> Plan Limit Reached</> : <><Plus className="h-4 w-4" /> New Private Deal</>}
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl p-0">
-            <div className="max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-4">
-            <DialogHeader>
-              <DialogTitle>New Private Deal</DialogTitle>
-              <DialogDescription>Analyze an off-market opportunity. Only visible to you.</DialogDescription>
-            </DialogHeader>
-
-            {/* Mode toggle */}
-            <div className="flex gap-2 p-1 bg-muted rounded-lg">
-              <button
-                type="button"
-                onClick={() => setMode("quick")}
-                className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${mode === "quick" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                ⚡ Quick Deal
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode("verified")}
-                className={`flex-1 rounded-md py-1.5 text-sm font-medium transition-colors ${mode === "verified" ? "bg-background shadow text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                🔒 Verified Deal
-              </button>
-            </div>
-
-            {mode === "verified" && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Deal Quality</span>
-                  <span className={`font-bold ${liveScore >= 70 ? "text-green-400" : liveScore >= 40 ? "text-yellow-400" : "text-red-400"}`}>
-                    {liveScore} / 100
-                  </span>
-                </div>
-                <Progress value={liveScore} className={`h-2 [&>div]:${qualityColor(liveScore)}`} />
-                <p className="text-xs text-muted-foreground">
-                  {liveScore >= 70 ? "✅ Verified — high quality deal" : liveScore >= 40 ? "⚠️ Partially verified — add more details" : "🔴 Unverified — add narrative and documents"}
-                </p>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              {/* Section 1: Basic Info */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">1 · Basic Info</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Company Name *</Label>
-                    <Input value={form.companyName} onChange={(e) => set("companyName", e.target.value)} placeholder="Target Co (or codename)" className="mt-1.5" data-testid="input-deal-name" />
-                  </div>
-                  <div className={form.industry === "Other" ? "col-span-2" : ""}>
-                    <Label>Industry *</Label>
-                    <Select value={form.industry} onValueChange={(v) => { set("industry", v); if (v !== "Other") set("customIndustry", ""); }}>
-                      <SelectTrigger className="mt-1.5" data-testid="select-deal-industry"><SelectValue placeholder="Select industry" /></SelectTrigger>
-                      <SelectContent className="max-h-64 overflow-y-auto z-[9999]">
-                        {INDUSTRIES.map((i) => <SelectItem key={i} value={i}>{i}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    {form.industry === "Other" && (
-                      <Input
-                        value={form.customIndustry}
-                        onChange={(e) => set("customIndustry", e.target.value)}
-                        placeholder="Enter your industry…"
-                        className="mt-2"
-                        data-testid="input-deal-custom-industry"
-                      />
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Section 2: Financials */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">2 · Financials</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label>Revenue (₹L) *</Label>
-                    <Input type="number" value={form.revenue} onChange={(e) => set("revenue", e.target.value)} className="mt-1.5 font-mono" data-testid="input-deal-revenue" />
-                  </div>
-                  <div>
-                    <Label>EBITDA (₹L) *</Label>
-                    <Input type="number" value={form.ebitda} onChange={(e) => set("ebitda", e.target.value)} className={`mt-1.5 font-mono ${ebitdaErr ? "border-destructive" : ""}`} data-testid="input-deal-ebitda" />
-                    {ebitdaErr && <p className="text-xs text-destructive mt-1">EBITDA cannot exceed revenue</p>}
-                  </div>
-                  <div>
-                    <Label>Growth (%) *</Label>
-                    <Input type="number" value={form.growthRate} onChange={(e) => set("growthRate", e.target.value)} className={`mt-1.5 font-mono ${growthWarn ? "border-yellow-500" : ""}`} data-testid="input-deal-growth" />
-                    {growthWarn && <p className="text-xs text-yellow-500 mt-1">Growth &gt;100% — verify</p>}
-                  </div>
-                </div>
-                {mode === "verified" && (
-                  <>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div>
-                        <Label>Revenue Y-1 (₹L)</Label>
-                        <Input type="number" value={form.revenueY1} onChange={(e) => set("revenueY1", e.target.value)} className="mt-1.5 font-mono" />
-                      </div>
-                      <div>
-                        <Label>Revenue Y-2 (₹L)</Label>
-                        <Input type="number" value={form.revenueY2} onChange={(e) => set("revenueY2", e.target.value)} className="mt-1.5 font-mono" />
-                      </div>
-                      <div>
-                        <Label>Revenue Y-3 (₹L)</Label>
-                        <Input type="number" value={form.revenueY3} onChange={(e) => set("revenueY3", e.target.value)} className="mt-1.5 font-mono" />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label>Total Debt (₹L)</Label>
-                        <Input type="number" value={form.totalDebt} onChange={(e) => set("totalDebt", e.target.value)} className="mt-1.5 font-mono" />
-                      </div>
-                      <div>
-                        <Label>Customer Concentration (%)</Label>
-                        <Input type="number" value={form.customerConcentration} onChange={(e) => set("customerConcentration", e.target.value)} min="0" max="100" className="mt-1.5 font-mono" />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Section 3: Narrative */}
-              <div className="space-y-3">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">3 · Narrative</h4>
-                <div>
-                  <Label>Business Overview {mode === "verified" && <span className="text-destructive">*</span>}</Label>
-                  <Textarea value={form.businessOverview} onChange={(e) => set("businessOverview", e.target.value)} placeholder="What does the company do? Key products, customers, markets…" rows={2} className="mt-1.5" />
-                </div>
-                <div>
-                  <Label>Why Selling {mode === "verified" && <span className="text-destructive">*</span>}</Label>
-                  <Textarea value={form.whySelling} onChange={(e) => set("whySelling", e.target.value)} placeholder="Promoter transition, capital for expansion, retirement…" rows={2} className="mt-1.5" />
-                </div>
-                {mode === "verified" && (
-                  <>
-                    <div>
-                      <Label>Growth Drivers</Label>
-                      <Textarea value={form.growthDrivers} onChange={(e) => set("growthDrivers", e.target.value)} placeholder="Expansion opportunities, product pipeline, untapped markets…" rows={2} className="mt-1.5" />
-                    </div>
-                    <div>
-                      <Label>Key Risks</Label>
-                      <Textarea value={form.keyRisks} onChange={(e) => set("keyRisks", e.target.value)} placeholder="Customer concentration, regulatory exposure, competition…" rows={2} className="mt-1.5" />
-                    </div>
-                  </>
-                )}
-                <div>
-                  <Label>Notes (Internal)</Label>
-                  <Textarea value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Sourcing context, deal thesis…" rows={1} className="mt-1.5" />
-                </div>
-              </div>
-
-              {/* Section 4: Documents (Verified only) */}
-              {mode === "verified" && (
-                <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b border-border pb-1">4 · Documents</h4>
-                  <p className="text-xs text-muted-foreground">Upload P&L, Balance Sheet, GST filings to unlock Verified status.</p>
-                  {pendingDocs.length > 0 && (
-                    <div className="space-y-1.5">
-                      {pendingDocs.map((doc) => (
-                        <div key={doc.id} className="flex items-center gap-2 text-xs p-2 rounded-md bg-muted/40">
-                          <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
-                          <span className="flex-1 truncate">{doc.fileName}</span>
-                          <Badge variant="outline" className="text-xs">{DOC_TYPE_LABELS[doc.documentType] ?? doc.documentType}</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  <p className="text-xs text-muted-foreground italic">Documents can be uploaded after creating the deal room.</p>
-                </div>
-              )}
-
-              {/* Legal confirmation */}
-              {mode === "verified" && (
-                <div className="flex items-start gap-3 p-3 rounded-lg border border-border bg-muted/20">
-                  <Checkbox
-                    id="legal-confirm"
-                    checked={form.legalConfirmed}
-                    onCheckedChange={(v) => set("legalConfirmed", !!v)}
-                    className="mt-0.5"
-                  />
-                  <label htmlFor="legal-confirm" className="text-xs text-muted-foreground leading-relaxed cursor-pointer">
-                    <span className="font-medium text-foreground">I confirm this data is accurate</span> — I understand that submitting false financial information may constitute fraud and violate applicable laws. This confirmation is timestamped and associated with my account.
-                  </label>
-                </div>
-              )}
-            </div>
-
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button
-                onClick={() => create.mutate()}
-                disabled={!canSubmit || !!ebitdaErr || create.isPending}
-                data-testid="button-create-deal"
-              >
-                {create.isPending ? "Creating…" : mode === "verified" ? "Create Deal Room" : "Save Draft Deal"}
-              </Button>
-            </DialogFooter>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button className="gap-2" data-testid="button-new-deal" onClick={() => setOpen(true)} disabled={atFreeLimit}>
+          {atFreeLimit ? <><Lock className="h-4 w-4" /> Plan Limit Reached</> : <><Plus className="h-4 w-4" /> New Private Deal</>}
+        </Button>
       }
     >
       {!isInvestorPro && (
@@ -671,6 +401,12 @@ export default function PrivateDeals() {
         </SheetContent>
       </Sheet>
     </PortalLayout>
+    <PrivateDealWizard
+      open={open}
+      onOpenChange={setOpen}
+      onSubmit={(payload) => create.mutate(payload)}
+      isPending={create.isPending}
+    />
     </PlanGate>
   );
 }

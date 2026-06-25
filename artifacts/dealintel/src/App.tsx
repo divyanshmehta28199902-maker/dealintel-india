@@ -27,6 +27,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import Analytics from "@/pages/investor/Analytics";
 import InvestorDashboard from "@/pages/investor/Dashboard";
 import Documents from "@/pages/investor/Documents";
+import ValuationPage from "@/pages/ValuationPage";
 
 const clerkPubKey = publishableKeyFromHost(
   window.location.hostname,
@@ -201,6 +202,9 @@ function AppRoutes() {
       </Route>
       <Route path="/investor/documents">
         <ProtectedRoute><Documents /></ProtectedRoute>
+      </Route>
+      <Route path="/valuation">
+        <ProtectedRoute><ValuationPage /></ProtectedRoute>
       </Route>
       {/* Standalone analytics — also embedded as a Pipeline tab */}
       <Route path="/pricing">

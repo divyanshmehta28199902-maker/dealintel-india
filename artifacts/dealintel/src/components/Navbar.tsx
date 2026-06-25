@@ -12,7 +12,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   TrendingUp, Building2, Search, BookmarkPlus, Shield, MessageSquare,
-  LogOut, ChevronDown, Bell, BarChart3, Sparkles, User, Settings, FileText,
+  LogOut, ChevronDown, Bell, BarChart3, Sparkles, User, Settings,
+  Users, Calculator, GitBranch,
 } from "lucide-react";
 
 const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -26,19 +27,17 @@ export default function Navbar() {
   const isInvestor = user?.role === "investor";
 
   const sellerLinks = [
-    { href: "/seller/dashboard", label: "Dashboard", icon: BarChart3 },
-    { href: "/seller/list", label: "List Business", icon: Building2 },
-    { href: "/seller/listings", label: "My Listings", icon: TrendingUp },
-    { href: "/seller/requests", label: "Inquiries", icon: Bell },
+    { href: "/seller/dashboard",  label: "Dashboard",        icon: BarChart3 },
+    { href: "/seller/listings",   label: "My Listings",      icon: TrendingUp },
+    { href: "/seller/requests",   label: "Interested Buyers", icon: Users },
+    { href: "/valuation",         label: "Valuation",        icon: Calculator },
   ];
 
   const investorLinks = [
-    { href: "/investor/dashboard", label: "Dashboard", icon: BarChart3 },
-    { href: "/investor/marketplace", label: "Marketplace", icon: Search },
-    { href: "/investor/watchlist", label: "Watchlist", icon: BookmarkPlus },
-    { href: "/investor/private-deals", label: "Private Deals", icon: Shield },
-    { href: "/investor/pipeline", label: "Pipeline", icon: TrendingUp },
-    { href: "/investor/documents", label: "Documents", icon: FileText },
+    { href: "/investor/dashboard",     label: "Dashboard",   icon: BarChart3 },
+    { href: "/investor/marketplace",   label: "Marketplace", icon: Search },
+    { href: "/investor/pipeline",      label: "Pipeline",    icon: GitBranch },
+    { href: "/valuation",              label: "Valuation",   icon: Calculator },
   ];
 
   const links = isSeller ? sellerLinks : isInvestor ? investorLinks : [];

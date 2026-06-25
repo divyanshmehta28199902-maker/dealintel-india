@@ -1,0 +1,147 @@
+CRITICAL: DO NOT REDESIGN THE APPLICATION
+
+You previously modified the application’s navigation instead of fixing the requested bug.
+
+Your task is to revert the navigation to the last working implementation.
+
+Rules
+
+* DO NOT redesign the UI.
+* DO NOT reorganize pages.
+* DO NOT improve UX.
+* DO NOT add new features.
+* DO NOT create new routes.
+* DO NOT rename existing routes.
+* DO NOT move pages into other pages.
+* DO NOT delete any existing business functionality.
+
+Only restore the previous implementation.
+
+⸻
+
+Restore the Buyer Sidebar EXACTLY
+
+The Buyer sidebar must be:
+
+* Dashboard
+* Deal Marketplace
+* Private Deals
+* Pipeline
+* Messages
+* Notifications
+* Profile
+* Settings
+
+Nothing else.
+
+Do NOT add:
+
+* Valuation
+* Analytics
+* Documents
+* Reports
+* Deal Center
+* Workspace
+* Any new navigation items
+
+⸻
+
+Restore Private Deals
+
+Private Deals previously existed and must be restored exactly.
+
+Restore:
+
+* the page
+* the route
+* the sidebar item
+* permissions
+* cards
+* filters
+* search
+* all previous functionality
+
+Do NOT redesign the page.
+
+⸻
+
+Remove Valuation from Sidebar
+
+Delete the Valuation sidebar item completely.
+
+If valuation tools exist they should remain inside:
+
+* Deal Details
+* Company Analysis
+* Financial Analysis
+
+Do NOT expose Valuation as a top-level page.
+
+⸻
+
+Pipeline
+
+Pipeline must remain its own standalone page.
+
+Do NOT merge Pipeline into Dashboard.
+
+Dashboard should contain only:
+
+* KPIs
+* Recent Activity
+* Quick Actions
+* Market Summary
+
+Pipeline should contain:
+
+* Active Deals
+* Deal Stages
+* Kanban/List View
+* Filters
+* Pipeline Analytics
+
+⸻
+
+Fix Go Back
+
+The Go Back button on Pipeline currently opens Page Not Found.
+
+Fix the navigation.
+
+If browser history exists:
+
+navigate(-1)
+
+Otherwise:
+
+navigate(”/dashboard”)
+
+Never allow a 404.
+
+⸻
+
+Important
+
+Do NOT regenerate navigation.
+
+Do NOT “improve” the sidebar.
+
+Do NOT change the application’s information architecture.
+
+Only restore the previous implementation and fix the broken routing.
+
+⸻
+
+Final Verification
+
+Before finishing:
+
+* Compare the current sidebar with the previous implementation.
+* Ensure Private Deals exists.
+* Ensure Valuation is removed from the sidebar.
+* Ensure Pipeline is a standalone page.
+* Ensure Dashboard has not changed.
+* Ensure all routes work.
+* Ensure no Page Not Found errors exist.
+
+If any of these conditions are not met, continue fixing until they are all satisfied.

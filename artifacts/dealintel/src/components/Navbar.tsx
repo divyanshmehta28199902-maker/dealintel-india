@@ -37,10 +37,10 @@ export default function Navbar() {
   ];
 
   const investorLinks = [
-    { href: "/investor/dashboard",     label: "Dashboard",   icon: BarChart3 },
-    { href: "/investor/marketplace",   label: "Marketplace", icon: Search },
-    { href: "/investor/pipeline",      label: "Pipeline",    icon: GitBranch },
-    { href: "/valuation",              label: "Valuation",   icon: Calculator },
+    { href: "/investor/dashboard",      label: "Dashboard",       icon: BarChart3 },
+    { href: "/investor/marketplace",    label: "Deal Marketplace", icon: Search },
+    { href: "/investor/private-deals",  label: "Private Deals",   icon: Shield },
+    { href: "/investor/pipeline",       label: "Pipeline",        icon: GitBranch },
   ];
 
   const links = isSeller ? sellerLinks : isInvestor ? investorLinks : [];

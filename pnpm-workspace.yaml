@@ -40,9 +40,7 @@ minimumReleaseAgeExclude:
   - vite
 
 packages:
-  - artifacts/*
   - lib/*
-  - lib/integrations/*
   - scripts
 
 catalog:

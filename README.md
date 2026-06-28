@@ -13,6 +13,21 @@ Discover • Evaluate • Value • Acquire
 
 AI-powered Deal Marketplace, Financial Analysis, Business Valuation, and Due Diligence Platform built for Investors, Business Owners, Private Equity Firms, Family Offices, Investment Banks, and M&A Advisors.
 
+---
+
+![Version](https://img.shields.io/badge/version-v1.0-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-beta-success?style=for-the-badge)
+![License](https://img.shields.io/badge/license-Proprietary-red?style=for-the-badge)
+![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwindcss)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791?style=for-the-badge&logo=postgresql)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)
+![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
+![Made in India](https://img.shields.io/badge/Made%20in-India-FF9933?style=for-the-badge)
+
+</div>
 </div>
 
 

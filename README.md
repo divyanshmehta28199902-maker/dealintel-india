@@ -1,192 +1,317 @@
-# 🚀 DealIntel India
+🚀 DealIntel India
 
-<p align="center">
+<div align="center">
 
-### India's AI-Powered M&A Intelligence Platform for SMEs
 
-Institutional-grade deal intelligence helping Indian businesses, investors, M&A advisors, private equity firms, and strategic buyers discover, evaluate, value, and execute acquisitions.
+Institutional-Grade M&A Intelligence Platform for Indian SMEs
 
-</p>
+Discover • Evaluate • Value • Acquire
 
----
+AI-powered Deal Marketplace, Financial Analysis, Business Valuation, and Due Diligence Platform built for Investors, Business Owners, Private Equity Firms, Family Offices, Investment Banks, and M&A Advisors.
 
-## 🌟 Overview
+⸻
 
-DealIntel India is a modern SaaS platform built specifically for the Indian lower and middle-market M&A ecosystem.
+</div>
 
-The platform combines AI-powered valuation, financial analysis, comparable transactions, DCF modelling, pipeline management and secure deal collaboration into one unified platform.
+⸻
 
----
+📖 Overview
 
-# ✨ Key Features
+DealIntel India is a next-generation M&A Intelligence Platform designed specifically for India’s Small & Medium Enterprise (SME) ecosystem.
 
-## 📈 Buyer Portal
+The platform helps investors discover acquisition opportunities, enables business owners to confidentially list companies for sale, and provides institutional-grade valuation, financial analysis, due diligence, and AI-powered deal insights.
 
-- Live Deal Marketplace
-- Advanced Search & Filters
-- AI Deal Scoring
-- DCF Valuation
-- Comparable Company Analysis
-- Financial Health Analysis
-- Watchlists
-- Investment Pipeline
-- Portfolio Dashboard
+Our mission is to make SME acquisitions faster, smarter, and more transparent.
 
----
+⸻
 
-## 🏢 Seller Portal
+✨ Key Features
 
-- Business Listing Wizard
-- AI Business Valuation
-- Financial Dashboard
-- Buyer Interest Tracking
-- Confidential Deal Room
-- Document Management
-- Deal Analytics
+👨‍💼 Investor Portal
 
----
+* AI Deal Marketplace
+* Advanced Search & Filters
+* Company Financial Analysis
+* DCF Valuation
+* Comparable Company Analysis
+* Risk Assessment
+* AI Investment Score
+* Deal Pipeline
+* Watchlist
+* Secure Deal Room
+* Investor Analytics
 
-## 🤝 M&A Advisor Portal
+⸻
 
-- Client Management
-- Deal Pipeline
-- Portfolio Tracking
-- Due Diligence Workspace
-- Communication Center
-- Progress Tracking
+🏢 Seller Portal
 
----
+* Business Listing Wizard
+* Financial Upload
+* AI Business Valuation
+* Buyer Matching
+* Listing Performance Analytics
+* Deal Progress Tracker
+* Investor Interest Dashboard
+* Confidential Listing Management
 
-## 🧠 AI Engine
+⸻
 
-- AI Company Summary
-- Investment Risk Analysis
-- Confidence Score
-- Market Intelligence
-- Comparable Transactions
-- Industry Benchmarking
-- DCF Analysis
-- Scenario Modelling
+🤝 M&A Advisor Portal
 
----
+* Client Portfolio Management
+* Buyer & Seller Pipeline
+* Team Collaboration
+* Deal Tracking
+* Performance Analytics
+* Document Sharing
 
-# 📊 Platform Modules
+⸻
 
-- Deal Marketplace
-- Dashboard Analytics
-- Company Profiles
-- Financial Analysis
-- Pipeline Management
-- Valuation Engine
-- Secure Data Room
-- Reporting
-- Notifications
+🖼 Product Screenshots
 
----
+Landing Page
 
-# 💻 Tech Stack
+⸻
+
+Investor Dashboard
+
+⸻
+
+Deal Marketplace
+
+⸻
+
+Deal Pipeline
+
+⸻
+
+Company Listings
+
+⸻
+
+Company Analysis
+
+⸻
+
+Valuation Analysis
+
+⸻
+
+AI Valuation
+
+⸻
+
+Risk Analysis
+
+⸻
+
+Private Deal Room
+
+⸻
+
+Seller Dashboard
+
+⸻
+
+Seller Pipeline
+
+⸻
+
+Business Listing
+
+⸻
+
+Financial Upload
+
+⸻
+
+Investor Pricing
+
+⸻
+
+Seller Pricing
+
+⸻
+
+🧠 Platform Modules
+
+* Deal Marketplace
+* AI Valuation Engine
+* Financial Statement Analysis
+* DCF Valuation
+* Comparable Company Analysis
+* Due Diligence
+* Company Profile
+* Investment Memorandum
+* Risk Analysis
+* Buyer Matching
+* Deal Pipeline
+* Secure Data Room
+* Analytics Dashboard
+* Subscription Management
+* User Authentication
+* Admin Dashboard
+
+⸻
+
+💼 Target Users
+
+* Business Owners
+* Strategic Buyers
+* Family Offices
+* Private Equity Firms
+* Venture Capital Firms
+* Investment Banks
+* Corporate Development Teams
+* M&A Advisors
+* Financial Consultants
+
+⸻
+
+⚙️ Technology Stack
 
 Frontend
 
-- Next.js
-- TypeScript
-- TailwindCSS
-- ShadCN UI
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* Shadcn UI
 
 Backend
 
-- Node.js
-- Express
-- PostgreSQL
-- Prisma ORM
+* Node.js
+* Express
+* PostgreSQL
+* Prisma ORM
 
-Analytics
+Charts
 
-- Recharts
-- AI Insights
-- Financial Models
+* Recharts
+
+Authentication
+
+* JWT
+* Role-Based Access Control
 
 Deployment
 
-- Replit
-- GitHub
+* Replit
+* GitHub
 
----
+⸻
 
-# 🔒 Security
+📈 Product Roadmap
 
-- Role Based Access
-- Secure Authentication
-- Document Permissions
-- Private Deal Rooms
+Phase 1
 
----
+* Investor Portal
+* Seller Portal
+* Marketplace
+* Dashboard
+* Valuation Engine
 
-# 🎯 Target Users
+✅ Completed
 
-- SME Owners
-- Investors
-- Private Equity
-- Venture Capital
-- Family Offices
-- M&A Advisors
-- Investment Bankers
+⸻
 
----
+Phase 2
 
-# 📸 Screenshots
+* AI Buyer Matching
+* OCR Financial Parser
+* Company Verification
+* Premium Reports
+* Notification Center
 
-## Landing Page
+🚧 In Progress
 
-docs/images/landing-page.png
+⸻
 
-## Buyer Dashboard
+Phase 3
 
-docs/images/buyer-dashboard.png
+* Virtual Data Room
+* AI Due Diligence Assistant
+* API Platform
+* CRM Integration
+* Mobile Application
 
-## Seller Dashboard
+📅 Planned
 
-docs/images/seller-dashboard.png
+⸻
 
-## Valuation Engine
+🔒 Security
 
-docs/images/valuation-engine.png
+* Role-Based Access Control
+* JWT Authentication
+* Encrypted Password Storage
+* Secure Document Upload
+* Protected Routes
+* Audit Logs
 
-## Deal Marketplace
+⸻
 
-docs/images/deal-marketplace.png
+📊 Current Development Status
 
----
+Module	Status
+Landing Page	✅
+Authentication	✅
+Investor Dashboard	✅
+Seller Dashboard	✅
+Marketplace	✅
+Pipeline	✅
+Financial Analysis	✅
+AI Valuation	✅
+Pricing	✅
+Admin	🚧
+OCR Parser	🚧
+AI Matching	🚧
+Virtual Data Room	📅
 
-# 🗺 Roadmap
+⸻
 
-- AI Deal Matching
-- Investor CRM
-- Virtual Data Room
-- Mobile Application
-- API Integrations
-- Due Diligence Automation
+🤝 Contributing
 
----
+Contributions, feature suggestions, bug reports, and discussions are welcome.
 
-# License
+Please read CONTRIBUTING.md before submitting pull requests.
 
-Copyright © 2026 DealIntel India.
+⸻
 
-All Rights Reserved.
+🛡 Security Policy
 
-This repository is proprietary and confidential.
+Please report security issues privately.
 
----
+See SECURITY.md for responsible disclosure guidelines.
 
-## Contact
+⸻
 
-Founder
+📜 License
 
-**Divyansh Mehta**
+This repository is currently released under a Private License.
 
-India
+All rights reserved.
 
----
+⸻
 
-⭐ Building India's Bloomberg + PitchBook for SME M&A.
+👨‍💻 Founder
+
+Divyansh Mehta
+
+Founder & Builder of DealIntel India
+
+📍 New Delhi, India
+
+GitHub
+
+https://github.com/divyanshmehta28199902-maker
+
+⸻
+
+<div align="center">
+
+⭐ If you like this project, consider giving it a Star!
+
+Building the future of SME M&A Intelligence in India 🇮🇳
+
+</div>
+

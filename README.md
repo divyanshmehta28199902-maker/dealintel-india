@@ -17,7 +17,7 @@ AI-powered Deal Marketplace, Financial Analysis, Business Valuation, and Due Dil
 
 ![Version](https://img.shields.io/badge/version-v1.0-blue?style=for-the-badge)
 ![Status](https://img.shields.io/badge/status-beta-success?style=for-the-badge)
-![License](https://img.shields.io/badge/license-Proprietary-red?style=for-the-badge)
+[![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](LICENSE)
 ![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=nextdotjs)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)

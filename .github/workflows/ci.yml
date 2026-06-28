@@ -1,0 +1,32 @@
+name: DealIntel CI
+
+on:
+push:
+branches:
+- main
+- master
+
+pull_request:
+branches:
+- main
+- master
+
+jobs:
+build:
+
+runs-on: ubuntu-latest
+steps:
+  - name: Checkout Repository
+    uses: actions/checkout@v4
+  - name: Setup Node.js
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
+  - name: Install Dependencies
+    run: npm install
+  - name: Run Linter
+    run: npm run lint --if-present
+  - name: Type Check
+    run: npm run type-check --if-present
+  - name: Build Application
+    run: npm run build

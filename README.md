@@ -26,7 +26,8 @@ AI-powered Deal Marketplace, Financial Analysis, Business Valuation, and Due Dil
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen?style=for-the-badge)
 ![Made in India](https://img.shields.io/badge/Made%20in-India-FF9933?style=for-the-badge)
-
+![GitHub Stars](https://img.shields.io/github/stars/divyanshmehta28199902-maker/dealintel-india?style=for-the-badge)
+![GitHub Issues](https://img.shields.io/github/issues/divyanshmehta28199902-maker/dealintel-india?style=for-the-badge)
 </div>
 </div>
 

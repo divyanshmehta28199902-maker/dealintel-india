@@ -41,7 +41,7 @@ minimumReleaseAgeExclude:
 
 packages:
   - lib/*
-  - scripts
+  - scripts 
 
 catalog:
   '@replit/vite-plugin-cartographer': ^0.5.21

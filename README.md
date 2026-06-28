@@ -2,18 +2,14 @@
 
 <div align="center">
 
-
 Institutional-Grade M&A Intelligence Platform for Indian SMEs
 
 Discover • Evaluate • Value • Acquire
 
 AI-powered Deal Marketplace, Financial Analysis, Business Valuation, and Due Diligence Platform built for Investors, Business Owners, Private Equity Firms, Family Offices, Investment Banks, and M&A Advisors.
 
-⸻
-
 </div>
 
-⸻
 
 📖 Overview
 
@@ -23,7 +19,7 @@ The platform helps investors discover acquisition opportunities, enables busines
 
 Our mission is to make SME acquisitions faster, smarter, and more transparent.
 
-⸻
+
 
 ✨ Key Features
 
@@ -41,7 +37,6 @@ Our mission is to make SME acquisitions faster, smarter, and more transparent.
 * Secure Deal Room
 * Investor Analytics
 
-⸻
 
 🏢 Seller Portal
 
@@ -54,7 +49,6 @@ Our mission is to make SME acquisitions faster, smarter, and more transparent.
 * Investor Interest Dashboard
 * Confidential Listing Management
 
-⸻
 
 🤝 M&A Advisor Portal
 
@@ -65,73 +59,41 @@ Our mission is to make SME acquisitions faster, smarter, and more transparent.
 * Performance Analytics
 * Document Sharing
 
-⸻
 
 🖼 Product Screenshots
 
 Landing Page
 
-⸻
-
 Investor Dashboard
-
-⸻
 
 Deal Marketplace
 
-⸻
-
 Deal Pipeline
-
-⸻
 
 Company Listings
 
-⸻
-
 Company Analysis
-
-⸻
 
 Valuation Analysis
 
-⸻
-
 AI Valuation
-
-⸻
 
 Risk Analysis
 
-⸻
-
 Private Deal Room
-
-⸻
 
 Seller Dashboard
 
-⸻
-
 Seller Pipeline
-
-⸻
 
 Business Listing
 
-⸻
-
 Financial Upload
-
-⸻
 
 Investor Pricing
 
-⸻
-
 Seller Pricing
 
-⸻
 
 🧠 Platform Modules
 

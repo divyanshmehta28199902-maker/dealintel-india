@@ -26,6 +26,6 @@ jobs:
 
       - run: pnpm install
 
-      - run: pnpm run typecheck --if-present
+      - run: pnpm run typecheck
 
       - run: pnpm run build
